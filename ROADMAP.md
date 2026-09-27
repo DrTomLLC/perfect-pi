@@ -54,6 +54,6 @@
 ## Phase 6 — First stable release
 
 - [ ] freeze supported API;
-- [ ] resolve permanent open-source license;
+- [ ] decide final licensing model and contributor-rights framework;
 - [ ] complete independent review;
 - [ ] publish crate only after tests and resource claims are reproducible.
