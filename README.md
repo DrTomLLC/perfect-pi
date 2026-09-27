@@ -140,13 +140,19 @@ Verification dependencies will never become runtime dependencies of the critical
 
 ## Contributing
 
-Perfectπ is intended to become infrastructure people can trust. Contributions that improve correctness, determinism, portability, verification, documentation, or measured efficiency are welcome. Changes to numerical semantics or the critical core require especially strong evidence.
+Perfectπ is currently **not accepting external code contributions** while ownership, licensing, and contributor-rights policy remain intentionally undecided. Design discussion, bug reports, numerical-correctness reports, and feature proposals are welcome.
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before participating.
 
-## License
+## Rights and licensing
 
-A permanent open-source license has **not yet been selected**. Until a license is published, no license grant should be assumed. The license will be resolved before the first public crate release.
+**Copyright © 2026 DrTomLLC. All rights reserved.**
+
+Perfectπ is publicly viewable, but it is **not currently open source and no software license is granted**. No permission to copy, modify, redistribute, sublicense, publish, sell, or create derivative works should be inferred from public availability. Any permissions required solely for GitHub to host and display the repository are governed by GitHub's platform terms.
+
+No patent, trademark, or branding rights are granted. Licensing and contributor-rights policy will be decided deliberately before any release that grants broader reuse rights.
+
+See [RIGHTS.md](RIGHTS.md).
 
 ---
 
