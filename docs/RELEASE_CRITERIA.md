@@ -4,7 +4,7 @@ Perfectπ will not call a release production-ready merely because it compiles.
 
 ## Before the first public crate release
 
-- permanent open-source license selected and published;
+- final licensing model and contributor-rights framework selected and published;
 - stable public naming and package metadata;
 - critical core builds with `#![no_std]`;
 - bounded core requires no allocator;
