@@ -1,0 +1,38 @@
+name: Bug report
+description: Report incorrect behavior, portability problems, or implementation defects
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you for helping make Perfectπ reliable. Provide enough detail for deterministic reproduction."
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Include code, target, enabled features, Rust version, and relevant build flags.
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: Rust target triple
+      placeholder: x86_64-unknown-linux-gnu
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional evidence
+      description: Exact values, bit patterns, logs, compiler output, or measurements.
