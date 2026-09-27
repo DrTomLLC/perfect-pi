@@ -1,0 +1,42 @@
+name: Numerical / precision issue
+description: Report a π digit, rounding, conversion, constant, or error-bound discrepancy
+title: "[Precision]: "
+labels: ["numerical-correctness"]
+body:
+  - type: textarea
+    id: discrepancy
+    attributes:
+      label: Observed discrepancy
+      description: Include the exact input/precision, observed output, and expected output.
+    validations:
+      required: true
+  - type: dropdown
+    id: class
+    attributes:
+      label: Area
+      options:
+        - Canonical digits
+        - Rounding
+        - Truncation
+        - f32
+        - f64
+        - f16 adapter
+        - f128 adapter
+        - Derived constant
+        - Conversion
+        - Error bound
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: Independent reference
+      description: Provide the independent source or computation used to identify the discrepancy.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Rust version, target, features, architecture, and relevant compiler flags.
