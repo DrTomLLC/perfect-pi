@@ -1,0 +1,27 @@
+name: Feature request
+description: Propose a capability or integration without expanding the critical core unnecessarily
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Problem / need
+      description: What concrete use case is not currently served?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Resource and dependency impact
+      description: Could this affect `no_std`, allocation, binary size, stack, execution time, MSRV, or dependencies?
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
