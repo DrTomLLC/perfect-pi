@@ -38,6 +38,16 @@ const F32_ROUNDED_BITS: [u32; 8] = [
     0x4049_0fdb,
 ];
 
+const F32_CEILING_BITS: [u32; 7] = [
+    0x4080_0000,
+    0x404c_cccd,
+    0x4049_999a,
+    0x4049_1687,
+    0x4049_0ff9,
+    0x4049_0ff9,
+    0x4049_0fdc,
+];
+
 const F64_TRUNCATED_BITS: [u64; 15] = [
     0x4008_0000_0000_0000,
     0x4008_cccc_cccc_cccd,
@@ -72,6 +82,25 @@ const F64_ROUNDED_BITS: [u64; 15] = [
     0x4009_21fb_5444_2eea,
     0x4009_21fb_5444_2d28,
     0x4009_21fb_5444_2d11,
+];
+
+const F64_CEILING_BITS: [u64; 16] = [
+    0x4010_0000_0000_0000,
+    0x4009_9999_9999_999a,
+    0x4009_3333_3333_3333,
+    0x4009_22d0_e560_4189,
+    0x4009_21ff_2e48_e8a7,
+    0x4009_21ff_2e48_e8a7,
+    0x4009_21fb_82c2_bd7f,
+    0x4009_21fb_5a7e_d197,
+    0x4009_21fb_5520_6ddf,
+    0x4009_21fb_5452_4550,
+    0x4009_21fb_5444_86e0,
+    0x4009_21fb_5444_2eea,
+    0x4009_21fb_5444_2eea,
+    0x4009_21fb_5444_2d28,
+    0x4009_21fb_5444_2d28,
+    0x4009_21fb_5444_2d1a,
 ];
 
 /// Error returned when a checked native-float conversion cannot guarantee
@@ -127,10 +156,12 @@ where
             return PI_F32;
         }
 
-        let table = if self.is_truncated() {
+        let table: &[u32] = if self.is_truncated() {
             &F32_TRUNCATED_BITS
-        } else {
+        } else if self.is_nearest_even() {
             &F32_ROUNDED_BITS
+        } else {
+            &F32_CEILING_BITS
         };
 
         match table.get(D) {
@@ -151,10 +182,12 @@ where
             return PI_F64;
         }
 
-        let table = if self.is_truncated() {
+        let table: &[u64] = if self.is_truncated() {
             &F64_TRUNCATED_BITS
-        } else {
+        } else if self.is_nearest_even() {
             &F64_ROUNDED_BITS
+        } else {
+            &F64_CEILING_BITS
         };
 
         match table.get(D) {
@@ -193,5 +226,9 @@ where
 
     fn is_truncated(&self) -> bool {
         *self == Pi::<D>::truncated()
+    }
+
+    fn is_nearest_even(&self) -> bool {
+        *self == Pi::<D>::round_nearest_even()
     }
 }
