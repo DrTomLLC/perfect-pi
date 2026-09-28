@@ -152,15 +152,15 @@ where
     /// stored value, not mathematical π.
     #[must_use]
     pub fn to_f32_lossy(&self) -> f32 {
-        let table: &[u32] = if self.is_truncated() {
-            &F32_TRUNCATED_BITS
+        let bits = if self.is_truncated() {
+            F32_TRUNCATED_BITS.get(D)
         } else if self.is_nearest_even() {
-            &F32_ROUNDED_BITS
+            F32_ROUNDED_BITS.get(D)
         } else {
-            &F32_CEILING_BITS
+            F32_CEILING_BITS.get(D)
         };
 
-        match table.get(D) {
+        match bits {
             Some(bits) => f32::from_bits(*bits),
             None => PI_F32,
         }
@@ -174,15 +174,15 @@ where
     /// stored value, not mathematical π.
     #[must_use]
     pub fn to_f64_lossy(&self) -> f64 {
-        let table: &[u64] = if self.is_truncated() {
-            &F64_TRUNCATED_BITS
+        let bits = if self.is_truncated() {
+            F64_TRUNCATED_BITS.get(D)
         } else if self.is_nearest_even() {
-            &F64_ROUNDED_BITS
+            F64_ROUNDED_BITS.get(D)
         } else {
-            &F64_CEILING_BITS
+            F64_CEILING_BITS.get(D)
         };
 
-        match table.get(D) {
+        match bits {
             Some(bits) => f64::from_bits(*bits),
             None => PI_F64,
         }
