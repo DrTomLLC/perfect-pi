@@ -14,8 +14,14 @@ default = []
 binary16 = []
 binary128 = []
 all-float-formats = ["binary16", "binary128"]
+fixed-bits = []
+num-complex = ["dep:num-complex"]
+rust-decimal = ["dep:rust_decimal"]
+all-interop = ["fixed-bits", "num-complex", "rust-decimal"]
 
 [dependencies]
+num-complex = { version = "0.4.6", default-features = false, optional = true }
+rust_decimal = { version = "1.43.0", default-features = false, optional = true }
 
 [package.metadata.perfect-pi]
 status = "pre-release"
