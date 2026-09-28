@@ -22,9 +22,7 @@ fn main() -> std::process::ExitCode {
         Some("nearest-away") => RoundingMode::NearestTiesAwayFromZero,
         Some(mode) => {
             eprintln!("unknown rounding mode: {mode}");
-            eprintln!(
-                "use trunc, away, floor, ceil, round/nearest-even, or nearest-away"
-            );
+            eprintln!("use trunc, away, floor, ceil, round/nearest-even, or nearest-away");
             return std::process::ExitCode::FAILURE;
         }
     };
