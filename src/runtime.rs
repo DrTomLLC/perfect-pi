@@ -1,6 +1,5 @@
 //! Optional runtime generation of π beyond the bounded constant tier.
 
-use alloc::{string::String, vec};
 use core::fmt;
 use num_bigint::BigInt;
 
@@ -95,25 +94,6 @@ pub fn generate_pi_ascii_with_limit(
 ) -> Result<usize, RuntimePiError> {
     enforce_precision_limit(decimal_places, max_decimal_places)?;
     generate_pi_ascii_with_rounding(decimal_places, rounding, output)
-}
-
-/// Generates an owned UTF-8 decimal string while enforcing a precision limit.
-///
-/// Runtime generation is already allocation-backed. The caller must supply an
-/// application-appropriate maximum precision.
-pub fn generate_pi_string(
-    decimal_places: usize,
-    max_decimal_places: usize,
-    rounding: RoundingMode,
-) -> Result<String, RuntimePiError> {
-    enforce_precision_limit(decimal_places, max_decimal_places)?;
-    let required = runtime_pi_ascii_len(decimal_places)?;
-    let mut output = vec![0_u8; required];
-    let written = generate_pi_ascii_with_rounding(decimal_places, rounding, &mut output)?;
-    if written != required {
-        return Err(RuntimePiError::InternalInvariant);
-    }
-    String::from_utf8(output).map_err(|_| RuntimePiError::InternalInvariant)
 }
 
 impl fmt::Display for RuntimePiError {
