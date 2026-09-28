@@ -1,0 +1,5 @@
+[verification-tools]
+cargo-audit = "0.22.2"
+cargo-fuzz = "0.13.2"
+cargo-mutants = "27.1.0"
+cargo-llvm-cov = "0.9.1"

@@ -63,7 +63,7 @@ where
                 None => break,
             };
             *destination = source;
-            index += 1;
+            index = index.saturating_add(1);
         }
 
         DecimalPi {

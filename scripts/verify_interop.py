@@ -63,20 +63,43 @@ def main() -> int:
             f"rust_decimal exact vector mismatch: expected {truncated28}"
         )
 
-    truncated40, rounded40 = bounded_case(40)
-    rounded_source = parse_decimal(rounded40)
     scale = 28
-    scaled = rounded_source * (10**scale)
-    rounded_coefficient = rounded_integer(scaled)
-    integer = rounded_coefficient // (10**scale)
-    fractional = rounded_coefficient % (10**scale)
-    expected_decimal28 = f"{integer}.{fractional:028d}"
+    expected_wide_values: set[str] = set()
+    for d in range(29, 41):
+        truncated, rounded = bounded_case(d)
+        for source_text in (truncated, rounded):
+            source = parse_decimal(source_text)
+            rounded_coefficient = rounded_integer(source * (10**scale))
+            integer = rounded_coefficient // (10**scale)
+            fractional = rounded_coefficient % (10**scale)
+            expected_wide_values.add(f"{integer}.{fractional:028d}")
+
+    if len(expected_wide_values) != 1:
+        failures.append(
+            "rust_decimal D=29..40 do not collapse to one verified 28-place result: "
+            f"{sorted(expected_wide_values)}"
+        )
+        expected_decimal28 = ""
+    else:
+        expected_decimal28 = next(iter(expected_wide_values))
+
     rounded_match = re.search(
         r'assert_eq!\(rounded\.to_string\(\),\s*"([^"]+)"\);', interop
     )
     if rounded_match is None or rounded_match.group(1) != expected_decimal28:
         failures.append(
             f"rust_decimal rounded vector mismatch: expected {expected_decimal28}"
+        )
+
+    wide_calls = {
+        int(value)
+        for value in re.findall(r"assert_wide_decimal!\((\d+)\);", interop)
+    }
+    expected_calls = set(range(29, 41))
+    if wide_calls != expected_calls:
+        failures.append(
+            f"rust_decimal wide-domain tests cover {sorted(wide_calls)}, "
+            f"expected {sorted(expected_calls)}"
         )
 
     if failures:
@@ -88,7 +111,7 @@ def main() -> int:
     print(f"PASS: I16F16 nearest-even bits = {expected_i16f16}")
     print(f"PASS: I32F32 nearest-even bits = {expected_i32f32}")
     print(f"PASS: rust_decimal exact D=28 = {truncated28}")
-    print(f"PASS: rust_decimal nearest-even D=40 -> 28 = {expected_decimal28}")
+    print(f"PASS: rust_decimal nearest-even D=29..40 -> 28 = {expected_decimal28}")
     print("PASS: complex interoperability reuses independently verified native-float conversions")
     return 0
 

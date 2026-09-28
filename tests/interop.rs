@@ -20,6 +20,28 @@ fn complex_adapter_preserves_existing_float_semantics() {
     );
     assert_eq!(c32.im.to_bits(), 0.0_f32.to_bits());
 
+    let c32_lossy: Complex32 = Pi::<40>::round_nearest_even().to_complex32_lossy();
+    assert_eq!(
+        c32_lossy.re.to_bits(),
+        Pi::<40>::round_nearest_even().to_f32_lossy().to_bits()
+    );
+    assert_eq!(c32_lossy.im.to_bits(), 0.0_f32.to_bits());
+
+    let c64_checked: Complex64 =
+        match Pi::<15>::round_nearest_even().try_to_complex64_preserving_places() {
+            Ok(value) => value,
+            Err(error) => panic!(
+                "unexpected complex64 precision loss: requested={}, guaranteed={}",
+                error.requested_decimal_places(),
+                error.guaranteed_decimal_places()
+            ),
+        };
+    assert_eq!(
+        c64_checked.re.to_bits(),
+        Pi::<15>::round_nearest_even().to_f64_lossy().to_bits()
+    );
+    assert_eq!(c64_checked.im.to_bits(), 0.0_f64.to_bits());
+
     let c64: Complex64 = Pi::<40>::round_nearest_even().to_complex64_lossy();
     assert_eq!(
         c64.re.to_bits(),
@@ -71,12 +93,52 @@ fn rust_decimal_adapter_is_exact_through_28_places_and_explicit_above() {
     assert_eq!(exact.to_string(), "3.1415926535897932384626433832");
     assert_eq!(exact.scale(), 28);
 
+    let boundary = match Pi::<28>::round_nearest_even().to_rust_decimal_nearest_even() {
+        Ok(value) => value,
+        Err(error) => panic!("unexpected D=28 rust_decimal conversion error: {error}"),
+    };
+    assert_eq!(boundary.to_string(), "3.1415926535897932384626433833");
+    assert_eq!(boundary.scale(), 28);
+
     let rounded = match Pi::<40>::round_nearest_even().to_rust_decimal_nearest_even() {
         Ok(value) => value,
         Err(error) => panic!("unexpected rounded rust_decimal conversion error: {error}"),
     };
     assert_eq!(rounded.to_string(), "3.1415926535897932384626433833");
     assert_eq!(rounded.scale(), 28);
+
+    macro_rules! assert_wide_decimal {
+        ($d:literal) => {{
+            for value in [Pi::<$d>::truncated(), Pi::<$d>::round_nearest_even()] {
+                let converted = match value.to_rust_decimal_nearest_even() {
+                    Ok(value) => value,
+                    Err(error) => {
+                        panic!("unexpected D={} rust_decimal conversion error: {error}", $d)
+                    }
+                };
+                assert_eq!(
+                    converted.to_string(),
+                    "3.1415926535897932384626433833",
+                    "D={}",
+                    $d
+                );
+                assert_eq!(converted.scale(), 28);
+            }
+        }};
+    }
+
+    assert_wide_decimal!(29);
+    assert_wide_decimal!(30);
+    assert_wide_decimal!(31);
+    assert_wide_decimal!(32);
+    assert_wide_decimal!(33);
+    assert_wide_decimal!(34);
+    assert_wide_decimal!(35);
+    assert_wide_decimal!(36);
+    assert_wide_decimal!(37);
+    assert_wide_decimal!(38);
+    assert_wide_decimal!(39);
+    assert_wide_decimal!(40);
 
     let too_wide = Pi::<29>::truncated().try_to_rust_decimal_exact();
     match too_wide {

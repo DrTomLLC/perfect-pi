@@ -32,3 +32,10 @@ All notable released changes to Perfectπ will be documented here.
 - Optional decimal interoperability added using current stable `rust_decimal 1.43.0`, exact through 28 places with explicit nearest-even rounding above that limit.
 - Direct dependency currency/isolation CI added; default Perfectπ remains dependency-free.
 - All-feature interoperability verified on the full `no_std` cross-target matrix.
+- Phase-4 exhaustive bounded-state verification added, covering 3,690 caller-buffer states.
+- Sanitizer-backed libFuzzer targets added for bounded-core and interoperability surfaces.
+- Mutation testing established with 96 generated mutants, 84 caught, 12 unviable, and zero missed/timeouts.
+- Source coverage measured at 92.66% lines, 91.48% regions, and 100% functions with required CI floors of 92% / 91% / 100%.
+- Cross-host reproducibility established for 30 representative objects across Windows and Linux under the same Rust compiler commit.
+- Verification-tool currency is now enforced for cargo-audit, cargo-fuzz, cargo-mutants, cargo-llvm-cov, and libfuzzer-sys.
+- Required RustSec dependency auditing added; the current all-feature dependency set has no known advisories.

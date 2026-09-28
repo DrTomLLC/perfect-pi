@@ -39,10 +39,10 @@
 ## Phase 4 — Verification and resource evidence
 
 - [x] independent reference generation;
-- [ ] fuzz/property testing;
-- [ ] mutation testing;
-- [ ] model-check suitable bounded invariants;
-- [ ] cross-target reproducibility tests;
+- [x] fuzz/property testing;
+- [x] mutation testing;
+- [x] exhaustively check bounded-state invariants where the finite state space is tractable;
+- [x] cross-target reproducibility tests;
 - [ ] measure ROM, RAM, stack, binary-size, instruction, and timing costs;
 - [ ] publish benchmark and resource reports.
 

@@ -1,0 +1,30 @@
+[package]
+name = "perfect-pi-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+fixed = { version = "=1.31.0", default-features = false }
+libfuzzer-sys = "=0.4.13"
+
+[dependencies.perfect-pi]
+path = ".."
+features = ["all-float-formats", "interop"]
+
+[[bin]]
+name = "bounded_api"
+path = "fuzz_targets/bounded_api.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "interop"
+path = "fuzz_targets/interop.rs"
+test = false
+doc = false
+bench = false
