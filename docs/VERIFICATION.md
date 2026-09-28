@@ -9,6 +9,8 @@ The initial core currently has:
 - known-answer coverage for every bounded precision `D = 0..40`;
 - explicit truncation and round-to-nearest-even vectors;
 - exact known bit-pattern checks for native `f32` and `f64` π;
+- exact-rational generation and IEEE-bit verification of all 164 bounded native-conversion outcomes (41 precisions × truncation/rounding × `f32`/`f64`);
+- independent proof of the checked preservation boundaries through `D=6` for `f32` and `D=15` for `f64`, including concrete failing cases at `D=7` and `D=16`;
 - allocation-free caller-buffer output tests;
 - a compile-fail doctest proving bounded operations are unavailable for `Pi<41>`;
 - independent standard-library Python Chudnovsky and Gauss–Legendre computations agreeing through 64 fractional digits, verifying all 41 production source digits and all 41 bounded precision vectors;

@@ -92,12 +92,32 @@ Truncation and rounding shall never be silently interchanged.
 
 ## 8. Conversion policy
 
-A conversion that can discard meaningful precision shall either:
+The bounded core shall support explicit conversion of canonical bounded decimal π values to native `f32` and `f64`.
 
-- be checked and report that the destination cannot preserve the requested information; or
-- be explicitly named/documented as lossy.
+Lossy conversion methods shall be named explicitly:
+
+- `to_f32_lossy()`;
+- `to_f64_lossy()`.
+
+Those methods convert the finite stored decimal value to the nearest IEEE-754 binary32/binary64 value using round-to-nearest, ties-to-even semantics. They do not claim to preserve the source's decimal-place count. Callers that want mathematical π directly in a native float shall use `PI_F32` or `PI_F64`; bounded-decimal conversion shall not silently substitute those semantics except where the correctly rounded finite decimal source has the same native encoding.
+
+Checked preservation methods shall be available:
+
+- `try_to_f32_preserving_places()`;
+- `try_to_f64_preserving_places()`.
+
+For the bounded π domain, checked preservation means the binary result lies within half of one unit in the source's last requested decimal place, so rounding the binary result back to `D` decimal places recovers the source value.
+
+The verified guaranteed ranges are:
+
+- `f32`: `D <= 6`;
+- `f64`: `D <= 15`.
+
+`D=7` contains a bounded π value that cannot preserve all seven requested places in `f32`. `D=16` contains a bounded π value that cannot preserve all sixteen requested places in `f64`. Therefore the checked APIs shall reject higher `D` values with a precision-loss error rather than silently narrow.
 
 No API shall imply that converting `Pi<40>` to `f64` creates a 40-decimal-place `f64`.
+
+Conversion bit patterns shall be independently verifiable from exact rational arithmetic rather than relying on Perfectπ or a language decimal parser as the sole oracle.
 
 ## 9. Formatting and serialization
 
@@ -159,7 +179,9 @@ Before a bounded release is described as production-ready, verification shall in
 - `no_std` builds;
 - representative cross-target builds;
 - static linting;
-- independent canonical-digit verification.
+- independent canonical-digit verification;
+- exact-rational verification of every bounded truncation/rounding conversion to `f32` and `f64`;
+- verification of the checked decimal-place preservation boundaries and their first failing cases.
 
 Additional verification should include fuzz/property testing, mutation testing, reproducibility checks, and model/exhaustive checking where they materially improve confidence.
 

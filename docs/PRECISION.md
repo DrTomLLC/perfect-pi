@@ -41,9 +41,15 @@ Native constants will therefore be documented using their representation propert
 
 Every conversion or fixed-precision construction must define its rounding behavior. Truncation must be explicitly requested and must not masquerade as rounding.
 
-## Lossy conversion
+## Native-float conversion
 
-Converting a higher-precision Perfectπ value into a lower-precision numeric type may lose information. Such conversions must be checked or explicitly named as lossy.
+Perfectπ converts the finite stored decimal value, not an imagined higher-precision `f32` or `f64` value. Callers that want mathematical π directly in a native float should use `PI_F32` or `PI_F64`; converting a `DecimalPi<D>` instead preserves the semantics of that finite decimal source before binary rounding.
+
+`to_f32_lossy()` and `to_f64_lossy()` explicitly permit decimal-place loss. Their results are the independently verified IEEE-754 round-to-nearest, ties-to-even encodings of the canonical finite decimal source.
+
+`try_to_f32_preserving_places()` succeeds only for `D <= 6`; `try_to_f64_preserving_places()` succeeds only for `D <= 15`. For the bounded π domain, these are the maximum conservative guarantees for recovering every requested decimal place. `D=7` already contains an `f32` case that cannot preserve all seven places, and `D=16` already contains an `f64` case that cannot preserve all sixteen.
+
+A checked preservation guarantee means the binary result lies within half of one unit in the source's last requested decimal place, so rounding that binary result back to `D` decimal places recovers the source value. Higher-precision sources must opt into the explicitly lossy methods.
 
 ## Error budgets
 
