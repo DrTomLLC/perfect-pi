@@ -14,13 +14,15 @@ pub const F32_GUARANTEED_DECIMAL_PLACES: usize = 6;
 pub const F64_GUARANTEED_DECIMAL_PLACES: usize = 15;
 
 // Exact IEEE-754 nearest-even encodings independently generated from the
-// three finite decimal value classes produced by the bounded rounding API.
-// Const-generic matches keep each monomorphization scalar and dead-strip
-// unrelated conversion vectors on constrained targets.
+// two finite decimal value classes that can exist at a fixed precision for
+// positive irrational π: floor/truncation and ceiling. Nearest rounding always
+// selects one of those two values. Runtime-parameter helpers retain direct
+// branch coverage while #[inline(always)] lets constant D call sites dead-strip
+// unrelated vectors on optimized constrained-target builds.
 
 #[inline(always)]
-fn f32_truncated_bits<const D: usize>() -> Option<u32> {
-    match D {
+fn f32_truncated_bits(decimal_places: usize) -> Option<u32> {
+    match decimal_places {
         0 => Some(0x4040_0000),
         1 => Some(0x4046_6666),
         2 => Some(0x4048_f5c3),
@@ -34,23 +36,8 @@ fn f32_truncated_bits<const D: usize>() -> Option<u32> {
 }
 
 #[inline(always)]
-fn f32_nearest_bits<const D: usize>() -> Option<u32> {
-    match D {
-        0 => Some(0x4040_0000),
-        1 => Some(0x4046_6666),
-        2 => Some(0x4048_f5c3),
-        3 => Some(0x4049_1687),
-        4 => Some(0x4049_0ff9),
-        5 => Some(0x4049_0fd0),
-        6 => Some(0x4049_0fdc),
-        7 => Some(0x4049_0fdb),
-        _ => None,
-    }
-}
-
-#[inline(always)]
-fn f32_ceiling_bits<const D: usize>() -> Option<u32> {
-    match D {
+fn f32_ceiling_bits(decimal_places: usize) -> Option<u32> {
+    match decimal_places {
         0 => Some(0x4080_0000),
         1 => Some(0x404c_cccd),
         2 => Some(0x4049_999a),
@@ -63,8 +50,8 @@ fn f32_ceiling_bits<const D: usize>() -> Option<u32> {
 }
 
 #[inline(always)]
-fn f64_truncated_bits<const D: usize>() -> Option<u64> {
-    match D {
+fn f64_truncated_bits(decimal_places: usize) -> Option<u64> {
+    match decimal_places {
         0 => Some(0x4008_0000_0000_0000),
         1 => Some(0x4008_cccc_cccc_cccd),
         2 => Some(0x4009_1eb8_51eb_851f),
@@ -85,30 +72,8 @@ fn f64_truncated_bits<const D: usize>() -> Option<u64> {
 }
 
 #[inline(always)]
-fn f64_nearest_bits<const D: usize>() -> Option<u64> {
-    match D {
-        0 => Some(0x4008_0000_0000_0000),
-        1 => Some(0x4008_cccc_cccc_cccd),
-        2 => Some(0x4009_1eb8_51eb_851f),
-        3 => Some(0x4009_22d0_e560_4189),
-        4 => Some(0x4009_21ff_2e48_e8a7),
-        5 => Some(0x4009_21f9_f01b_866e),
-        6 => Some(0x4009_21fb_82c2_bd7f),
-        7 => Some(0x4009_21fb_5a7e_d197),
-        8 => Some(0x4009_21fb_53c8_d4f1),
-        9 => Some(0x4009_21fb_5452_4550),
-        10 => Some(0x4009_21fb_5444_86e0),
-        11 => Some(0x4009_21fb_5444_2eea),
-        12 => Some(0x4009_21fb_5444_2eea),
-        13 => Some(0x4009_21fb_5444_2d28),
-        14 => Some(0x4009_21fb_5444_2d11),
-        _ => None,
-    }
-}
-
-#[inline(always)]
-fn f64_ceiling_bits<const D: usize>() -> Option<u64> {
-    match D {
+fn f64_ceiling_bits(decimal_places: usize) -> Option<u64> {
+    match decimal_places {
         0 => Some(0x4010_0000_0000_0000),
         1 => Some(0x4009_9999_9999_999a),
         2 => Some(0x4009_3333_3333_3333),
@@ -179,11 +144,9 @@ where
     #[must_use]
     pub fn to_f32_lossy(&self) -> f32 {
         let bits = if self.is_truncated() {
-            f32_truncated_bits::<D>()
-        } else if self.is_nearest_even() {
-            f32_nearest_bits::<D>()
+            f32_truncated_bits(D)
         } else {
-            f32_ceiling_bits::<D>()
+            f32_ceiling_bits(D)
         };
 
         match bits {
@@ -201,11 +164,9 @@ where
     #[must_use]
     pub fn to_f64_lossy(&self) -> f64 {
         let bits = if self.is_truncated() {
-            f64_truncated_bits::<D>()
-        } else if self.is_nearest_even() {
-            f64_nearest_bits::<D>()
+            f64_truncated_bits(D)
         } else {
-            f64_ceiling_bits::<D>()
+            f64_ceiling_bits(D)
         };
 
         match bits {
@@ -244,9 +205,5 @@ where
 
     fn is_truncated(&self) -> bool {
         *self == Pi::<D>::truncated()
-    }
-
-    fn is_nearest_even(&self) -> bool {
-        *self == Pi::<D>::round_nearest_even()
     }
 }
