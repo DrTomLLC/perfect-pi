@@ -14,7 +14,7 @@ TARGETS = (
     "thumbv7em-none-eabihf",
     "riscv32imac-unknown-none-elf",
 )
-PROBES = ("native", "bounded40")
+PROBES = ("native", "bounded40", "conversion40")
 
 
 def run(command: list[str], *, capture: bool = False) -> str:
