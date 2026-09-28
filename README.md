@@ -193,7 +193,7 @@ See [Universal Support](docs/UNIVERSAL_SUPPORT.md), [Safety and Reliability](doc
 
 ## Verification strategy
 
-The bounded precision space is intentionally finite. Every supported decimal precision from `Pi<0>` through `Pi<40>` is covered by known-answer tests. All 164 bounded conversion outcomes (41 precisions × truncation/rounding × `f32`/`f64`) are checked against IEEE bit patterns independently generated from exact rational arithmetic, and canonical π digits are cross-verified with independent algorithms.
+The bounded precision space is intentionally finite. Every supported decimal precision from `Pi<0>` through `Pi<40>` is covered by known-answer tests. All 246 bounded conversion outcomes (41 precisions × truncation/nearest/ceiling × `f32`/`f64`) are checked against IEEE bit patterns independently generated from exact rational arithmetic, and canonical π digits are cross-verified with independent algorithms.
 
 Phase-4 hardening now adds exhaustive bounded-state buffer verification, sanitizer-backed libFuzzer targets, mutation testing with zero surviving viable mutants, enforced source-coverage floors, and byte-for-byte cross-host reproducibility checks for 30 representative target/probe objects.
 
