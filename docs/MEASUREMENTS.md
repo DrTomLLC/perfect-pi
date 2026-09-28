@@ -10,7 +10,7 @@ From the repository root:
 python scripts/measure_resources.py
 ```
 
-The script uses only the Python standard library plus the installed Rust toolchain and `llvm-tools`.
+The script uses only the Python standard library plus the installed Rust toolchain and `llvm-tools`. It obtains the exact `.rlib` path from Cargo's JSON artifact output rather than selecting files by timestamp, preventing stale build artifacts from contaminating measurements.
 
 ## Method
 

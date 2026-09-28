@@ -2,6 +2,7 @@
 """Reproduce Perfectπ object-level resource probes with standard Python."""
 
 from pathlib import Path
+import json
 import os
 import subprocess
 import sys
@@ -47,12 +48,41 @@ def llvm_size_path() -> Path:
     return path
 
 
-def newest_rlib(target: str) -> Path:
-    directory = ROOT / "target" / target / "release" / "deps"
-    matches = list(directory.glob("libperfect_pi-*.rlib"))
-    if not matches:
-        raise RuntimeError(f"Perfectπ rlib not found for {target}")
-    return max(matches, key=lambda path: path.stat().st_mtime_ns)
+def build_rlib(target: str) -> Path:
+    output = run(
+        [
+            "cargo",
+            "build",
+            "--release",
+            "--lib",
+            "--target",
+            target,
+            "--message-format=json-render-diagnostics",
+        ],
+        capture=True,
+    )
+
+    rlibs: list[Path] = []
+    for line in output.splitlines():
+        try:
+            message = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if message.get("reason") != "compiler-artifact":
+            continue
+        artifact_target = message.get("target", {})
+        if artifact_target.get("name") != "perfect_pi":
+            continue
+        for filename in message.get("filenames", []):
+            path = Path(filename)
+            if path.suffix == ".rlib":
+                rlibs.append(path)
+
+    if len(rlibs) != 1:
+        raise RuntimeError(
+            f"expected exactly one Perfectπ rlib for {target}, found {len(rlibs)}"
+        )
+    return rlibs[0]
 
 
 def section_totals(output: str) -> tuple[int, int, int]:
@@ -82,8 +112,7 @@ def main() -> int:
 
     for target in TARGETS:
         run(["rustup", "target", "add", target])
-        run(["cargo", "build", "--release", "--lib", "--target", target])
-        rlib = newest_rlib(target)
+        rlib = build_rlib(target)
 
         for probe in PROBES:
             source = PROBE_DIR / f"{probe}.rs"
