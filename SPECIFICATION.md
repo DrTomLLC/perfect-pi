@@ -1,8 +1,8 @@
 # Perfectπ Normative Specification v1
 
-Status: **Baseline for implementation**
+Status: **Universal 1.0 release-candidate baseline**
 
-This document is the normative technical specification for the initial bounded Perfectπ core. If explanatory documentation conflicts with this file, this file controls until it is deliberately revised.
+This document is the normative technical specification for Perfectπ. It defines the invariant bounded core plus optional interoperability and arbitrary-precision tiers. If explanatory documentation conflicts with this file, this file controls until it is deliberately revised.
 
 ## 1. Scope
 
@@ -89,6 +89,32 @@ D=40 -> 3.1415926535897932384626433832795028841972
 ```
 
 Truncation and rounding shall never be silently interchanged.
+
+### 7.1 General decimal rounding policy
+
+The public RoundingMode policy shall expose:
+
+- toward zero;
+- away from zero;
+- toward negative infinity;
+- toward positive infinity;
+- nearest with ties to even;
+- nearest with ties away from zero.
+
+Pi<D>::with_rounding shall apply the selected policy to the bounded domain.
+The runtime-generation tier shall apply the same policy names and mathematical
+semantics. Existing truncation and nearest-even methods remain compatibility
+conveniences.
+
+Because π is positive and irrational, at any finite decimal precision:
+
+- toward zero equals toward negative infinity;
+- away from zero equals toward positive infinity;
+- an exact halfway tie is impossible, so both nearest tie policies return the
+  same value for π.
+
+These equivalences are properties of π, not permission to collapse or rename
+the public policies.
 
 ## 8. Conversion policy
 
@@ -214,18 +240,20 @@ The `runtime-generation` feature shall:
 
 - use arbitrary-precision integer arithmetic without changing the default dependency graph;
 - keep its direct dependency optional, exact-version pinned, and configured with default features disabled;
-- expose caller-buffer ASCII generation with explicit truncation semantics;
-- expose explicit decimal round-to-nearest, ties-to-even generation;
+- expose caller-buffer ASCII generation with the shared RoundingMode semantics;
+- retain explicit truncation and nearest-even compatibility entry points;
+- provide a caller-selected maximum-precision gate that rejects before expensive generation or output mutation;
+- keep final output storage caller-owned rather than adding a direct Perfectπ allocation convenience;
 - avoid binary floating-point as an intermediate representation;
 - reject undersized caller buffers before modifying them;
 - use variable resource cost proportional to the requested precision;
 - compile on the supported current-stable `no_std` target matrix.
 
-The `arbitrary-precision` feature is the semantic alias for this precision-above-40 capability.
+The `arbitrary-precision` feature is the semantic alias for this precision-above-40 capability. The `full` feature enables all current production capability tiers: all IEEE interchange adapters, all interoperability adapters, and arbitrary precision. The default feature set remains empty.
 
 The implemented generator uses Machin's identity with conservative integer lower/upper bounds. Guard precision shall increase until both bounds prove the same requested truncation. Nearest-even generation shall certify at least one additional decimal digit before rounding. Because pi is irrational, an exact finite decimal halfway tie cannot occur.
 
-Runtime-generation results shall be independently checked against at least two separately implemented pi algorithms at precision materially above the bounded 40-place tier.
+Runtime-generation results shall be independently checked against at least two separately implemented pi algorithms at precision materially above the bounded 40-place tier. All public runtime rounding modes shall be covered by independent reference checks or by a documented mathematical reduction to independently verified values.
 
 ## 14. Verification
 
@@ -234,6 +262,7 @@ Before a bounded release is described as production-ready, verification shall in
 - known-answer testing for every `D` from 0 through 40;
 - truncation vectors;
 - round-to-nearest-even vectors;
+- exhaustive bounded equivalence checks for every public RoundingMode at every D from 0 through 40;
 - native exact-bit tests;
 - allocation-free formatting tests;
 - compile-time rejection evidence for unsupported `Pi<D>` operations;
@@ -241,18 +270,21 @@ Before a bounded release is described as production-ready, verification shall in
 - representative cross-target builds;
 - static linting;
 - independent canonical-digit verification;
-- exact-rational verification of every bounded truncation/rounding conversion to `f32` and `f64`;
+- exact-rational verification of every bounded truncation, nearest, and ceiling conversion class to `f32` and `f64`;
 - verification of the checked decimal-place preservation boundaries and their first failing cases.
 
 Additional verification should include fuzz/property testing, mutation testing, reproducibility checks, and model/exhaustive checking where they materially improve confidence.
 
 ## 15. Rights and release status
 
-The project is currently **all rights reserved** and `publish = false`.
+Perfectπ is source-available under the PolyForm Noncommercial License 1.0.0 for
+the community/noncommercial uses granted by LICENSE. Commercial use requires a
+separate written paid commercial license from DrTomLLC as described by
+RIGHTS.md and COMMERCIAL_LICENSING.md.
 
-Nothing in this specification grants an open-source or redistribution license.
-
-Package publication, licensing, and external contribution rights require a later explicit project decision.
+The Cargo package remains `publish = false`. Package publication and creation
+of a public release are separate owner-controlled actions and are not implied
+by implementation or verification completion.
 
 ## 16. Change control
 
@@ -266,4 +298,8 @@ Changes to any of the following are specification changes and require deliberate
 - critical-core allocation or `unsafe` policy;
 - panic/error behavior;
 - public serialization semantics;
-- claims about safety, certification, or measured resource usage.
+- claims about safety, certification, or measured resource usage;
+- public RoundingMode meanings;
+- feature-tier meanings, including full;
+- caller-visible runtime resource-limit behavior;
+- declared portability and qualification evidence.

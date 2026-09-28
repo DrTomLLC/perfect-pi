@@ -14,65 +14,85 @@ pub const F32_GUARANTEED_DECIMAL_PLACES: usize = 6;
 pub const F64_GUARANTEED_DECIMAL_PLACES: usize = 15;
 
 // Exact IEEE-754 nearest-even encodings independently generated from the
-// canonical finite decimal values. At D>=8 every canonical bounded value maps
-// to PI_F32; at D>=15 every canonical bounded value maps to PI_F64.
-const F32_TRUNCATED_BITS: [u32; 8] = [
-    0x4040_0000,
-    0x4046_6666,
-    0x4048_f5c3,
-    0x4049_0625,
-    0x4049_0e56,
-    0x4049_0fd0,
-    0x4049_0fd8,
-    0x4049_0fda,
-];
+// two finite decimal value classes that can exist at a fixed precision for
+// positive irrational π: floor/truncation and ceiling. Nearest rounding always
+// selects one of those two values. Runtime-parameter helpers retain direct
+// branch coverage while #[inline(always)] lets constant D call sites dead-strip
+// unrelated vectors on optimized constrained-target builds.
 
-const F32_ROUNDED_BITS: [u32; 8] = [
-    0x4040_0000,
-    0x4046_6666,
-    0x4048_f5c3,
-    0x4049_1687,
-    0x4049_0ff9,
-    0x4049_0fd0,
-    0x4049_0fdc,
-    0x4049_0fdb,
-];
+#[inline(always)]
+fn f32_truncated_bits(decimal_places: usize) -> Option<u32> {
+    match decimal_places {
+        0 => Some(0x4040_0000),
+        1 => Some(0x4046_6666),
+        2 => Some(0x4048_f5c3),
+        3 => Some(0x4049_0625),
+        4 => Some(0x4049_0e56),
+        5 => Some(0x4049_0fd0),
+        6 => Some(0x4049_0fd8),
+        7 => Some(0x4049_0fda),
+        _ => None,
+    }
+}
 
-const F64_TRUNCATED_BITS: [u64; 15] = [
-    0x4008_0000_0000_0000,
-    0x4008_cccc_cccc_cccd,
-    0x4009_1eb8_51eb_851f,
-    0x4009_20c4_9ba5_e354,
-    0x4009_21ca_c083_126f,
-    0x4009_21f9_f01b_866e,
-    0x4009_21fa_fc8b_007a,
-    0x4009_21fb_4d12_d84a,
-    0x4009_21fb_53c8_d4f1,
-    0x4009_21fb_542f_e938,
-    0x4009_21fb_5441_1744,
-    0x4009_21fb_5443_d6f4,
-    0x4009_21fb_5444_261e,
-    0x4009_21fb_5444_2c46,
-    0x4009_21fb_5444_2d11,
-];
+#[inline(always)]
+fn f32_ceiling_bits(decimal_places: usize) -> Option<u32> {
+    match decimal_places {
+        0 => Some(0x4080_0000),
+        1 => Some(0x404c_cccd),
+        2 => Some(0x4049_999a),
+        3 => Some(0x4049_1687),
+        4 => Some(0x4049_0ff9),
+        5 => Some(0x4049_0ff9),
+        6 => Some(0x4049_0fdc),
+        _ => None,
+    }
+}
 
-const F64_ROUNDED_BITS: [u64; 15] = [
-    0x4008_0000_0000_0000,
-    0x4008_cccc_cccc_cccd,
-    0x4009_1eb8_51eb_851f,
-    0x4009_22d0_e560_4189,
-    0x4009_21ff_2e48_e8a7,
-    0x4009_21f9_f01b_866e,
-    0x4009_21fb_82c2_bd7f,
-    0x4009_21fb_5a7e_d197,
-    0x4009_21fb_53c8_d4f1,
-    0x4009_21fb_5452_4550,
-    0x4009_21fb_5444_86e0,
-    0x4009_21fb_5444_2eea,
-    0x4009_21fb_5444_2eea,
-    0x4009_21fb_5444_2d28,
-    0x4009_21fb_5444_2d11,
-];
+#[inline(always)]
+fn f64_truncated_bits(decimal_places: usize) -> Option<u64> {
+    match decimal_places {
+        0 => Some(0x4008_0000_0000_0000),
+        1 => Some(0x4008_cccc_cccc_cccd),
+        2 => Some(0x4009_1eb8_51eb_851f),
+        3 => Some(0x4009_20c4_9ba5_e354),
+        4 => Some(0x4009_21ca_c083_126f),
+        5 => Some(0x4009_21f9_f01b_866e),
+        6 => Some(0x4009_21fa_fc8b_007a),
+        7 => Some(0x4009_21fb_4d12_d84a),
+        8 => Some(0x4009_21fb_53c8_d4f1),
+        9 => Some(0x4009_21fb_542f_e938),
+        10 => Some(0x4009_21fb_5441_1744),
+        11 => Some(0x4009_21fb_5443_d6f4),
+        12 => Some(0x4009_21fb_5444_261e),
+        13 => Some(0x4009_21fb_5444_2c46),
+        14 => Some(0x4009_21fb_5444_2d11),
+        _ => None,
+    }
+}
+
+#[inline(always)]
+fn f64_ceiling_bits(decimal_places: usize) -> Option<u64> {
+    match decimal_places {
+        0 => Some(0x4010_0000_0000_0000),
+        1 => Some(0x4009_9999_9999_999a),
+        2 => Some(0x4009_3333_3333_3333),
+        3 => Some(0x4009_22d0_e560_4189),
+        4 => Some(0x4009_21ff_2e48_e8a7),
+        5 => Some(0x4009_21ff_2e48_e8a7),
+        6 => Some(0x4009_21fb_82c2_bd7f),
+        7 => Some(0x4009_21fb_5a7e_d197),
+        8 => Some(0x4009_21fb_5520_6ddf),
+        9 => Some(0x4009_21fb_5452_4550),
+        10 => Some(0x4009_21fb_5444_86e0),
+        11 => Some(0x4009_21fb_5444_2eea),
+        12 => Some(0x4009_21fb_5444_2eea),
+        13 => Some(0x4009_21fb_5444_2d28),
+        14 => Some(0x4009_21fb_5444_2d28),
+        15 => Some(0x4009_21fb_5444_2d1a),
+        _ => None,
+    }
+}
 
 /// Error returned when a checked native-float conversion cannot guarantee
 /// preservation of every requested decimal place.
@@ -109,6 +129,8 @@ impl fmt::Display for PrecisionLoss {
     }
 }
 
+impl core::error::Error for PrecisionLoss {}
+
 impl<const D: usize> DecimalPi<D>
 where
     (): SupportedPrecision<D>,
@@ -121,18 +143,14 @@ where
     /// stored value, not mathematical π.
     #[must_use]
     pub fn to_f32_lossy(&self) -> f32 {
-        if D >= F32_TRUNCATED_BITS.len() {
-            return PI_F32;
-        }
-
-        let table = if self.is_truncated() {
-            &F32_TRUNCATED_BITS
+        let bits = if self.is_truncated() {
+            f32_truncated_bits(D)
         } else {
-            &F32_ROUNDED_BITS
+            f32_ceiling_bits(D)
         };
 
-        match table.get(D) {
-            Some(bits) => f32::from_bits(*bits),
+        match bits {
+            Some(bits) => f32::from_bits(bits),
             None => PI_F32,
         }
     }
@@ -145,18 +163,14 @@ where
     /// stored value, not mathematical π.
     #[must_use]
     pub fn to_f64_lossy(&self) -> f64 {
-        if D >= F64_TRUNCATED_BITS.len() {
-            return PI_F64;
-        }
-
-        let table = if self.is_truncated() {
-            &F64_TRUNCATED_BITS
+        let bits = if self.is_truncated() {
+            f64_truncated_bits(D)
         } else {
-            &F64_ROUNDED_BITS
+            f64_ceiling_bits(D)
         };
 
-        match table.get(D) {
-            Some(bits) => f64::from_bits(*bits),
+        match bits {
+            Some(bits) => f64::from_bits(bits),
             None => PI_F64,
         }
     }

@@ -14,9 +14,11 @@ The repository licensing baseline is now established: PolyForm Noncommercial 1.0
 - critical public APIs have no known panic paths;
 - `f32` / `f64` native constants verified;
 - `Pi<D>` semantics implemented for the declared range;
-- rounding, truncation, and lossy conversion behavior documented and tested;
+- all six public rounding policies, truncation, and lossy conversion behavior documented and tested;
+- untrusted runtime precision can be rejected by a caller-selected limit before expensive generation or output mutation;
 - all `D = 0..40` known-answer tests pass;
-- supported target matrix builds successfully;
+- selected all-feature target matrix builds successfully;
+- the Universal 1.0 dependency-free portable-core matrix builds successfully across every declared representative target;
 - optional feature tiers build independently and in the all-features configuration without contaminating the default dependency graph;
 - every direct optional integration dependency is at the newest appropriate stable release, optional, and configured with default features disabled unless explicitly justified;
 - resource measurements published for representative constrained and general-purpose targets;
@@ -32,7 +34,10 @@ The repository licensing baseline is now established: PolyForm Noncommercial 1.0
 - fuzz/property and mutation testing integrated;
 - benchmark methodology stabilized;
 - no unresolved correctness issue affecting canonical values or conversion semantics;
-- documentation examples validated against released API.
+- documentation examples validated against released API;
+- Universal Support Contract and requirement-to-evidence traceability reviewed against the exact release candidate;
+- an independent critic review finds no unresolved repository-scoped blocker on the exact candidate;
+- downstream critical-system qualification boundaries remain explicit and do not overclaim certification.
 
 ## Safety-related claims
 

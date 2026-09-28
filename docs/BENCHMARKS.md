@@ -7,6 +7,7 @@ This report records host measurements for Perfectπ. It is evidence for the meas
 - CPU: AMD Ryzen AI 9 365 with Radeon 880M
 - OS: Windows x86-64
 - Rust: stable 1.98.1
+- production source measured: `f11b0ab21b5e820777afd5f0b04b6732b9dbc349`
 - profile: Cargo `--release`
 - harness: `examples/host_benchmark.rs`
 - timing source: `std::time::Instant`
@@ -17,11 +18,11 @@ This report records host measurements for Perfectπ. It is evidence for the meas
 
 | Operation | Iterations per run | Median ns/op | Interpretation |
 | --- | ---: | ---: | --- |
-| native `PI_F64.to_bits()` | 20,000,000 | 0.283 | compiler-optimized constant path; timer/loop microbenchmark |
-| `Pi<40>::round_nearest_even()` | 5,000,000 | 0.559 | compiler-optimized bounded materialization |
-| rounded `Pi<40>` → lossy `f64` | 5,000,000 | 0.287 | optimized finite-table/native-collapse path |
-| runtime generation, 100 fractional places | 100 | 32,207 | about 32.207 µs per generated value |
-| runtime generation, 1,000 fractional places | 10 | 1,251,440 | about 1.251 ms per generated value |
+| native `PI_F64.to_bits()` | 20,000,000 | 0.233 | compiler-optimized constant path; timer/loop microbenchmark |
+| `Pi<40>::round_nearest_even()` | 5,000,000 | 0.452 | compiler-optimized bounded materialization |
+| rounded `Pi<40>` → lossy `f64` | 5,000,000 | 0.226 | optimized finite-table/native-collapse path |
+| runtime generation, 100 fractional places | 100 | 26,594 | about 26.594 µs per generated value |
+| runtime generation, 1,000 fractional places | 10 | 1,024,520 | about 1.025 ms per generated value |
 
 The sub-nanosecond core figures must not be generalized to other CPUs or used as hardware latency claims. They mainly demonstrate that the optimized native/bounded paths are tiny relative to host timer-scale work. Runtime generation has deliberately variable cost and should be benchmarked at the precision actually used by an application.
 

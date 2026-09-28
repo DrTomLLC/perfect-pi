@@ -1,9 +1,18 @@
-use perfect_pi::{F32_GUARANTEED_DECIMAL_PLACES, F64_GUARANTEED_DECIMAL_PLACES, Pi};
+use perfect_pi::{F32_GUARANTEED_DECIMAL_PLACES, F64_GUARANTEED_DECIMAL_PLACES, Pi, RoundingMode};
 
 macro_rules! assert_bits {
-    ($d:literal, $tf32:literal, $tf64:literal, $rf32:literal, $rf64:literal) => {{
+    (
+        $d:literal,
+        $tf32:literal,
+        $tf64:literal,
+        $rf32:literal,
+        $rf64:literal,
+        $cf32:literal,
+        $cf64:literal
+    ) => {{
         let truncated = Pi::<$d>::truncated();
         let rounded = Pi::<$d>::round_nearest_even();
+        let ceiling = Pi::<$d>::with_rounding(RoundingMode::TowardPositiveInfinity);
         assert_eq!(
             truncated.to_f32_lossy().to_bits(),
             $tf32,
@@ -28,9 +37,20 @@ macro_rules! assert_bits {
             "D={} rounded f64",
             $d
         );
+        assert_eq!(
+            ceiling.to_f32_lossy().to_bits(),
+            $cf32,
+            "D={} ceiling f32",
+            $d
+        );
+        assert_eq!(
+            ceiling.to_f64_lossy().to_bits(),
+            $cf64,
+            "D={} ceiling f64",
+            $d
+        );
     }};
 }
-
 #[test]
 fn all_bounded_values_match_independent_ieee_reference_bits() {
     assert_bits!(
@@ -38,26 +58,34 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40400000,
         0x4008000000000000,
         0x40400000,
-        0x4008000000000000
+        0x4008000000000000,
+        0x40800000,
+        0x4010000000000000
     );
     assert_bits!(
         1,
         0x40466666,
         0x4008cccccccccccd,
         0x40466666,
-        0x4008cccccccccccd
+        0x4008cccccccccccd,
+        0x404ccccd,
+        0x400999999999999a
     );
     assert_bits!(
         2,
         0x4048f5c3,
         0x40091eb851eb851f,
         0x4048f5c3,
-        0x40091eb851eb851f
+        0x40091eb851eb851f,
+        0x4049999a,
+        0x4009333333333333
     );
     assert_bits!(
         3,
         0x40490625,
         0x400920c49ba5e354,
+        0x40491687,
+        0x400922d0e5604189,
         0x40491687,
         0x400922d0e5604189
     );
@@ -66,6 +94,8 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490e56,
         0x400921cac083126f,
         0x40490ff9,
+        0x400921ff2e48e8a7,
+        0x40490ff9,
         0x400921ff2e48e8a7
     );
     assert_bits!(
@@ -73,12 +103,16 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fd0,
         0x400921f9f01b866e,
         0x40490fd0,
-        0x400921f9f01b866e
+        0x400921f9f01b866e,
+        0x40490ff9,
+        0x400921ff2e48e8a7
     );
     assert_bits!(
         6,
         0x40490fd8,
         0x400921fafc8b007a,
+        0x40490fdc,
+        0x400921fb82c2bd7f,
         0x40490fdc,
         0x400921fb82c2bd7f
     );
@@ -87,6 +121,8 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fda,
         0x400921fb4d12d84a,
         0x40490fdb,
+        0x400921fb5a7ed197,
+        0x40490fdb,
         0x400921fb5a7ed197
     );
     assert_bits!(
@@ -94,12 +130,16 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb53c8d4f1,
         0x40490fdb,
-        0x400921fb53c8d4f1
+        0x400921fb53c8d4f1,
+        0x40490fdb,
+        0x400921fb55206ddf
     );
     assert_bits!(
         9,
         0x40490fdb,
         0x400921fb542fe938,
+        0x40490fdb,
+        0x400921fb54524550,
         0x40490fdb,
         0x400921fb54524550
     );
@@ -108,12 +148,16 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54411744,
         0x40490fdb,
+        0x400921fb544486e0,
+        0x40490fdb,
         0x400921fb544486e0
     );
     assert_bits!(
         11,
         0x40490fdb,
         0x400921fb5443d6f4,
+        0x40490fdb,
+        0x400921fb54442eea,
         0x40490fdb,
         0x400921fb54442eea
     );
@@ -122,12 +166,16 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb5444261e,
         0x40490fdb,
+        0x400921fb54442eea,
+        0x40490fdb,
         0x400921fb54442eea
     );
     assert_bits!(
         13,
         0x40490fdb,
         0x400921fb54442c46,
+        0x40490fdb,
+        0x400921fb54442d28,
         0x40490fdb,
         0x400921fb54442d28
     );
@@ -136,17 +184,23 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d11,
         0x40490fdb,
-        0x400921fb54442d11
+        0x400921fb54442d11,
+        0x40490fdb,
+        0x400921fb54442d28
     );
     assert_bits!(
         15,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
-        0x400921fb54442d18
+        0x400921fb54442d18,
+        0x40490fdb,
+        0x400921fb54442d1a
     );
     assert_bits!(
         16,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -157,10 +211,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         18,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -171,10 +229,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         20,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -185,10 +247,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         22,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -199,10 +265,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         24,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -213,10 +283,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         26,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -227,10 +301,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         28,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -241,10 +319,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         30,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -255,10 +337,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         32,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -269,10 +355,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         34,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -283,10 +373,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         36,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -297,10 +391,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         38,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -311,10 +409,14 @@ fn all_bounded_values_match_independent_ieee_reference_bits() {
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
+        0x400921fb54442d18,
+        0x40490fdb,
         0x400921fb54442d18
     );
     assert_bits!(
         40,
+        0x40490fdb,
+        0x400921fb54442d18,
         0x40490fdb,
         0x400921fb54442d18,
         0x40490fdb,
@@ -364,7 +466,11 @@ fn checked_conversion_boundaries_are_explicit() {
 
 macro_rules! assert_preserves_f32 {
     ($d:literal) => {{
-        for source in [Pi::<$d>::truncated(), Pi::<$d>::round_nearest_even()] {
+        for source in [
+            Pi::<$d>::truncated(),
+            Pi::<$d>::round_nearest_even(),
+            Pi::<$d>::with_rounding(RoundingMode::TowardPositiveInfinity),
+        ] {
             let converted = match source.try_to_f32_preserving_places() {
                 Ok(value) => value,
                 Err(error) => panic!(
@@ -381,7 +487,11 @@ macro_rules! assert_preserves_f32 {
 
 macro_rules! assert_preserves_f64 {
     ($d:literal) => {{
-        for source in [Pi::<$d>::truncated(), Pi::<$d>::round_nearest_even()] {
+        for source in [
+            Pi::<$d>::truncated(),
+            Pi::<$d>::round_nearest_even(),
+            Pi::<$d>::with_rounding(RoundingMode::TowardPositiveInfinity),
+        ] {
             let converted = match source.try_to_f64_preserving_places() {
                 Ok(value) => value,
                 Err(error) => panic!(

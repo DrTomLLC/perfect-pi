@@ -4,6 +4,15 @@ All notable released changes to Perfectπ will be documented here.
 
 ## Unreleased
 
+- Universal 1.0 support contract, qualification guide, and executable requirement traceability added.
+- Shared six-mode `RoundingMode` added for bounded and runtime π: toward zero, away from zero, toward negative infinity, toward positive infinity, nearest ties-to-even, and nearest ties-away-from-zero.
+- Runtime generation now offers explicit caller precision ceilings while retaining caller-owned output storage and the no-direct-allocation source policy.
+- Runtime independent verification expanded so all six rounding modes are checked against both Chudnovsky and Gauss–Legendre through 1,000 fractional digits at nine checkpoints.
+- Runtime ASan fuzzing expanded across rounding policies, precision limits, buffer capacities, and deterministic regeneration.
+- Aggregate `full` feature added to enable all current production capability tiers while preserving an empty default feature set.
+- Portable-core CI expanded across embedded ARM/RISC-V, 32/64-bit, little/big-endian, Linux/musl, Windows, Android, Apple, WebAssembly/WASI, BSD/illumos, s390x, PowerPC, and LoongArch representative targets.
+- Public error types now implement `core::error::Error` where their contained dependency errors permit it.
+
 - Repository and architecture baseline established.
 - Public brand defined as Perfectπ / Perfect Pi.
 - Bounded precision design fixed at 0 through 40 decimal places after the decimal point.

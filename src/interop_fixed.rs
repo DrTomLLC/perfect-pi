@@ -24,6 +24,8 @@ impl fmt::Display for FixedInteropError {
     }
 }
 
+impl core::error::Error for FixedInteropError {}
+
 impl<const D: usize> DecimalPi<D>
 where
     (): SupportedPrecision<D>,

@@ -27,9 +27,11 @@ Perfectπ should therefore support fault-aware systems rather than falsely claim
 
 Automatic startup self-test is intentionally not provided. The evaluation and fault-model rationale are documented in [Startup Integrity Self-Test Evaluation](INTEGRITY_SELF_TEST.md). Applications that require startup or periodic integrity checking should use independently stored expected values at the application boundary.
 
-## Certification
+## Certification and qualification
 
 No README claim, crate feature, or test suite may describe Perfectπ as safety-certified unless an applicable certification process has actually been completed and its scope is documented.
+
+Perfectπ is designed to be qualification-friendly across critical-system domains. Repository evidence can be reused, but a deployment must bind the exact crate commit, features, compiler, target, linker/application, hardware, fault model, and governing assurance process. The concrete evidence checklist and requalification triggers are defined in [Critical-System Qualification Guide](QUALIFICATION.md).
 
 ## Verification expectations
 

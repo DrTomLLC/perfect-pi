@@ -4,13 +4,13 @@
   <img src="docs/assets/brand/perfect-pi-icon-dark-512.png" alt="Perfectπ logo" width="160">
 </p>
 
-**Perfect Pi** — deterministic, bounded, resource-efficient π infrastructure for Rust.
+**Perfect Pi** — universal, deterministic, resource-explicit π infrastructure for Rust.
 
-> One π ecosystem from tiny `no_std` targets to high-precision scientific computing, while making every expensive capability explicit and opt-in.
+> One π ecosystem from tiny `no_std` targets through application, scientific, arbitrary-precision, and qualification-oriented critical-system use—without making small targets pay for large-target capabilities.
 
 ## Status
 
-**Bounded core, optional adapters, verification hardening, and the extended runtime/arbitrary-precision tier are implemented; minimum supported Rust is the current stable release, Rust 1.98.1; no public crate release yet.**
+**Universal 1.0 work is implemented on the release-candidate path: bounded core, explicit six-mode rounding, optional adapters, guarded arbitrary precision, broad portability CI, and qualification evidence; minimum supported Rust tracks current stable Rust 1.98.1; no public crate release yet.**
 
 The repository contains a working `no_std` bounded core, optional IEEE/interoperability adapters, and opt-in runtime/arbitrary-precision generation. The bounded core remains allocation-free and dependency-free by default. The project is still pre-release and must not be treated as safety-certified.
 
@@ -21,7 +21,7 @@ Rust already provides π for native floating-point types, and arbitrary-precisio
 - native `f32` / `f64` fast paths with effectively no library overhead;
 - a bounded, deterministic decimal precision model from 0 through **40 places after the decimal point**;
 - `#![no_std]` and no-allocation operation for the critical bounded core;
-- explicit rounding plus checked precision-preserving and explicitly named lossy conversions — never silent precision claims;
+- six explicit decimal rounding policies plus checked precision-preserving and explicitly named lossy conversions — never silent precision claims;
 - fixed and documented memory / execution bounds;
 - optional stable IEEE `binary16` / `binary128` interchange adapters, ecosystem interoperability, and independently verified runtime/arbitrary-precision generation;
 - verification tooling kept outside production dependencies.
@@ -67,7 +67,7 @@ Perfectπ is being designed as a reusable π foundation for:
 
 Perfectπ owns **π and its numerical semantics**. It does not attempt to become a domain-specific mathematics framework.
 
-## Planned architecture
+## Architecture
 
 ```text
 perfect-pi
@@ -170,9 +170,10 @@ Precision beyond the bounded `0..=40` tier is opt-in:
 cargo run --example runtime_generate --features runtime-generation -- 256
 cargo run --example runtime_generate --features runtime-generation -- 256 round
 cargo build --features arbitrary-precision
+cargo build --features full
 ```
 
-`runtime-generation` uses current `num-bigint 0.5.1` with default features disabled. It computes Machin's identity with conservative arbitrary-precision integer bounds and increases guard precision until the requested decimal result is certified. Both truncation and decimal nearest-even rounding are explicit, with no binary-float detour. `arbitrary-precision` is a semantic alias for the same precision-above-40 capability. The default dependency graph remains unchanged.
+`runtime-generation` uses current `num-bigint 0.5.1` with default features disabled. It computes Machin's identity with conservative arbitrary-precision integer bounds and increases guard precision until the requested decimal result is certified. All six public decimal rounding modes are explicit, with no binary-float detour. The limit-taking API rejects untrusted precision above a caller-selected ceiling before expensive generation or output mutation, while final output storage remains caller-owned. `arbitrary-precision` is the precision-above-40 alias; `full` enables every current production capability. The default dependency graph remains unchanged.
 
 See [Runtime Generation and Arbitrary Precision](docs/RUNTIME_GENERATION.md). Engineering and bounded-output examples are under `examples/`.
 
@@ -188,11 +189,11 @@ Optional-format probes remain tiny: binary16 π+τ measures 16–24 bytes of tex
 
 Perfectπ is being designed for use in high-reliability software, including resource-constrained and fault-aware systems. That does **not** by itself make a downstream system safety-certified, radiation-hardened, or immune to hardware, compiler, memory, power, or integration faults.
 
-See [Safety and Reliability](docs/SAFETY.md).
+See [Universal Support](docs/UNIVERSAL_SUPPORT.md), [Safety and Reliability](docs/SAFETY.md), and the [Critical-System Qualification Guide](docs/QUALIFICATION.md). Universal support means a common, verified library architecture; it does not mean every downstream device or safety case is pre-certified.
 
 ## Verification strategy
 
-The bounded precision space is intentionally finite. Every supported decimal precision from `Pi<0>` through `Pi<40>` is covered by known-answer tests. All 164 bounded conversion outcomes (41 precisions × truncation/rounding × `f32`/`f64`) are checked against IEEE bit patterns independently generated from exact rational arithmetic, and canonical π digits are cross-verified with independent algorithms.
+The bounded precision space is intentionally finite. Every supported decimal precision from `Pi<0>` through `Pi<40>` is covered by known-answer tests. All 246 bounded conversion outcomes (41 precisions × truncation/nearest/ceiling × `f32`/`f64`) are checked against IEEE bit patterns independently generated from exact rational arithmetic, and canonical π digits are cross-verified with independent algorithms.
 
 Phase-4 hardening now adds exhaustive bounded-state buffer verification, sanitizer-backed libFuzzer targets, mutation testing with zero surviving viable mutants, enforced source-coverage floors, and byte-for-byte cross-host reproducibility checks for 30 representative target/probe objects.
 
@@ -214,6 +215,10 @@ Primary repository assets:
 ## Project documents
 
 - [Normative Specification v1](SPECIFICATION.md)
+- [Universal Support Contract](docs/UNIVERSAL_SUPPORT.md)
+- [Universal 1.0 Independent Critic Review](docs/UNIVERSAL_FINAL_REVIEW.md)
+- [Universal 1.0 Traceability](docs/TRACEABILITY.md)
+- [Critical-System Qualification Guide](docs/QUALIFICATION.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Precision and Numerical Semantics](docs/PRECISION.md)
 - [Optional IEEE Float Formats](docs/FLOAT_FORMATS.md)

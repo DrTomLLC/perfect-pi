@@ -1,11 +1,13 @@
-//! Optional runtime generation of pi beyond the bounded constant tier.
+//! Optional runtime generation of π beyond the bounded constant tier.
 
 use core::fmt;
 use num_bigint::BigInt;
 
+use crate::RoundingMode;
+
 const MAX_GUARD_PLACES: u32 = 64;
 
-/// Error returned by runtime pi generation.
+/// Error returned by runtime π generation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RuntimePiError {
     /// The caller-provided output buffer cannot hold the requested decimal text.
@@ -17,11 +19,18 @@ pub enum RuntimePiError {
     },
     /// The requested precision cannot be represented by this API.
     PrecisionTooLarge,
+    /// A caller-selected resource limit rejected the requested precision.
+    PrecisionLimitExceeded {
+        /// Requested places after the decimal point.
+        requested: usize,
+        /// Maximum places permitted by the caller.
+        limit: usize,
+    },
     /// An internal arithmetic or formatting invariant was not satisfied.
     InternalInvariant,
 }
 
-/// Returns the ASCII byte count required for runtime-generated pi.
+/// Returns the ASCII byte count required for runtime-generated π.
 pub fn runtime_pi_ascii_len(decimal_places: usize) -> Result<usize, RuntimePiError> {
     if decimal_places == 0 {
         Ok(1)
@@ -32,36 +41,34 @@ pub fn runtime_pi_ascii_len(decimal_places: usize) -> Result<usize, RuntimePiErr
     }
 }
 
-/// Generates pi truncated to exactly `decimal_places` places after the decimal point.
+/// Generates π truncated to exactly decimal_places places after the decimal point.
 ///
-/// This optional variable-cost path uses arbitrary-precision integer arithmetic
-/// internally and writes the final decimal representation into caller storage.
-/// Machin's identity supplies the value, while conservative integer bounds are
-/// widened for every division and guard precision grows until both bounds prove
-/// the same requested truncation.
+/// Equivalent to generate_pi_ascii_with_rounding with TowardZero.
 pub fn generate_pi_ascii(
     decimal_places: usize,
     output: &mut [u8],
 ) -> Result<usize, RuntimePiError> {
-    let required = runtime_pi_ascii_len(decimal_places)?;
-    if output.len() < required {
-        return Err(RuntimePiError::BufferTooSmall {
-            required,
-            provided: output.len(),
-        });
-    }
-
-    let scaled = certified_scaled_pi(decimal_places)?;
-    write_scaled_pi(decimal_places, &scaled, output, required)
+    generate_pi_ascii_with_rounding(decimal_places, RoundingMode::TowardZero, output)
 }
 
-/// Generates pi rounded to exactly `decimal_places` places using nearest, ties-to-even.
+/// Generates π rounded to decimal_places places using nearest, ties-to-even.
 ///
-/// Pi is irrational, so an exact finite decimal halfway tie cannot occur. The
-/// implementation certifies one additional decimal digit, then rounds that exact
-/// finite prefix without routing through binary floating point.
+/// Equivalent to generate_pi_ascii_with_rounding with NearestTiesToEven.
 pub fn generate_pi_ascii_round_nearest_even(
     decimal_places: usize,
+    output: &mut [u8],
+) -> Result<usize, RuntimePiError> {
+    generate_pi_ascii_with_rounding(decimal_places, RoundingMode::NearestTiesToEven, output)
+}
+
+/// Generates π using an explicit decimal rounding policy.
+///
+/// This optional variable-cost path uses arbitrary-precision integer arithmetic
+/// and never routes through binary floating point. Callers forwarding untrusted
+/// precision should prefer generate_pi_ascii_with_limit.
+pub fn generate_pi_ascii_with_rounding(
+    decimal_places: usize,
+    rounding: RoundingMode,
     output: &mut [u8],
 ) -> Result<usize, RuntimePiError> {
     let required = runtime_pi_ascii_len(decimal_places)?;
@@ -72,16 +79,21 @@ pub fn generate_pi_ascii_round_nearest_even(
         });
     }
 
-    let extended_places = decimal_places
-        .checked_add(1)
-        .ok_or(RuntimePiError::PrecisionTooLarge)?;
-    let extended = certified_scaled_pi(extended_places)?;
-    let next_digit = &extended % 10_u8;
-    let mut rounded = &extended / 10_u8;
-    if next_digit >= BigInt::from(5_u8) {
-        rounded += 1_u8;
-    }
-    write_scaled_pi(decimal_places, &rounded, output, required)
+    let scaled = scaled_pi_for_rounding(decimal_places, rounding)?;
+    write_scaled_pi(decimal_places, &scaled, output, required)
+}
+
+/// Generates π while enforcing a caller-selected maximum precision.
+///
+/// The limit check happens before generation or output mutation.
+pub fn generate_pi_ascii_with_limit(
+    decimal_places: usize,
+    max_decimal_places: usize,
+    rounding: RoundingMode,
+    output: &mut [u8],
+) -> Result<usize, RuntimePiError> {
+    enforce_precision_limit(decimal_places, max_decimal_places)?;
+    generate_pi_ascii_with_rounding(decimal_places, rounding, output)
 }
 
 impl fmt::Display for RuntimePiError {
@@ -89,9 +101,56 @@ impl fmt::Display for RuntimePiError {
         match self {
             Self::BufferTooSmall { .. } => formatter.write_str("output buffer is too small"),
             Self::PrecisionTooLarge => formatter.write_str("requested precision is too large"),
+            Self::PrecisionLimitExceeded { .. } => {
+                formatter.write_str("requested precision exceeds the configured limit")
+            }
             Self::InternalInvariant => {
                 formatter.write_str("runtime pi generation invariant failed")
             }
+        }
+    }
+}
+
+impl core::error::Error for RuntimePiError {}
+
+fn enforce_precision_limit(
+    decimal_places: usize,
+    max_decimal_places: usize,
+) -> Result<(), RuntimePiError> {
+    if decimal_places > max_decimal_places {
+        Err(RuntimePiError::PrecisionLimitExceeded {
+            requested: decimal_places,
+            limit: max_decimal_places,
+        })
+    } else {
+        Ok(())
+    }
+}
+
+fn scaled_pi_for_rounding(
+    decimal_places: usize,
+    rounding: RoundingMode,
+) -> Result<BigInt, RuntimePiError> {
+    match rounding {
+        RoundingMode::TowardZero | RoundingMode::TowardNegativeInfinity => {
+            certified_scaled_pi(decimal_places)
+        }
+        RoundingMode::AwayFromZero | RoundingMode::TowardPositiveInfinity => {
+            let mut value = certified_scaled_pi(decimal_places)?;
+            value += 1_u8;
+            Ok(value)
+        }
+        RoundingMode::NearestTiesToEven | RoundingMode::NearestTiesAwayFromZero => {
+            let extended_places = decimal_places
+                .checked_add(1)
+                .ok_or(RuntimePiError::PrecisionTooLarge)?;
+            let extended = certified_scaled_pi(extended_places)?;
+            let next_digit = &extended % 10_u8;
+            let mut rounded = &extended / 10_u8;
+            if next_digit >= BigInt::from(5_u8) {
+                rounded += 1_u8;
+            }
+            Ok(rounded)
         }
     }
 }
@@ -107,9 +166,6 @@ fn certified_scaled_pi(decimal_places: usize) -> Result<BigInt, RuntimePiError> 
         let exponent =
             u32::try_from(working_places).map_err(|_| RuntimePiError::PrecisionTooLarge)?;
 
-        // For inverse >= 5 and scale = 10^d, the term denominator already
-        // exceeds the scale by term d because 5^(2d+1) > 10^d. Keep a
-        // conservative eight-term margin while retaining a hard termination bound.
         let max_terms = working_places
             .checked_add(8)
             .ok_or(RuntimePiError::PrecisionTooLarge)?;

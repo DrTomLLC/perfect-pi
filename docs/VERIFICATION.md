@@ -8,8 +8,9 @@ The initial core currently has:
 
 - known-answer coverage for every bounded precision `D = 0..40`;
 - explicit truncation and round-to-nearest-even vectors;
+- exhaustive bounded equivalence checks for all six public `RoundingMode` policies at every `D = 0..40`;
 - exact known bit-pattern checks for native `f32` and `f64` π;
-- exact-rational generation and IEEE-bit verification of all 164 bounded native-conversion outcomes (41 precisions × truncation/rounding × `f32`/`f64`);
+- exact-rational generation and IEEE-bit verification of all 246 bounded native-conversion outcomes (41 precisions × truncation/nearest/ceiling × `f32`/`f64`);
 - independent proof of the checked preservation boundaries through `D=6` for `f32` and `D=15` for `f64`, including concrete failing cases at `D=7` and `D=16`;
 - allocation-free caller-buffer output tests;
 - a compile-fail doctest proving bounded operations are unavailable for `Pi<41>`;
@@ -24,7 +25,9 @@ The initial core currently has:
 - RustSec advisory auditing of the resolved optional dependency graph;
 - exhaustive bounded-state caller-buffer verification across 3,690 legal precision/mode/capacity states;
 - sanitizer-backed libFuzzer targets for the bounded core, optional interoperability surfaces, and runtime arbitrary-precision generation;
-- independent truncation and nearest-even runtime-generation checks against both Chudnovsky and Gauss-Legendre through 1,000 fractional digits at nine precision checkpoints;
+- independent checks of all six runtime rounding policies against both Chudnovsky and Gauss-Legendre through 1,000 fractional digits at nine precision checkpoints;
+- runtime precision-limit tests proving rejection occurs before output mutation, with the same surfaces exercised by sanitizer-backed fuzzing;
+- a 29-target dependency-free core portability matrix spanning embedded, word-size, endian, OS, mobile, WebAssembly, and architecture classes;
 - mutation testing with zero surviving viable mutants required by CI; retained exact counts are updated whenever the production tree changes;
 - measured post-Phase-5 all-feature source coverage of 95.23% lines, 91.80% regions, and 100% functions, with enforced CI floors of 92% / 91% / 100%;
 - byte-for-byte reproducibility of 30 representative probe objects across repeated Windows and Linux builds using the same Rust 1.98.1 compiler commit.
@@ -50,7 +53,7 @@ Canonical π digits and derived constants should be checked against more than on
 - rounding and truncation boundaries;
 - checked/lossy conversion boundaries;
 - integer overflow and narrowing boundaries;
-- cross-target builds;
+- cross-target builds, including dependency-free core portability and selected all-feature targets;
 - cross-target reproducibility checks;
 - property/fuzz tests where inputs exist;
 - mutation testing of critical logic;

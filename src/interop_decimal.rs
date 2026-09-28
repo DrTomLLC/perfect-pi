@@ -34,6 +34,8 @@ impl fmt::Display for RustDecimalInteropError {
     }
 }
 
+impl core::error::Error for RustDecimalInteropError {}
+
 impl<const D: usize> DecimalPi<D>
 where
     (): SupportedPrecision<D>,

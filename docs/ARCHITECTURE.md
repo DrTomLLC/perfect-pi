@@ -24,7 +24,7 @@ Target properties:
 - compile-time bounded precision;
 - fixed and documented memory and execution bounds.
 
-The implemented bounded core exposes native `f32` / `f64` representations, verified native derived constants, the bounded `Pi<D>` precision family, checked precision-preserving conversions, and explicitly named lossy conversions to `f32` / `f64`. Conversion semantics are exhaustively verified across the finite bounded domain, while native-only callers remain separate from bounded conversion machinery.
+The implemented bounded core exposes native `f32` / `f64` representations, verified native derived constants, the bounded `Pi<D>` precision family, shared six-mode `RoundingMode` semantics, checked precision-preserving conversions, and explicitly named lossy conversions to `f32` / `f64`. Conversion and rounding semantics are exhaustively verified across the finite bounded domain, while native-only callers remain separate from bounded conversion machinery.
 
 ### 2. Optional float adapters
 
@@ -51,13 +51,17 @@ Each direct dependency is optional with default features disabled. The default P
 
 ### 4. Optional arbitrary precision
 
-Precision beyond 40 decimal places remains outside the bounded core. The implemented `arbitrary-precision` feature enables the same variable-cost generator as `runtime-generation`, backed by `num-bigint` with default features disabled. It may allocate when executed, but none of that dependency graph is present unless explicitly enabled.
+Precision beyond 40 decimal places remains outside the bounded core. The implemented `arbitrary-precision` feature enables the same variable-cost generator as `runtime-generation`, backed by `num-bigint` with default features disabled. It may allocate internally through that dependency when executed, but Perfectπ retains caller-owned final output storage and none of that dependency graph is present unless explicitly enabled.
 
 ### 5. Optional π calculation algorithms
 
-The implemented `runtime-generation` feature computes π with Machin's identity and arbitrary-precision integer interval bounds. It is not the mechanism used by the bounded critical core to obtain a constant that is already known. Guard precision increases until lower and upper bounds prove the same requested decimal truncation.
+The implemented `runtime-generation` feature computes π with Machin's identity and arbitrary-precision integer interval bounds. It is not the mechanism used by the bounded critical core to obtain a constant that is already known. Guard precision increases until lower and upper bounds prove the requested finite decimal result. The runtime tier uses the same six public rounding policies as the bounded tier and provides a caller-selected maximum-precision gate for untrusted requests.
 
-### 6. Verification infrastructure
+### 6. Aggregate full capability
+
+The additive `full` feature enables all current production capability tiers: IEEE interchange adapters, ecosystem interoperability, and arbitrary precision. It is an explicit convenience for capable targets and does not alter the empty default feature set.
+
+### 7. Verification infrastructure
 
 Heavy reference libraries, independent π algorithms, fuzzing, mutation testing, model checking, and cross-target validation are development tools only.
 

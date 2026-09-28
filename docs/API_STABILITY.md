@@ -14,11 +14,12 @@ The baseline includes:
 - checked and explicitly lossy `f32` / `f64` conversion APIs;
 - optional `Binary16` and `Binary128` interchange types and constants;
 - optional complex, fixed-point, and `rust_decimal` interoperability;
-- optional `runtime-generation` / `arbitrary-precision` ASCII generation with explicit truncation and nearest-even rounding.
+- shared `RoundingMode` semantics covering six conventional decimal rounding directions;
+- optional `runtime-generation` / `arbitrary-precision` generation with caller-buffer and caller-limit entry points; final output storage remains caller-owned.
 
 ## Feature compatibility
 
-The default feature set remains empty. Existing feature names are part of the compatibility surface: `binary16`, `binary128`, `all-float-formats`, `complex`, `fixed-point`, `decimal`, `interop`, `runtime-generation`, and `arbitrary-precision`.
+The default feature set remains empty. Existing feature names are part of the compatibility surface: `binary16`, `binary128`, `all-float-formats`, `complex`, `fixed-point`, `decimal`, `interop`, `runtime-generation`, `arbitrary-precision`, and `full`. The `full` feature is an additive umbrella over all current production capability features; it does not change the empty default feature set.
 
 ## Rust and platform policy
 

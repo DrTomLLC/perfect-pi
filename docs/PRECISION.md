@@ -41,6 +41,8 @@ Native constants will therefore be documented using their representation propert
 
 Every conversion or fixed-precision construction must define its rounding behavior. Truncation must be explicitly requested and must not masquerade as rounding.
 
+Perfectπ exposes six conventional decimal policies through `RoundingMode`: toward zero, away from zero, toward negative infinity, toward positive infinity, nearest ties-to-even, and nearest ties-away-from-zero. Because π is positive and irrational, toward zero equals toward negative infinity, away from zero equals toward positive infinity, and an exact finite-decimal halfway tie is impossible. The two nearest tie policies therefore produce the same π result while remaining semantically distinct public policies.
+
 ## Native-float conversion
 
 Perfectπ converts the finite stored decimal value, not an imagined higher-precision `f32` or `f64` value. Callers that want mathematical π directly in a native float should use `PI_F32` or `PI_F64`; converting a `DecimalPi<D>` instead preserves the semantics of that finite decimal source before binary rounding.
