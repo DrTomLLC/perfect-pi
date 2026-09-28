@@ -270,7 +270,7 @@ Before a bounded release is described as production-ready, verification shall in
 - representative cross-target builds;
 - static linting;
 - independent canonical-digit verification;
-- exact-rational verification of every bounded truncation/rounding conversion to `f32` and `f64`;
+- exact-rational verification of every bounded truncation, nearest, and ceiling conversion class to `f32` and `f64`;
 - verification of the checked decimal-place preservation boundaries and their first failing cases.
 
 Additional verification should include fuzz/property testing, mutation testing, reproducibility checks, and model/exhaustive checking where they materially improve confidence.
