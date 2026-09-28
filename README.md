@@ -173,7 +173,7 @@ cargo build --features arbitrary-precision
 cargo build --features full
 ```
 
-`runtime-generation` uses current `num-bigint 0.5.1` with default features disabled. It computes Machin's identity with conservative arbitrary-precision integer bounds and increases guard precision until the requested decimal result is certified. All six public decimal rounding modes are explicit, with no binary-float detour. Limit-taking APIs reject untrusted precision above a caller-selected ceiling before expensive generation or output mutation. `arbitrary-precision` is the precision-above-40 alias; `full` enables every current production capability. The default dependency graph remains unchanged.
+`runtime-generation` uses current `num-bigint 0.5.1` with default features disabled. It computes Machin's identity with conservative arbitrary-precision integer bounds and increases guard precision until the requested decimal result is certified. All six public decimal rounding modes are explicit, with no binary-float detour. The limit-taking API rejects untrusted precision above a caller-selected ceiling before expensive generation or output mutation, while final output storage remains caller-owned. `arbitrary-precision` is the precision-above-40 alias; `full` enables every current production capability. The default dependency graph remains unchanged.
 
 See [Runtime Generation and Arbitrary Precision](docs/RUNTIME_GENERATION.md). Engineering and bounded-output examples are under `examples/`.
 
