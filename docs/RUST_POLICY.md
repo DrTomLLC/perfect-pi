@@ -55,6 +55,7 @@ Required CI includes:
 - **Current nightly** — runs Perfectπ against the newest nightly and verifies native nightly `f16` / `f128` π-family encodings against Perfectπ;
 - direct dependency currency verification against crates.io, including enforcement that integration dependencies remain optional with default features disabled;
 - host tests on current stable Linux, Windows, and macOS;
-- current-stable `no_std` cross-target builds and resource probes.
+- current-stable all-feature `no_std` cross-target builds and resource probes on selected representative targets;
+- a dependency-free portable-core matrix covering 29 representative current-stable targets across embedded ARM/RISC-V, 32/64-bit, little/big-endian, Linux/musl, Windows, Android, Apple, WebAssembly/WASI, BSD/illumos, s390x, PowerPC, and LoongArch.
 
 This policy intentionally means a new Rust stable release can make CI fail until Perfectπ is moved forward and revalidated.
