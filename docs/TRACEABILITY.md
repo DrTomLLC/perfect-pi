@@ -13,7 +13,7 @@ exact pull-request head passes the referenced gate.
 | PPI-U-005 | Stable binary16/binary128 interchange is optional and dependency-free | src/binary16.rs; src/binary128.rs; verify_float_formats.py |
 | PPI-U-006 | Complex/fixed/decimal interoperability is optional | interop modules; tests/interop.rs; verify_interop.py |
 | PPI-U-007 | Precision above 40 is opt-in and independently certified before output | src/runtime.rs; runtime tests; verify_runtime_generation.py |
-| PPI-U-008 | Runtime callers can enforce a precision/resource ceiling before expensive work or mutation | generate_pi_ascii_with_limit; generate_pi_string; runtime_rounding tests; runtime fuzz target |
+| PPI-U-008 | Runtime callers can enforce a precision/resource ceiling before expensive work or mutation | generate_pi_ascii_with_limit; runtime_rounding tests; runtime fuzz target |
 | PPI-U-009 | One aggregate feature enables all production capability tiers | Cargo.toml full feature; feature-isolation CI |
 | PPI-U-010 | Core portability spans representative embedded, endian, word-size, OS, mobile, and WebAssembly classes | portable-core-matrix CI |
 | PPI-U-011 | Selected no_std targets validate all optional production features | no-std-targets CI |
