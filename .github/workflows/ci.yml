@@ -25,6 +25,8 @@ jobs:
           rustup default stable
       - name: Formatting
         run: cargo fmt --check
+      - name: Production source policy
+        run: python3 scripts/verify_source_policy.py
       - name: Clippy
         run: cargo clippy --all-targets -- -D warnings
       - name: Clippy all features
@@ -39,8 +41,12 @@ jobs:
           cargo check --lib --no-default-features --features binary16
           cargo check --lib --no-default-features --features binary128
           cargo check --lib --no-default-features --features all-float-formats
+          cargo check --lib --no-default-features --features complex
+          cargo check --lib --no-default-features --features fixed-point
+          cargo check --lib --no-default-features --features decimal
+          cargo check --lib --no-default-features --features interop
       - name: Compile-fail documentation tests
-        run: cargo test --doc
+        run: cargo test --doc --all-features
       - name: Rustdoc warnings
         env:
           RUSTDOCFLAGS: -D warnings
@@ -51,6 +57,10 @@ jobs:
         run: python3 scripts/verify_conversions.py
       - name: Independent optional float-format verification
         run: python3 scripts/verify_float_formats.py
+      - name: Independent interoperability verification
+        run: python3 scripts/verify_interop.py
+      - name: Enforce direct dependency currency/isolation
+        run: python3 scripts/verify_dependency_policy.py
 
   current-stable:
     name: Current stable

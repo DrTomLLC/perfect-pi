@@ -36,13 +36,14 @@ Perfectπ's default bounded core remains dependency-free.
 
 If an optional integration requires an external crate:
 
-1. use the newest stable, appropriate release available when the dependency is adopted;
-2. do not select an older release merely to support an obsolete Rust compiler;
-3. disable unnecessary default features where practical;
-4. keep the dependency behind an explicit opt-in feature;
-5. document why it exists and its resource/dependency impact;
-6. keep the default core free of that dependency;
-7. review dependency currency as part of release preparation.
+1. use and exactly pin the newest stable, appropriate release available when the dependency is adopted;
+2. required CI compares each direct dependency with crates.io and fails when a newer stable release exists, forcing an explicit update and complete revalidation;
+3. do not select an older release merely to support an obsolete Rust compiler;
+4. disable unnecessary default features where practical;
+5. keep the dependency behind an explicit opt-in feature;
+6. document why it exists and its resource/dependency impact;
+7. keep the default core free of that dependency;
+8. review dependency currency as part of release preparation.
 
 A dependency may be held back only for a documented correctness, safety, regression, platform, or compatibility defect in the newer release. Such an exception must be explicit and temporary.
 
@@ -52,6 +53,7 @@ Required CI includes:
 
 - **Current stable** — verifies the manifest Rust floor equals the current stable toolchain and runs all-feature checks/tests/Clippy;
 - **Current nightly** — runs Perfectπ against the newest nightly and verifies native nightly `f16` / `f128` π-family encodings against Perfectπ;
+- direct dependency currency verification against crates.io, including enforcement that integration dependencies remain optional with default features disabled;
 - host tests on current stable Linux, Windows, and macOS;
 - current-stable `no_std` cross-target builds and resource probes.
 

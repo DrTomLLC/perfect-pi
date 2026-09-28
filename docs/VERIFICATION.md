@@ -18,7 +18,9 @@ The initial core currently has:
 - successful WASM and AArch64 builds;
 - successful current-stable Rust 1.98.1 check, tests, and Clippy, with no support target below current stable;
 - dual-algorithm independent verification of all 10 binary16 and all 10 binary128 optional constants;
-- all-feature builds and tests across the supported host and `no_std` target matrix.
+- all-feature builds and tests across the supported host and `no_std` target matrix;
+- independent exact-rational reference checks for fixed-point interop and rust_decimal exact/28-place nearest-even results;
+- required crates.io currency checks for all direct optional interoperability dependencies.
 
 ## Bounded-domain verification
 

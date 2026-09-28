@@ -27,3 +27,8 @@ All notable released changes to Perfectπ will be documented here.
 - Ten π-family constants independently verified for each optional format using Chudnovsky and Gauss–Legendre references.
 - Optional float formats verified under current stable Rust 1.98.1, current nightly, and the full host/`no_std` target matrix.
 - Resource probes added for optional binary16 and binary128 paths.
+- Optional complex interoperability added using current stable `num-complex 0.4.6`.
+- Optional fixed-point interoperability added using current stable `fixed 1.31.0`, with nearest-even decimal parsing and no binary-float detour.
+- Optional decimal interoperability added using current stable `rust_decimal 1.43.0`, exact through 28 places with explicit nearest-even rounding above that limit.
+- Direct dependency currency/isolation CI added; default Perfectπ remains dependency-free.
+- All-feature interoperability verified on the full `no_std` cross-target matrix.

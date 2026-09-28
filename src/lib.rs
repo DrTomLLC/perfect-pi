@@ -23,6 +23,12 @@ mod binary128;
 mod binary16;
 mod bounded;
 mod conversion;
+#[cfg(feature = "complex")]
+mod interop_complex;
+#[cfg(feature = "decimal")]
+mod interop_decimal;
+#[cfg(feature = "fixed-point")]
+mod interop_fixed;
 mod native;
 
 #[cfg(feature = "binary16")]
@@ -39,6 +45,10 @@ pub use binary128::{
 };
 pub use bounded::{BufferTooSmall, DecimalPi, MAX_DECIMAL_PLACES, Pi};
 pub use conversion::{F32_GUARANTEED_DECIMAL_PLACES, F64_GUARANTEED_DECIMAL_PLACES, PrecisionLoss};
+#[cfg(feature = "decimal")]
+pub use interop_decimal::{RUST_DECIMAL_MAX_PLACES, RustDecimalInteropError};
+#[cfg(feature = "fixed-point")]
+pub use interop_fixed::FixedInteropError;
 pub use native::{
     FRAC_PI_2_F32, FRAC_PI_2_F64, FRAC_PI_3_F32, FRAC_PI_3_F64, FRAC_PI_4_F32, FRAC_PI_4_F64,
     FRAC_PI_6_F32, FRAC_PI_6_F64, FRAC_PI_8_F32, FRAC_PI_8_F64, INV_PI_F32, INV_PI_F64, PI_F32,
