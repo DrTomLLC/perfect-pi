@@ -1,0 +1,4 @@
+all_features = true
+minimum_test_timeout = 10
+timeout_multiplier = 3.0
+build_timeout_multiplier = 3.0

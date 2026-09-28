@@ -53,7 +53,7 @@ where
         let mut fractional = [0_u8; D];
 
         let mut index = 0;
-        while index < D {
+        while index != D {
             let destination = match fractional.get_mut(index) {
                 Some(destination) => destination,
                 None => break,
@@ -63,7 +63,7 @@ where
                 None => break,
             };
             *destination = source;
-            index += 1;
+            index = index.saturating_add(1);
         }
 
         DecimalPi {

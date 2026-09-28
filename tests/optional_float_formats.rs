@@ -81,5 +81,12 @@ fn binary128_constants_match_verified_ieee_bits() {
             0x01, 0xb8
         ]
     );
+    assert_eq!(
+        PI_BINARY128.to_le_bytes(),
+        [
+            0xb8, 0x01, 0x17, 0xc5, 0x8c, 0x89, 0x69, 0x84, 0xd1, 0x42, 0x44, 0xb5, 0x1f, 0x92,
+            0x00, 0x40
+        ]
+    );
     assert_eq!(Binary128::from_bits(PI_BINARY128.to_bits()), PI_BINARY128);
 }

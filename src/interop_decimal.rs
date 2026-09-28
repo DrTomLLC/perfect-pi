@@ -57,19 +57,22 @@ where
     /// Converts to `rust_decimal::Decimal`, rounding to at most 28 decimal
     /// places using round-to-nearest, ties-to-even when the source is wider.
     ///
-    /// For `D <= 28` this is exact.
+    /// For `D <= 28` this is exact. For every supported Perfectπ value with
+    /// `D > 28`, the first discarded source digit is greater than five, so
+    /// the finite-domain nearest-even result always increments the 28-place
+    /// coefficient by exactly one.
     pub fn to_rust_decimal_nearest_even(
         &self,
     ) -> Result<rust_decimal::Decimal, RustDecimalInteropError> {
         let scale = core::cmp::min(D, RUST_DECIMAL_MAX_PLACES);
-        decimal_from_source(self, scale, D > scale)
+        decimal_from_source(self, scale, D > RUST_DECIMAL_MAX_PLACES)
     }
 }
 
 fn decimal_from_source<const D: usize>(
     value: &DecimalPi<D>,
     scale: usize,
-    round_discarded: bool,
+    round_up: bool,
 ) -> Result<rust_decimal::Decimal, RustDecimalInteropError> {
     let mut coefficient = u128::from(value.integer_part());
     let digits = value.fractional_digits();
@@ -86,37 +89,13 @@ fn decimal_from_source<const D: usize>(
         coefficient = coefficient
             .checked_add(digit)
             .ok_or(RustDecimalInteropError::CoefficientOverflow)?;
-        index += 1;
+        index = index.saturating_add(1);
     }
 
-    if round_discarded {
-        let next = match digits.get(scale) {
-            Some(digit) => *digit,
-            None => 0,
-        };
-        let mut tail_nonzero = false;
-        let mut tail = scale.saturating_add(1);
-
-        while tail < D {
-            let digit = match digits.get(tail) {
-                Some(digit) => *digit,
-                None => return Err(RustDecimalInteropError::CoefficientOverflow),
-            };
-            if digit != 0 {
-                tail_nonzero = true;
-                break;
-            }
-            tail += 1;
-        }
-
-        let retained_is_odd = coefficient & 1 != 0;
-        let round_up = next > 5 || (next == 5 && (tail_nonzero || retained_is_odd));
-
-        if round_up {
-            coefficient = coefficient
-                .checked_add(1)
-                .ok_or(RustDecimalInteropError::CoefficientOverflow)?;
-        }
+    if round_up {
+        coefficient = coefficient
+            .checked_add(1)
+            .ok_or(RustDecimalInteropError::CoefficientOverflow)?;
     }
 
     let signed =

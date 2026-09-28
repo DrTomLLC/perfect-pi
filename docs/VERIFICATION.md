@@ -20,7 +20,15 @@ The initial core currently has:
 - dual-algorithm independent verification of all 10 binary16 and all 10 binary128 optional constants;
 - all-feature builds and tests across the supported host and `no_std` target matrix;
 - independent exact-rational reference checks for fixed-point interop and rust_decimal exact/28-place nearest-even results;
-- required crates.io currency checks for all direct optional interoperability dependencies.
+- required crates.io currency checks for all direct optional interoperability dependencies and verification tools;
+- RustSec advisory auditing of the resolved optional dependency graph;
+- exhaustive bounded-state caller-buffer verification across 3,690 legal precision/mode/capacity states;
+- sanitizer-backed libFuzzer targets for the bounded core and optional interoperability surfaces;
+- mutation testing with 96 generated mutants: 84 caught, 12 unviable, 0 missed, and 0 timed out;
+- measured all-feature source coverage of 92.66% lines, 91.48% regions, and 100% functions, with enforced CI floors of 92% / 91% / 100%;
+- byte-for-byte reproducibility of 30 representative probe objects across repeated Windows and Linux builds using the same Rust 1.98.1 compiler commit.
+
+Detailed methodology and retained evidence are documented in [Phase 4 Verification Hardening](PHASE4_VERIFICATION.md).
 
 ## Bounded-domain verification
 
