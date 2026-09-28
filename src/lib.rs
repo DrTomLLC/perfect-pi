@@ -18,9 +18,6 @@
 //! - no allocator, no I/O, no runtime π generation, and no `unsafe` in the default bounded core;
 //! - optional runtime/arbitrary-precision generation remains feature-gated and variable-cost.
 
-#[cfg(feature = "runtime-generation")]
-extern crate alloc;
-
 #[cfg(feature = "binary128")]
 mod binary128;
 #[cfg(feature = "binary16")]
@@ -66,6 +63,5 @@ pub use rounding::RoundingMode;
 #[cfg(feature = "runtime-generation")]
 pub use runtime::{
     RuntimePiError, generate_pi_ascii, generate_pi_ascii_round_nearest_even,
-    generate_pi_ascii_with_limit, generate_pi_ascii_with_rounding, generate_pi_string,
-    runtime_pi_ascii_len,
+    generate_pi_ascii_with_limit, generate_pi_ascii_with_rounding, runtime_pi_ascii_len,
 };
