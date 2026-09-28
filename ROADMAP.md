@@ -12,7 +12,7 @@
 ## Phase 1 — Native core
 
 - [x] create minimal Rust workspace;
-- [x] establish and verify MSRV policy (Rust 1.85);
+- [x] establish current-Rust-only policy: minimum supported Rust tracks the newest stable release (currently Rust 1.98.1);
 - [x] implement native `f32` / `f64` constants;
 - [x] implement verified derived constants;
 - [x] enforce `no_std`, no allocation, and `forbid(unsafe_code)`;

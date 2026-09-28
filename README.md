@@ -10,7 +10,7 @@
 
 ## Status
 
-**Initial bounded core implemented and locally verified; MSRV Rust 1.85; no public crate release yet.**
+**Initial bounded core implemented and verified; minimum supported Rust is the current stable release, Rust 1.98.1; no public crate release yet.**
 
 The repository now contains a working `no_std` bounded core: native `f32` / `f64` constants, `Pi<D>` support for every `D = 0..=40`, explicit truncation and round-to-nearest-even behavior, checked and explicitly lossy native-float conversions, allocation-free caller-buffer output, and independent canonical/conversion verification. It is still pre-release and must not yet be treated as a production-validated or safety-certified dependency.
 
@@ -78,8 +78,8 @@ perfect-pi
 │   ├── checked conversions
 │   └── fixed resource bounds
 ├── optional float adapters
-│   ├── f16
-│   └── f128
+│   ├── IEEE binary16
+│   └── IEEE binary128
 ├── optional interoperability
 │   ├── complex
 │   ├── fixed-point
@@ -124,7 +124,7 @@ Checked conversion guarantees all requested decimal places through `D=6` for `f3
 
 ### Optional IEEE binary16 / binary128
 
-Stable Rust still treats native `f16` and `f128` as experimental, so Perfectπ does not make nightly Rust part of its portability contract. Instead, optional features expose exact IEEE interchange bits:
+Current stable Rust 1.98.1 still treats native `f16` and `f128` as experimental, so Perfectπ does not make nightly Rust part of its production portability contract. Current nightly is nevertheless tested continuously, and its native `f16` / `f128` π-family bit patterns are required to match Perfectπ. Until those primitives reach stable, optional features expose exact IEEE interchange bits:
 
 ```text
 cargo build --features binary16
@@ -180,6 +180,7 @@ Primary repository assets:
 - [Architecture](docs/ARCHITECTURE.md)
 - [Precision and Numerical Semantics](docs/PRECISION.md)
 - [Optional IEEE Float Formats](docs/FLOAT_FORMATS.md)
+- [Rust and Dependency Currency Policy](docs/RUST_POLICY.md)
 - [Safety and Reliability](docs/SAFETY.md)
 - [Resource Budget](docs/RESOURCE_BUDGET.md)
 - [Initial Resource Measurements](docs/MEASUREMENTS.md)

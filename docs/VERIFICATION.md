@@ -16,7 +16,7 @@ The initial core currently has:
 - independent standard-library Python Chudnovsky and Gauss–Legendre computations agreeing through 64 fractional digits, verifying all 41 production source digits and all 41 bounded precision vectors;
 - successful bare-metal Cortex-M and RISC-V `no_std` builds;
 - successful WASM and AArch64 builds;
-- successful Rust 1.85.0 MSRV check, tests, and Clippy;
+- successful current-stable Rust 1.98.1 check, tests, and Clippy, with no support target below current stable;
 - dual-algorithm independent verification of all 10 binary16 and all 10 binary128 optional constants;
 - all-feature builds and tests across the supported host and `no_std` target matrix.
 

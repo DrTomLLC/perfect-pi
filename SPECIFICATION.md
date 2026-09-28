@@ -176,9 +176,9 @@ The optional adapters shall:
 - expose π, τ, π/2, π/3, π/4, π/6, π/8, 1/π, 2/π, and 2/√π;
 - use round-to-nearest, ties-to-even reference encodings;
 - be independently verified from more than one π computation;
-- compile on the supported MSRV and `no_std` target matrix.
+- compile on the current stable Rust release and the supported `no_std` target matrix.
 
-Names implying stable native Rust primitives, including `PI_F16` and `PI_F128`, are reserved until those primitive types can be supported without weakening the stable/MSRV contract.
+Names implying stable native Rust primitives, including `PI_F16` and `PI_F128`, are reserved until those primitive types can be supported on current stable Rust without weakening the portability contract.
 
 Arbitrary precision beyond 40 decimal places belongs outside the bounded critical core.
 

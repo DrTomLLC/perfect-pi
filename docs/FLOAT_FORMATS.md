@@ -16,7 +16,7 @@ The adapters are deliberately representation-only:
 - neither type requires nightly Rust;
 - both support exact bit access and big-/little-endian byte extraction.
 
-This preserves Perfectπ's stable/MSRV contract while allowing callers to move exact IEEE values into hardware registers, file formats, wire formats, foreign-function boundaries, or external numeric libraries.
+This preserves Perfectπ's current-stable contract while allowing callers to move exact IEEE values into hardware registers, file formats, wire formats, foreign-function boundaries, or external numeric libraries.
 
 ## Features
 
@@ -65,8 +65,8 @@ Each result is converted independently to IEEE binary16 and binary128 using exac
 
 The optional formats are also tested under:
 
-- the Rust 1.85 MSRV;
-- current stable Rust;
+- current stable Rust 1.98.1;
+- current nightly Rust (currently 1.101.0-nightly), including direct comparison with native nightly `f16` / `f128` constants;
 - Linux;
 - Windows;
 - macOS;
@@ -80,4 +80,4 @@ The optional formats are also tested under:
 
 Perfectπ intentionally does not expose `PI_F16` or `PI_F128` today.
 
-Those names are reserved for a future native adapter after Rust stabilizes the primitive types sufficiently for Perfectπ's stable/MSRV and portability requirements. The existing `Binary16` / `Binary128` bit contracts will remain useful for serialization and cross-language interchange regardless of future native support.
+Those names are reserved for a native adapter once the primitive types reach current stable Rust and satisfy Perfectπ's portability requirements. Current nightly is already used to verify that its native `f16` / `f128` π-family encodings match Perfectπ's stable IEEE contracts. The existing `Binary16` / `Binary128` bit contracts will remain useful for serialization and cross-language interchange regardless of future native support.
