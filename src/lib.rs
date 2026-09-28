@@ -7,16 +7,16 @@
 #![deny(clippy::unwrap_used)]
 #![warn(missing_docs)]
 
-//! Perfectπ — deterministic, bounded, resource-efficient π infrastructure.
+//! Perfectπ — universal, deterministic, resource-explicit π infrastructure.
 //!
-//! The initial core is intentionally small:
+//! The default critical core remains intentionally small:
 //! - native IEEE-754 `f32` and `f64` π constants;
 //! - bounded decimal representations from 0 through 40 places;
-//! - explicit truncation and round-to-nearest, ties-to-even semantics;
+//! - six explicit decimal rounding policies, including truncation and nearest-even;
 //! - checked precision-preserving and explicitly lossy native-float conversions;
 //! - optional dependency-free IEEE binary16 / binary128 interchange formats;
 //! - no allocator, no I/O, no runtime π generation, and no `unsafe` in the default bounded core;
-//! - optional runtime/arbitrary-precision generation remains feature-gated and variable-cost.
+//! - optional interoperability and runtime/arbitrary-precision tiers remain feature-gated.
 
 #[cfg(feature = "binary128")]
 mod binary128;
