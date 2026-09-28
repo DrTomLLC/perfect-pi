@@ -1,5 +1,19 @@
 use perfect_pi::Pi;
 
+fn assert_core_error<T: core::error::Error>() {}
+
+#[test]
+fn public_error_types_implement_core_error() {
+    assert_core_error::<perfect_pi::BufferTooSmall>();
+    assert_core_error::<perfect_pi::PrecisionLoss>();
+    #[cfg(feature = "fixed-point")]
+    assert_core_error::<perfect_pi::FixedInteropError>();
+    #[cfg(feature = "decimal")]
+    assert_core_error::<perfect_pi::RustDecimalInteropError>();
+    #[cfg(feature = "runtime-generation")]
+    assert_core_error::<perfect_pi::RuntimePiError>();
+}
+
 #[test]
 fn core_error_display_contracts_are_stable_and_nonempty() {
     let value = Pi::<40>::truncated();
