@@ -67,7 +67,7 @@ Perfectπ is being designed as a reusable π foundation for:
 
 Perfectπ owns **π and its numerical semantics**. It does not attempt to become a domain-specific mathematics framework.
 
-## Planned architecture
+## Architecture
 
 ```text
 perfect-pi
