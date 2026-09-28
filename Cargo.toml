@@ -20,6 +20,7 @@ decimal = ["dep:rust_decimal"]
 interop = ["complex", "fixed-point", "decimal"]
 runtime-generation = ["dep:num-bigint"]
 arbitrary-precision = ["runtime-generation"]
+full = ["all-float-formats", "interop", "arbitrary-precision"]
 
 [dependencies]
 fixed = { version = "=1.31.0", default-features = false, optional = true }
