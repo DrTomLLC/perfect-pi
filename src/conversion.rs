@@ -109,6 +109,8 @@ impl fmt::Display for PrecisionLoss {
     }
 }
 
+impl core::error::Error for PrecisionLoss {}
+
 impl<const D: usize> DecimalPi<D>
 where
     (): SupportedPrecision<D>,
