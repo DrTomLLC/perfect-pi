@@ -53,7 +53,7 @@ where
         let mut fractional = [0_u8; D];
 
         let mut index = 0;
-        while index < D {
+        while index != D {
             let destination = match fractional.get_mut(index) {
                 Some(destination) => destination,
                 None => break,
