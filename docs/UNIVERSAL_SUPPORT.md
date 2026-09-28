@@ -33,8 +33,9 @@ This finite domain is deliberately exhaustively testable and allocation-free.
 The arbitrary-precision tier accepts a runtime precision limited by address
 space, the big-integer implementation, execution resources, and caller policy.
 For untrusted inputs, use a caller-selected maximum through
-generate_pi_ascii_with_limit or generate_pi_string. Perfectπ does not invent a
-global maximum that would be wrong for either a microcontroller or a workstation.
+generate_pi_ascii_with_limit. Perfectπ does not invent a global maximum that
+would be wrong for either a microcontroller or a workstation. Final output
+storage remains caller-owned.
 
 ## Rounding
 
