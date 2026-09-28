@@ -17,11 +17,11 @@ This report records host measurements for Perfectπ. It is evidence for the meas
 
 | Operation | Iterations per run | Median ns/op | Interpretation |
 | --- | ---: | ---: | --- |
-| native `PI_F64.to_bits()` | 20,000,000 | 0.283 | compiler-optimized constant path; timer/loop microbenchmark |
-| `Pi<40>::round_nearest_even()` | 5,000,000 | 0.559 | compiler-optimized bounded materialization |
-| rounded `Pi<40>` → lossy `f64` | 5,000,000 | 0.287 | optimized finite-table/native-collapse path |
-| runtime generation, 100 fractional places | 100 | 32,207 | about 32.207 µs per generated value |
-| runtime generation, 1,000 fractional places | 10 | 1,251,440 | about 1.251 ms per generated value |
+| native `PI_F64.to_bits()` | 20,000,000 | 0.221 | compiler-optimized constant path; timer/loop microbenchmark |
+| `Pi<40>::round_nearest_even()` | 5,000,000 | 0.436 | compiler-optimized bounded materialization |
+| rounded `Pi<40>` → lossy `f64` | 5,000,000 | 0.219 | optimized finite-table/native-collapse path |
+| runtime generation, 100 fractional places | 100 | 24,288 | about 24.288 µs per generated value |
+| runtime generation, 1,000 fractional places | 10 | 1,058,940 | about 1.059 ms per generated value |
 
 The sub-nanosecond core figures must not be generalized to other CPUs or used as hardware latency claims. They mainly demonstrate that the optimized native/bounded paths are tiny relative to host timer-scale work. Runtime generation has deliberately variable cost and should be benchmarked at the precision actually used by an application.
 
