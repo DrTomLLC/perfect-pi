@@ -71,8 +71,8 @@ Target-hardware transitive stack high-water, WCET/cycles, power, software-vs-har
 - [x] define the Universal Support Contract and critical-system qualification boundary;
 - [x] establish requirement-to-evidence traceability;
 - [x] expand core portability CI across embedded, endian, word-size, OS, mobile, WebAssembly, and architecture classes;
-- [ ] pass all repository verification gates on the exact Universal 1.0 pull-request head;
+- [x] pass all repository verification gates on the exact Universal 1.0 pull-request head;
 - [x] complete independent critic review of the Universal 1.0 production candidate and retain the evidence;
-- [ ] merge only after exact-head CI and critic evidence are green.
+- [x] merge only after exact-head CI and critic evidence are green.
 
-Phases 0 through 6 remain complete. Phase 7 is the current Universal 1.0 release-candidate gate. Publishing a stable crate/release remains a separate owner-controlled action and is not an implicit side effect of completing or merging Phase 7.
+Phases 0 through 7 are complete for the repository-scoped Universal 1.0 baseline. Pull request #10 was merged only after exact-head CI and retained independent critic evidence were green. Publishing a stable crate/release remains a separate owner-controlled action and is not an implicit side effect of repository completion.
