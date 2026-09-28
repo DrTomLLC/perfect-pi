@@ -11,7 +11,7 @@ Perfectπ keeps runtime generation outside the bounded core. Enable `runtime-gen
 - `generate_pi_ascii_round_nearest_even(decimal_places, output)` retains the explicit nearest-even compatibility API.
 - `generate_pi_ascii_with_rounding(decimal_places, rounding, output)` supports all six public `RoundingMode` policies.
 - `generate_pi_ascii_with_limit(decimal_places, max_decimal_places, rounding, output)` rejects requests above a caller-selected ceiling before expensive generation or output mutation.
-- `generate_pi_string(decimal_places, max_decimal_places, rounding)` provides an owned-string convenience in this already allocation-backed tier while requiring the same explicit ceiling.
+- Perfectπ keeps final output storage caller-owned; the runtime implementation may allocate internally through its opt-in big-integer dependency, but production source does not expose a direct allocation convenience.
 - Output is `3` at zero places and `3.<digits>` otherwise.
 - Too-small output is rejected before output bytes are modified.
 - Runtime and memory cost increase with requested precision.
@@ -25,7 +25,7 @@ This is intentionally different from assuming a fixed number of guard digits is 
 
 ## Verification
 
-`tests/runtime_generation.rs` and `tests/runtime_rounding.rs` check zero, bounded, 100-place, six-mode rounding, precision-limit, owned-string, and failure behavior. `scripts/verify_runtime_generation.py` independently computes π with Chudnovsky and Gauss-Legendre and requires all six public runtime rounding modes to match the independent reference through 1,000 fractional digits at nine checkpoints. The runtime libFuzzer target mutates precision, rounding policy, output capacity, and caller limits under AddressSanitizer.
+`tests/runtime_generation.rs` and `tests/runtime_rounding.rs` check zero, bounded, 100-place, six-mode rounding, precision-limit, and failure behavior. `scripts/verify_runtime_generation.py` independently computes π with Chudnovsky and Gauss-Legendre and requires all six public runtime rounding modes to match the independent reference through 1,000 fractional digits at nine checkpoints. The runtime libFuzzer target mutates precision, rounding policy, output capacity, and caller limits under AddressSanitizer.
 
 ## Example
 
