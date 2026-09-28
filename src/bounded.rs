@@ -2,6 +2,8 @@
 
 use core::fmt::{self, Write};
 
+use crate::RoundingMode;
+
 /// Maximum public bounded precision, measured in places after the decimal point.
 pub const MAX_DECIMAL_PLACES: usize = 40;
 
@@ -35,7 +37,7 @@ impl_supported_precision!(
 /// ```compile_fail
 /// let _ = perfect_pi::Pi::<41>::truncated();
 /// ```
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Pi<const D: usize>(());
 
 impl<const D: usize> Pi<D>
@@ -72,24 +74,33 @@ where
         }
     }
 
-    /// Returns π rounded to `D` decimal places using nearest, ties-to-even.
+    /// Returns π rounded to D decimal places using nearest, ties-to-even.
     ///
-    /// π is irrational, so an exact finite decimal halfway tie cannot occur.
-    /// For π specifically, a first discarded digit of 5 necessarily has a
-    /// later nonzero digit, making `next >= 5` equivalent to the declared
-    /// nearest, ties-to-even result.
+    /// Compatibility convenience for with_rounding(NearestTiesToEven).
     #[must_use]
     pub fn round_nearest_even() -> DecimalPi<D> {
-        let mut value = Self::truncated();
-        let next = match CANONICAL_FRACTIONAL_DIGITS.get(D) {
-            Some(digit) => *digit,
-            None => return value,
-        };
+        Self::with_rounding(RoundingMode::NearestTiesToEven)
+    }
 
-        // An exact halfway tie would require π to terminate after a 5,
-        // which is impossible because π is irrational. Therefore a leading
-        // discarded 5 always has a later nonzero digit and rounds upward.
-        let round_up = next >= 5;
+    /// Returns π at D decimal places using the requested rounding policy.
+    ///
+    /// Because π is positive and irrational, it always has discarded nonzero
+    /// digits at every finite decimal precision and can never be an exact
+    /// halfway tie.
+    #[must_use]
+    pub fn with_rounding(mode: RoundingMode) -> DecimalPi<D> {
+        let mut value = Self::truncated();
+
+        let round_up = match mode {
+            RoundingMode::TowardZero | RoundingMode::TowardNegativeInfinity => false,
+            RoundingMode::AwayFromZero | RoundingMode::TowardPositiveInfinity => true,
+            RoundingMode::NearestTiesToEven | RoundingMode::NearestTiesAwayFromZero => {
+                match CANONICAL_FRACTIONAL_DIGITS.get(D) {
+                    Some(digit) => *digit >= 5,
+                    None => false,
+                }
+            }
+        };
 
         if round_up {
             value.increment_last_place();
@@ -104,7 +115,7 @@ where
 /// The integer portion is stored separately from exactly `D` fractional
 /// decimal digits. Values are created by [`Pi::truncated`] or
 /// [`Pi::round_nearest_even`].
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct DecimalPi<const D: usize> {
     integer: u8,
     fractional: [u8; D],
@@ -237,3 +248,5 @@ impl fmt::Display for BufferTooSmall {
         formatter.write_str("output buffer is too small")
     }
 }
+
+impl core::error::Error for BufferTooSmall {}
