@@ -34,7 +34,7 @@
 - [x] validate WebAssembly build;
 - [x] add optional IEEE-754 binary16 support on stable Rust (bit-format adapter; native `f16` reserved until Rust stabilization);
 - [x] add optional IEEE-754 binary128 support on stable Rust (bit-format adapter; native `f128` reserved until Rust stabilization);
-- [ ] add optional fixed/decimal/complex interoperability without contaminating core dependencies.
+- [x] add optional fixed/decimal/complex interoperability without contaminating core dependencies.
 
 ## Phase 4 — Verification and resource evidence
 

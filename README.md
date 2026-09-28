@@ -141,6 +141,27 @@ let quad_bits: u128 = PI_BINARY128.to_bits();
 
 `Binary16` and `Binary128` are transparent bit-format wrappers, not software arithmetic types. They add no dependencies or allocation, and the default feature set includes neither adapter. `PI_F16` and `PI_F128` are intentionally reserved for a future native-Rust adapter if those primitives become stable.
 
+### Optional interoperability
+
+Perfectπ's default dependency graph remains empty. Interoperability is opt-in:
+
+```text
+cargo build --features complex
+cargo build --features fixed-point
+cargo build --features decimal
+cargo build --features interop
+```
+
+Current latest-stable integrations are:
+
+- `num-complex 0.4.6`;
+- `fixed 1.31.0`;
+- `rust_decimal 1.43.0`.
+
+Complex adapters reuse Perfectπ's existing checked/lossy native-float contracts. Fixed-point conversion is explicitly nearest-even and does not detour through binary floating point. `rust_decimal` conversion is exact through 28 decimal places; wider bounded values require the explicitly rounded nearest-even path.
+
+See [Optional Interoperability](docs/INTEROPERABILITY.md).
+
 ## Resource philosophy
 
 `PI_F32` and `PI_F64` are direct aliases of Rust `core` constants. `Pi<D>` is verified as a zero-sized type, while the current straightforward `DecimalPi<40>` materialization occupies 41 bytes (one integer byte plus 40 fractional digit bytes).
@@ -180,6 +201,7 @@ Primary repository assets:
 - [Architecture](docs/ARCHITECTURE.md)
 - [Precision and Numerical Semantics](docs/PRECISION.md)
 - [Optional IEEE Float Formats](docs/FLOAT_FORMATS.md)
+- [Optional Interoperability](docs/INTEROPERABILITY.md)
 - [Rust and Dependency Currency Policy](docs/RUST_POLICY.md)
 - [Safety and Reliability](docs/SAFETY.md)
 - [Resource Budget](docs/RESOURCE_BUDGET.md)

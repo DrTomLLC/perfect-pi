@@ -38,7 +38,16 @@ The default feature set enables neither optional format. Enabling them must not 
 
 ### 3. Optional interoperability
 
-Interoperability with complex, fixed-point, decimal, unit-aware, and other numerical crates must remain optional and must not introduce dependencies into the bounded core.
+The implemented interoperability layer is opt-in and does not introduce dependencies into the default bounded core.
+
+Current adapters use the newest stable direct dependencies under the project currency policy:
+
+- `complex` → `num-complex 0.4.6`, reusing Perfectπ's checked/lossy native-float semantics;
+- `fixed-point` → `fixed 1.31.0`, converting the exact stored decimal text through the destination crate's round-to-nearest, ties-to-even decimal parser without a binary-float detour;
+- `decimal` → `rust_decimal 1.43.0`, exact through 28 decimal places and explicitly nearest-even rounded above that limit;
+- `interop` enables all three.
+
+Each direct dependency is optional with default features disabled. The default Perfectπ dependency graph remains empty. See [Optional Interoperability](INTEROPERABILITY.md).
 
 ### 4. Optional arbitrary precision
 

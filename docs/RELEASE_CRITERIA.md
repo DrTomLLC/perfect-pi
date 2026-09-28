@@ -16,6 +16,7 @@ Perfectπ will not call a release production-ready merely because it compiles.
 - all `D = 0..40` known-answer tests pass;
 - supported target matrix builds successfully;
 - optional feature tiers build independently and in the all-features configuration without contaminating the default dependency graph;
+- every direct optional integration dependency is at the newest appropriate stable release, optional, and configured with default features disabled unless explicitly justified;
 - resource measurements published for representative constrained and general-purpose targets;
 - independent canonical-digit verification completed;
 - security and dependency review completed.

@@ -186,6 +186,26 @@ Runtime π-generation algorithms belong outside the bounded critical core.
 
 Optional tiers must not become dependencies of the smallest default path.
 
+### 13.1 Optional interoperability
+
+Interoperability features shall remain opt-in and shall not add dependencies to the default bounded core.
+
+Current interoperability contracts are:
+
+- `complex`: uses the newest stable `num-complex` release and reuses Perfectπ's existing checked/lossy `f32` / `f64` conversion semantics with an exactly zero imaginary component;
+- `fixed-point`: uses the newest stable `fixed` release and converts the stored finite decimal representation through the destination crate's decimal parser using round-to-nearest, ties-to-even semantics without routing through binary floating point;
+- `decimal`: uses the newest stable `rust_decimal` release, converts exactly when `D <= 28`, rejects wider exact requests, and provides an explicitly named nearest-even conversion for wider bounded values;
+- `interop`: enables all current interoperability features.
+
+All direct interoperability dependencies shall:
+
+- remain optional;
+- have default features disabled unless a documented requirement proves otherwise;
+- be kept at the newest appropriate stable release by required CI;
+- compile across the supported current-stable `no_std` target matrix when their feature is enabled.
+
+The default Perfectπ dependency graph shall remain empty.
+
 ## 14. Verification
 
 Before a bounded release is described as production-ready, verification shall include:
