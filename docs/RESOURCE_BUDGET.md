@@ -31,7 +31,7 @@ The initial implementation has now established these concrete properties:
 - bare-metal library checks pass for `thumbv6m-none-eabi`, `thumbv7em-none-eabihf`, and `riscv32imac-unknown-none-elf`;
 - library checks also pass for `wasm32-unknown-unknown` and `aarch64-unknown-linux-gnu`;
 - forced `Pi<40>` conversion probes measure 328 bytes of text on Cortex-M0, 340 bytes on Cortex-M hardware-float, and 440 bytes on bare-metal RISC-V;
-- table-backed low-precision conversion probes measure 492 bytes of text on Cortex-M0, 444 bytes on Cortex-M hardware-float, and 694 bytes on bare-metal RISC-V.
+- table-backed low-precision conversion probes measure 386 bytes of text on Cortex-M0, 398 bytes on Cortex-M hardware-float, and 534 bytes on bare-metal RISC-V.
 
 These are verified implementation facts, not yet complete linked-binary or worst-case timing measurements. The checked/lossy conversion layer remains dependency-free and allocation-free. See [Initial Resource Measurements](MEASUREMENTS.md) for object-level Cortex-M and RISC-V measurements, including conversion paths.
 
