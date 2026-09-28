@@ -1,6 +1,6 @@
-# Initial Resource Measurements
+# Universal 1.0 Resource Measurements
 
-These measurements characterize the first Perfectπ core baseline. They are **object-level probes**, not final linked-firmware size claims.
+These measurements characterize the Perfectπ Universal 1.0 release-candidate implementation. They are **object-level probes**, not final linked-firmware size claims.
 
 ## Reproduce
 
@@ -31,21 +31,21 @@ The script uses only the Python standard library plus the installed Rust toolcha
 | Target | Probe | Text bytes | Read-only π digits | Target unwind/metadata relevant to loaded image* |
 | --- | --- | ---: | ---: | ---: |
 | Cortex-M0 `thumbv6m-none-eabi` | native f32+f64 | 32 | 0 | 16 ARM exidx |
-| Cortex-M0 `thumbv6m-none-eabi` | bounded Pi<40> trunc+round | 162 | 41 | 32 ARM exidx |
-| Cortex-M0 `thumbv6m-none-eabi` | Pi<40> conversion f32+f64 | 328 | 41 | 72 ARM exidx |
-| Cortex-M0 `thumbv6m-none-eabi` | low-precision conversion tables | 386 | 41 | 88 ARM exidx |
+| Cortex-M0 `thumbv6m-none-eabi` | bounded Pi<40> trunc+round | 188 | 41 | 40 ARM exidx |
+| Cortex-M0 `thumbv6m-none-eabi` | Pi<40> conversion f32+f64 | 354 | 41 | 80 ARM exidx |
+| Cortex-M0 `thumbv6m-none-eabi` | low-precision conversion tables | 540 | 41 | 112 ARM exidx |
 | Cortex-M0 `thumbv6m-none-eabi` | optional binary16 π+τ | 24 | 0 | 16 ARM exidx |
 | Cortex-M0 `thumbv6m-none-eabi` | optional binary128 π+τ | 80 | 0 | 16 ARM exidx |
 | Cortex-M `thumbv7em-none-eabihf` | native f32+f64 | 32 | 0 | 16 ARM exidx |
-| Cortex-M `thumbv7em-none-eabihf` | bounded Pi<40> trunc+round | 158 | 41 | 32 ARM exidx |
-| Cortex-M `thumbv7em-none-eabihf` | Pi<40> conversion f32+f64 | 340 | 41 | 72 ARM exidx |
-| Cortex-M `thumbv7em-none-eabihf` | low-precision conversion tables | 398 | 41 | 88 ARM exidx |
+| Cortex-M `thumbv7em-none-eabihf` | bounded Pi<40> trunc+round | 196 | 41 | 40 ARM exidx |
+| Cortex-M `thumbv7em-none-eabihf` | Pi<40> conversion f32+f64 | 378 | 41 | 80 ARM exidx |
+| Cortex-M `thumbv7em-none-eabihf` | low-precision conversion tables | 564 | 41 | 112 ARM exidx |
 | Cortex-M `thumbv7em-none-eabihf` | optional binary16 π+τ | 20 | 0 | 16 ARM exidx |
 | Cortex-M `thumbv7em-none-eabihf` | optional binary128 π+τ | 74 | 0 | 24 ARM exidx |
 | RISC-V `riscv32imac-unknown-none-elf` | native f32+f64 | 28 | 0 | 0 |
-| RISC-V `riscv32imac-unknown-none-elf` | bounded Pi<40> trunc+round | 250 | 41 | 0 |
-| RISC-V `riscv32imac-unknown-none-elf` | Pi<40> conversion f32+f64 | 440 | 41 | 0 |
-| RISC-V `riscv32imac-unknown-none-elf` | low-precision conversion tables | 534 | 41 | 0 |
+| RISC-V `riscv32imac-unknown-none-elf` | bounded Pi<40> trunc+round | 288 | 41 | 0 |
+| RISC-V `riscv32imac-unknown-none-elf` | Pi<40> conversion f32+f64 | 478 | 41 | 0 |
+| RISC-V `riscv32imac-unknown-none-elf` | low-precision conversion tables | 730 | 41 | 0 |
 | RISC-V `riscv32imac-unknown-none-elf` | optional binary16 π+τ | 16 | 0 | 0 |
 | RISC-V `riscv32imac-unknown-none-elf` | optional binary128 π+τ | 62 | 0 | 0 |
 
@@ -58,21 +58,21 @@ The same exact probe objects are also inspected with `llvm-size` for writable se
 | Target | Probe | Instructions |
 | --- | --- | ---: |
 | Cortex-M0 `thumbv6m-none-eabi` | native f32+f64 | 13 |
-| Cortex-M0 `thumbv6m-none-eabi` | bounded Pi<40> trunc+round | 74 |
-| Cortex-M0 `thumbv6m-none-eabi` | Pi<40> conversion f32+f64 | 144 |
-| Cortex-M0 `thumbv6m-none-eabi` | low-precision conversion tables | 171 |
+| Cortex-M0 `thumbv6m-none-eabi` | bounded Pi<40> trunc+round | 86 |
+| Cortex-M0 `thumbv6m-none-eabi` | Pi<40> conversion f32+f64 | 156 |
+| Cortex-M0 `thumbv6m-none-eabi` | low-precision conversion tables | 241 |
 | Cortex-M0 `thumbv6m-none-eabi` | optional binary16 π+τ | 10 |
 | Cortex-M0 `thumbv6m-none-eabi` | optional binary128 π+τ | 32 |
 | Cortex-M `thumbv7em-none-eabihf` | native f32+f64 | 13 |
-| Cortex-M `thumbv7em-none-eabihf` | bounded Pi<40> trunc+round | 65 |
-| Cortex-M `thumbv7em-none-eabihf` | Pi<40> conversion f32+f64 | 134 |
-| Cortex-M `thumbv7em-none-eabihf` | low-precision conversion tables | 152 |
+| Cortex-M `thumbv7em-none-eabihf` | bounded Pi<40> trunc+round | 78 |
+| Cortex-M `thumbv7em-none-eabihf` | Pi<40> conversion f32+f64 | 147 |
+| Cortex-M `thumbv7em-none-eabihf` | low-precision conversion tables | 216 |
 | Cortex-M `thumbv7em-none-eabihf` | optional binary16 π+τ | 8 |
 | Cortex-M `thumbv7em-none-eabihf` | optional binary128 π+τ | 25 |
 | RISC-V `riscv32imac-unknown-none-elf` | native f32+f64 | 8 |
-| RISC-V `riscv32imac-unknown-none-elf` | bounded Pi<40> trunc+round | 87 |
-| RISC-V `riscv32imac-unknown-none-elf` | Pi<40> conversion f32+f64 | 143 |
-| RISC-V `riscv32imac-unknown-none-elf` | low-precision conversion tables | 188 |
+| RISC-V `riscv32imac-unknown-none-elf` | bounded Pi<40> trunc+round | 102 |
+| RISC-V `riscv32imac-unknown-none-elf` | Pi<40> conversion f32+f64 | 158 |
+| RISC-V `riscv32imac-unknown-none-elf` | low-precision conversion tables | 253 |
 | RISC-V `riscv32imac-unknown-none-elf` | optional binary16 π+τ | 6 |
 | RISC-V `riscv32imac-unknown-none-elf` | optional binary128 π+τ | 18 |
 
@@ -95,7 +95,7 @@ The bounded representation deliberately stores one decimal digit per byte. Packi
 
 The conversion implementation uses compact independently verified IEEE bit tables only for bounded values whose native result differs from the corresponding native π constant. The `conversion40` probe therefore measures the high-precision/native-collapse path, while `conversion_low` measures the distinct low-precision table-backed path. These are object-level forced-use probes; final linked applications may remove additional code/data through LTO and section garbage collection.
 
-The conversion implementation was deliberately reduced from an exact generic fixed-width rational converter after measurement showed roughly 0.9-1.1 KiB of forced conversion text on constrained targets. The finite-domain verified lookup/native-constant design lowers the measured conversion probes to 328-398 bytes of text across the tested Cortex-M paths and 440-534 bytes across the tested RISC-V paths while preserving identical independently verified IEEE results.
+The conversion implementation was deliberately reduced from an exact generic fixed-width rational converter after measurement showed roughly 0.9-1.1 KiB of forced conversion text on constrained targets. On the Universal 1.0 candidate, the finite-domain verified lookup/native-constant design measures 354-564 bytes of text across the tested Cortex-M conversion probes and 478-730 bytes across the tested RISC-V conversion probes while preserving identical independently verified IEEE results.
 
 The optional binary16/binary128 adapters are bit-format wrappers only; they do not emulate arithmetic. In the forced π+τ probes, binary16 contributes 16-24 bytes of text and binary128 contributes 62-80 bytes across the measured constrained targets, with 0 measured rodata. Because these are opt-in features and ordinary constants, unused adapters remain absent from the default build and may be further eliminated by final linking.
 
