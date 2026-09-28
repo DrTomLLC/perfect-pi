@@ -109,7 +109,7 @@ jobs:
       - name: Configure current nightly Rust
         run: rustup toolchain install nightly --profile minimal --component rust-src
       - name: Install current cargo-fuzz
-        run: cargo install cargo-fuzz --version 0.13.2 --locked
+        run: cargo install cargo-fuzz --version =0.13.2 --locked
       - name: Fuzz bounded API with AddressSanitizer
         run: cargo +nightly fuzz run bounded_api --sanitizer address -- -runs=25000 -max_len=8
       - name: Fuzz interoperability with AddressSanitizer
@@ -126,7 +126,7 @@ jobs:
           rustup toolchain install stable --profile minimal
           rustup default stable
       - name: Install current cargo-mutants
-        run: cargo install cargo-mutants --version 27.1.0 --locked
+        run: cargo install cargo-mutants --version =27.1.0 --locked
       - name: Mutation test all production code
         run: cargo mutants --all-features --jobs 2 --timeout 45 --build-timeout 90 --no-shuffle
 
@@ -141,7 +141,7 @@ jobs:
           rustup toolchain install stable --profile minimal --component llvm-tools
           rustup default stable
       - name: Install current cargo-llvm-cov
-        run: cargo install cargo-llvm-cov --version 0.9.1 --locked
+        run: cargo install cargo-llvm-cov --version =0.9.1 --locked
       - name: Enforce production coverage floor
         run: >-
           cargo llvm-cov --all-features --all-targets --summary-only
@@ -160,7 +160,7 @@ jobs:
           rustup toolchain install stable --profile minimal
           rustup default stable
       - name: Install current cargo-audit
-        run: cargo install cargo-audit --version 0.22.2 --locked
+        run: cargo install cargo-audit --version =0.22.2 --locked
       - name: Generate dependency lockfile
         run: cargo generate-lockfile
       - name: RustSec advisory audit
