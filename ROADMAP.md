@@ -11,32 +11,34 @@
 
 ## Phase 1 — Native core
 
-- [ ] create minimal Rust workspace;
-- [ ] establish MSRV policy;
-- [ ] implement native `f32` / `f64` constants;
-- [ ] implement verified derived constants;
-- [ ] enforce `no_std`, no allocation, and `forbid(unsafe_code)`;
-- [ ] add exact bit-pattern and known-answer tests.
+- [x] create minimal Rust workspace;
+- [x] establish and verify MSRV policy (Rust 1.85);
+- [x] implement native `f32` / `f64` constants;
+- [x] implement verified derived constants;
+- [x] enforce `no_std`, no allocation, and `forbid(unsafe_code)`;
+- [x] add exact bit-pattern and known-answer tests;
+- [x] add CI quality and cross-target gates.
 
 ## Phase 2 — Bounded precision
 
-- [ ] implement `Pi<D>` for `0 <= D <= 40`;
-- [ ] define stable compile-time bound enforcement;
-- [ ] implement explicit rounding and truncation semantics;
+- [x] implement `Pi<D>` for `0 <= D <= 40`;
+- [x] define stable compile-time bound enforcement;
+- [x] implement explicit rounding and truncation semantics;
 - [ ] implement checked and explicitly lossy conversions;
-- [ ] exhaustively test all supported `D` values.
+- [x] exhaustively test all supported `D` values.
 
 ## Phase 3 — Portability and optional adapters
 
-- [ ] validate Cortex-M and RISC-V `no_std` builds;
-- [ ] validate x86-64 and AArch64 builds;
+- [x] validate Cortex-M and RISC-V `no_std` builds;
+- [x] validate x86-64 and AArch64 builds;
+- [x] validate WebAssembly build;
 - [ ] add optional `f16` support where appropriate;
 - [ ] add optional `f128` support where appropriate;
 - [ ] add optional fixed/decimal/complex interoperability without contaminating core dependencies.
 
 ## Phase 4 — Verification and resource evidence
 
-- [ ] independent reference generation;
+- [x] independent reference generation;
 - [ ] fuzz/property testing;
 - [ ] mutation testing;
 - [ ] model-check suitable bounded invariants;

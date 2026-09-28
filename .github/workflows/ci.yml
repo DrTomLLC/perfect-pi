@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality and verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Configure stable Rust
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt,clippy
+          rustup default stable
+      - name: Formatting
+        run: cargo fmt --check
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --all-targets
+      - name: Compile-fail documentation tests
+        run: cargo test --doc
+      - name: Rustdoc warnings
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --no-deps
+      - name: Independent canonical-digit verification
+        run: python3 scripts/verify_reference.py
+
+  msrv:
+    name: MSRV 1.85.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Configure MSRV
+        run: |
+          rustup toolchain install 1.85.0 --profile minimal --component clippy
+          rustup default 1.85.0
+      - name: Check
+        run: cargo check --lib
+      - name: Test
+        run: cargo test --all-targets
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+  host-matrix:
+    name: Host ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Configure stable Rust
+        shell: bash
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+      - name: Test
+        run: cargo test --all-targets
+
+  no-std-targets:
+    name: no_std cross-targets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Configure stable Rust and targets
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup target add thumbv6m-none-eabi
+          rustup target add thumbv7em-none-eabihf
+          rustup target add riscv32imac-unknown-none-elf
+          rustup target add wasm32-unknown-unknown
+          rustup target add aarch64-unknown-linux-gnu
+      - name: Cortex-M0
+        run: cargo check --lib --target thumbv6m-none-eabi
+      - name: Cortex-M hardware-float
+        run: cargo check --lib --target thumbv7em-none-eabihf
+      - name: RISC-V bare metal
+        run: cargo check --lib --target riscv32imac-unknown-none-elf
+      - name: WebAssembly
+        run: cargo check --lib --target wasm32-unknown-unknown
+      - name: AArch64
+        run: cargo check --lib --target aarch64-unknown-linux-gnu

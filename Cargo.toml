@@ -1,0 +1,20 @@
+[package]
+name = "perfect-pi"
+version = "0.1.0-alpha.1"
+edition = "2024"
+rust-version = "1.85"
+description = "Perfectπ — deterministic, bounded, resource-efficient Pi infrastructure for Rust."
+repository = "https://github.com/DrTomLLC/perfect-pi"
+readme = "README.md"
+license-file = "RIGHTS.md"
+publish = false
+
+[features]
+default = []
+
+[dependencies]
+
+[package.metadata.perfect-pi]
+status = "pre-release"
+bounded_decimal_places = 40
+rights = "All rights reserved"
