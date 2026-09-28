@@ -216,6 +216,7 @@ Primary repository assets:
 
 - [Normative Specification v1](SPECIFICATION.md)
 - [Universal Support Contract](docs/UNIVERSAL_SUPPORT.md)
+- [Universal 1.0 Independent Critic Review](docs/UNIVERSAL_FINAL_REVIEW.md)
 - [Universal 1.0 Traceability](docs/TRACEABILITY.md)
 - [Critical-System Qualification Guide](docs/QUALIFICATION.md)
 - [Architecture](docs/ARCHITECTURE.md)
