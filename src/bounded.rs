@@ -113,8 +113,8 @@ where
 /// A fixed, allocation-free decimal representation of π.
 ///
 /// The integer portion is stored separately from exactly `D` fractional
-/// decimal digits. Values are created by [`Pi::truncated`] or
-/// [`Pi::round_nearest_even`].
+/// decimal digits. Values are created by [`Pi::truncated`],
+/// [`Pi::round_nearest_even`], or [`Pi::with_rounding`].
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct DecimalPi<const D: usize> {
     integer: u8,
