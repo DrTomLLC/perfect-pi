@@ -15,6 +15,7 @@ Perfectπ will not call a release production-ready merely because it compiles.
 - rounding, truncation, and lossy conversion behavior documented and tested;
 - all `D = 0..40` known-answer tests pass;
 - supported target matrix builds successfully;
+- optional feature tiers build independently and in the all-features configuration without contaminating the default dependency graph;
 - resource measurements published for representative constrained and general-purpose targets;
 - independent canonical-digit verification completed;
 - security and dependency review completed.

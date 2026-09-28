@@ -18,6 +18,8 @@ These are architecture targets, not benchmark results:
 | 41 production fractional digits | 0 writable | 41 bytes before linker treatment | no cost until bounded path is used |
 | bounded `Pi<40>` materialization | a few dozen bytes | fixed | bounded fixed-width work |
 | bounded native conversion | no persistent allocation | finite verified tables/code only when used | bounded lookup/selection |
+| optional `Binary16` | 2-byte value when materialized | constants only when referenced | bit/byte interchange only |
+| optional `Binary128` | 16-byte value when materialized | constants only when referenced | bit/byte interchange only |
 
 ## Verified baseline measurements
 
@@ -31,7 +33,10 @@ The initial implementation has now established these concrete properties:
 - bare-metal library checks pass for `thumbv6m-none-eabi`, `thumbv7em-none-eabihf`, and `riscv32imac-unknown-none-elf`;
 - library checks also pass for `wasm32-unknown-unknown` and `aarch64-unknown-linux-gnu`;
 - forced `Pi<40>` conversion probes measure 328 bytes of text on Cortex-M0, 340 bytes on Cortex-M hardware-float, and 440 bytes on bare-metal RISC-V;
-- table-backed low-precision conversion probes measure 386 bytes of text on Cortex-M0, 398 bytes on Cortex-M hardware-float, and 534 bytes on bare-metal RISC-V.
+- table-backed low-precision conversion probes measure 386 bytes of text on Cortex-M0, 398 bytes on Cortex-M hardware-float, and 534 bytes on bare-metal RISC-V;
+- optional binary16 π+τ probes measure 24 bytes of text on Cortex-M0, 20 bytes on Cortex-M hardware-float, and 16 bytes on bare-metal RISC-V, with 0 measured rodata;
+- optional binary128 π+τ probes measure 80 bytes of text on Cortex-M0, 74 bytes on Cortex-M hardware-float, and 62 bytes on bare-metal RISC-V, with 0 measured rodata;
+- enabling all optional float-format features adds no Rust dependency and continues to pass the existing `no_std` target matrix.
 
 These are verified implementation facts, not yet complete linked-binary or worst-case timing measurements. The checked/lossy conversion layer remains dependency-free and allocation-free. See [Initial Resource Measurements](MEASUREMENTS.md) for object-level Cortex-M and RISC-V measurements, including conversion paths.
 

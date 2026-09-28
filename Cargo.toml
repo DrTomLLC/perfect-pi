@@ -11,6 +11,9 @@ publish = false
 
 [features]
 default = []
+binary16 = []
+binary128 = []
+all-float-formats = ["binary16", "binary128"]
 
 [dependencies]
 

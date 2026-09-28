@@ -14,12 +14,29 @@
 //! - bounded decimal representations from 0 through 40 places;
 //! - explicit truncation and round-to-nearest, ties-to-even semantics;
 //! - checked precision-preserving and explicitly lossy native-float conversions;
+//! - optional dependency-free IEEE binary16 / binary128 interchange formats;
 //! - no allocator, no I/O, no runtime π generation, and no `unsafe`.
 
+#[cfg(feature = "binary128")]
+mod binary128;
+#[cfg(feature = "binary16")]
+mod binary16;
 mod bounded;
 mod conversion;
 mod native;
 
+#[cfg(feature = "binary16")]
+pub use binary16::{
+    Binary16, FRAC_PI_2_BINARY16, FRAC_PI_3_BINARY16, FRAC_PI_4_BINARY16, FRAC_PI_6_BINARY16,
+    FRAC_PI_8_BINARY16, INV_PI_BINARY16, PI_BINARY16, TAU_BINARY16, TWO_INV_PI_BINARY16,
+    TWO_INV_SQRT_PI_BINARY16,
+};
+#[cfg(feature = "binary128")]
+pub use binary128::{
+    Binary128, FRAC_PI_2_BINARY128, FRAC_PI_3_BINARY128, FRAC_PI_4_BINARY128, FRAC_PI_6_BINARY128,
+    FRAC_PI_8_BINARY128, INV_PI_BINARY128, PI_BINARY128, TAU_BINARY128, TWO_INV_PI_BINARY128,
+    TWO_INV_SQRT_PI_BINARY128,
+};
 pub use bounded::{BufferTooSmall, DecimalPi, MAX_DECIMAL_PLACES, Pi};
 pub use conversion::{F32_GUARANTEED_DECIMAL_PLACES, F64_GUARANTEED_DECIMAL_PLACES, PrecisionLoss};
 pub use native::{
