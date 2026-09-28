@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+<title>Perfect Pi monochrome logo</title>
+<desc>Monochrome geometric pi symbol inside a bounded precision ring.</desc>
+<circle cx="512" cy="512" r="352" fill="none" stroke="#000000" stroke-width="54"
+        stroke-linecap="round" stroke-dasharray="1560 125 455 72" transform="rotate(-22 512 512)"/>
+<path d="
+M 278 334
+Q 278 302 310 302
+H 714
+Q 746 302 746 334
+V 389
+Q 746 421 714 421
+H 676
+V 690
+Q 676 744 728 744
+H 752
+V 819
+H 710
+Q 583 819 583 698
+V 421
+H 441
+V 666
+Q 441 819 287 819
+H 255
+V 744
+H 277
+Q 348 744 348 666
+V 421
+H 310
+Q 278 421 278 389
+Z" fill="#000000"/>
+</svg>

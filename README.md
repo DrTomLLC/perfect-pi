@@ -1,5 +1,9 @@
 # Perfectπ
 
+<p align="center">
+  <img src="docs/assets/brand/perfect-pi-icon-dark-512.png" alt="Perfectπ logo" width="160">
+</p>
+
 **Perfect Pi** — deterministic, bounded, resource-efficient π infrastructure for Rust.
 
 > One π ecosystem from tiny `no_std` targets to high-precision scientific computing, while making every expensive capability explicit and opt-in.
@@ -122,6 +126,19 @@ See [Safety and Reliability](docs/SAFETY.md).
 The bounded precision space is intentionally finite. Every supported decimal precision from `Pi<0>` through `Pi<40>` can be exhaustively covered by known-answer tests. Native representations will be checked by exact bit pattern, and canonical values will be cross-verified against independent references and algorithms.
 
 Verification dependencies will never become runtime dependencies of the critical core.
+
+## Branding
+
+The official Perfectπ visual identity is a geometric **π** inside a segmented bounded-precision ring. Brand assets are maintained in [`docs/assets/brand`](docs/assets/brand), with usage rules in [Branding](docs/BRANDING.md).
+
+Primary repository assets:
+
+- GitHub avatar / square mark: `docs/assets/brand/perfect-pi-icon-dark-512.png`
+- Vector master: `docs/assets/brand/perfect-pi-icon-dark.svg`
+- Transparent vector: `docs/assets/brand/perfect-pi-icon-transparent.svg`
+- Monochrome vector: `docs/assets/brand/perfect-pi-icon-monochrome.svg`
+- Wordmark: `docs/assets/brand/perfect-pi-wordmark-dark.svg`
+- GitHub social preview: `docs/assets/brand/perfect-pi-github-social-preview-1280x640.png`
 
 ## Project documents
 
