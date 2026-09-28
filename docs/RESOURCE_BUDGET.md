@@ -36,8 +36,8 @@ The Universal 1.0 release candidate has established these concrete properties:
 - the default feature set has zero normal Rust dependencies and does not import `alloc`;
 - bare-metal library checks pass for `thumbv6m-none-eabi`, `thumbv7em-none-eabihf`, and `riscv32imac-unknown-none-elf`;
 - library checks also pass for `wasm32-unknown-unknown` and `aarch64-unknown-linux-gnu`;
-- forced `Pi<40>` conversion probes measure 354 bytes of text on Cortex-M0, 378 bytes on Cortex-M hardware-float, and 478 bytes on bare-metal RISC-V;
-- table-backed low-precision conversion probes measure 540 bytes of text on Cortex-M0, 564 bytes on Cortex-M hardware-float, and 730 bytes on bare-metal RISC-V;
+- forced `Pi<40>` conversion probes measure 394 bytes of text on Cortex-M0, 408 bytes on Cortex-M hardware-float, and 534 bytes on bare-metal RISC-V;
+- table-backed low-precision conversion probes measure 524 bytes of text on Cortex-M0, 580 bytes on Cortex-M hardware-float, and 722 bytes on bare-metal RISC-V;
 - optional binary16 π+τ probes measure 24 bytes of text on Cortex-M0, 20 bytes on Cortex-M hardware-float, and 16 bytes on bare-metal RISC-V, with 0 measured rodata;
 - optional binary128 π+τ probes measure 80 bytes of text on Cortex-M0, 74 bytes on Cortex-M hardware-float, and 62 bytes on bare-metal RISC-V, with 0 measured rodata;
 - enabling all optional float-format features adds no Rust dependency and continues to pass the existing `no_std` target matrix;
