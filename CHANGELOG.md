@@ -4,6 +4,7 @@ All notable released changes to Perfectπ will be documented here.
 
 ## Unreleased
 
+- Universal 1.0 repository-scoped acceptance completed after exact-head CI, independent critic review, and merge of pull request #10; package publication remains separately gated.
 - Universal 1.0 support contract, qualification guide, and executable requirement traceability added.
 - Shared six-mode `RoundingMode` added for bounded and runtime π: toward zero, away from zero, toward negative infinity, toward positive infinity, nearest ties-to-even, and nearest ties-away-from-zero.
 - Runtime generation now offers explicit caller precision ceilings while retaining caller-owned output storage and the no-direct-allocation source policy.
