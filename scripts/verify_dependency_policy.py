@@ -114,10 +114,12 @@ def check_fuzz(failures: list[str]) -> None:
         return
     if perfect_pi.get("path") != "..":
         failures.append("fuzz/perfect-pi: path must remain '..'")
-    required_features = {"all-float-formats", "interop"}
+    required_features = {"all-float-formats", "interop", "runtime-generation"}
     features = set(perfect_pi.get("features", []))
     if not required_features.issubset(features):
-        failures.append("fuzz/perfect-pi: must enable all-float-formats and interop")
+        failures.append(
+            "fuzz/perfect-pi: must enable all-float-formats, interop, and runtime-generation"
+        )
     else:
         print("PASS: fuzz/perfect-pi exercises all optional numeric surfaces")
 

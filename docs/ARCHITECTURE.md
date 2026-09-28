@@ -51,11 +51,11 @@ Each direct dependency is optional with default features disabled. The default P
 
 ### 4. Optional arbitrary precision
 
-Precision beyond 40 decimal places belongs outside the bounded core. It may allocate, use larger dependencies, and have variable execution cost. None of that code may be pulled into critical builds unless explicitly enabled.
+Precision beyond 40 decimal places remains outside the bounded core. The implemented `arbitrary-precision` feature enables the same variable-cost generator as `runtime-generation`, backed by `num-bigint` with default features disabled. It may allocate when executed, but none of that dependency graph is present unless explicitly enabled.
 
 ### 5. Optional π calculation algorithms
 
-Algorithms that derive π at runtime are research/verification functionality, not the mechanism used by the bounded critical core to obtain a constant that is already known.
+The implemented `runtime-generation` feature computes π with Machin's identity and arbitrary-precision integer interval bounds. It is not the mechanism used by the bounded critical core to obtain a constant that is already known. Guard precision increases until lower and upper bounds prove the same requested decimal truncation.
 
 ### 6. Verification infrastructure
 

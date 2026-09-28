@@ -1,45 +1,45 @@
 # Contributing to Perfectπ
 
-## Current contribution status
+Perfectπ accepts bug reports, numerical-correctness reports, design proposals, benchmarks, documentation improvements, tests, and implementation contributions.
 
-Perfectπ is currently **all rights reserved** and is **not accepting external code, documentation, or other copyrightable contributions** while the project owner determines the final licensing and contributor-rights model.
+Copyrightable contributions are accepted only under the [Perfectπ Contributor Agreement](CONTRIBUTOR_AGREEMENT.md).
 
-This restriction is intentional: accepting third-party code before that framework exists could create ownership or relicensing ambiguity.
+## Required contributor attestation
 
-You may still participate through:
+Every pull request containing copyrightable material must state that the contributor:
 
-- bug reports;
-- numerical / precision discrepancy reports;
-- feature proposals;
-- design discussion;
-- reproducible benchmark or compatibility observations.
+- has read and agrees to the Perfectπ Contributor Agreement;
+- has the right and authority to submit the contribution;
+- identifies any third-party material and its applicable terms;
+- understands that accepted contributions may be distributed under the community license and separate paid commercial licenses.
 
-Please do **not** submit source-code patches, pull requests containing implementation material, or substantial replacement documentation unless the project owner explicitly requests that contribution under separately stated terms.
-
-## Future contribution policy
-
-Before external code contributions are opened, Perfectπ will publish a contributor-rights policy appropriate to the final licensing model. That may include contribution terms, a Developer Certificate of Origin, a contributor license agreement, assignment terms, or another explicit mechanism.
-
-No such mechanism is in effect today.
+Each contribution commit must also include a `Signed-off-by: Name <email>` trailer. The trailer records the contributor's attestation; it does not replace the Contributor Agreement.
 
 ## Engineering rules
 
-When code contributions are eventually opened, the critical core is intended to follow these requirements:
+Changes to the critical bounded core must preserve:
 
-- the newest stable Rust release only; older Rust compatibility is not a project goal;
-- `#![no_std]` compatible;
-- no heap allocation;
+- the newest stable Rust release policy;
+- `#![no_std]` compatibility;
+- no heap allocation in the bounded critical core;
 - no `unsafe` code;
 - no `unwrap`, `expect`, `panic!`, `todo!`, or equivalent panic-driven control flow in production critical paths;
 - no hidden I/O, randomness, environment state, or runtime initialization;
 - no silent narrowing, truncation, or overflow;
-- no dependency added without a documented necessity and impact review;
-- when a dependency is justified, use the newest appropriate stable release rather than selecting an older version for obsolete compiler compatibility.
+- dependency isolation and current-version policy.
+
+Optional extended tiers may use explicitly feature-gated dependencies or allocation only when their documented contract requires it. They must not contaminate the default dependency-free bounded core.
 
 ## Numerical changes
 
-Any future change affecting digits, rounding, conversion, derived constants, or error bounds must include independent reference evidence, boundary tests, explicit exact/rounded/truncated/lossy semantics, and resource impact when material.
+Any change affecting digits, rounding, conversion, derived constants, runtime generation, or error bounds must include independent reference evidence, boundary tests, explicit exact/rounded/truncated/lossy semantics, and resource impact when material.
+
+## Verification
+
+Before merge, applicable repository gates must remain green: formatting, source policy, dependency policy, stable/nightly checks, tests, Clippy with warnings denied, rustdoc, cross-target checks, independent numerical verification, security audit, coverage floors, fuzzing, mutation testing, and reproducibility checks.
+
+Never weaken a legitimate test or verification gate merely to make a change pass.
 
 ## Safety language
 
-Perfectπ must not be described as certified, failsafe, formally verified, constant-time, or zero-overhead unless the exact claim is supported by evidence and its scope is stated.
+Perfectπ must not be described as certified, failsafe, formally verified, constant-time, production-qualified, or zero-overhead unless the exact claim is supported by documented evidence and scope.

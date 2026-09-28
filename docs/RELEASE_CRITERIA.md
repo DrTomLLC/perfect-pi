@@ -2,6 +2,8 @@
 
 Perfectπ will not call a release production-ready merely because it compiles.
 
+The repository licensing baseline is now established: PolyForm Noncommercial 1.0.0 for community/noncommercial use, separate paid commercial licensing, and the Perfectπ Contributor Agreement. Cargo publication remains disabled until an explicit package-release action is approved.
+
 ## Before the first public crate release
 
 - final licensing model and contributor-rights framework selected and published;

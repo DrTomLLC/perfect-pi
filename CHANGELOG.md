@@ -34,8 +34,16 @@ All notable released changes to Perfectπ will be documented here.
 - All-feature interoperability verified on the full `no_std` cross-target matrix.
 - Phase-4 exhaustive bounded-state verification added, covering 3,690 caller-buffer states.
 - Sanitizer-backed libFuzzer targets added for bounded-core and interoperability surfaces.
-- Mutation testing established with 96 generated mutants, 84 caught, 12 unviable, and zero missed/timeouts.
-- Source coverage measured at 92.66% lines, 91.48% regions, and 100% functions with required CI floors of 92% / 91% / 100%.
+- Post-Phase-5 mutation testing established with 170 generated mutants: 158 caught, 12 compiler-unviable, 0 missed, and 0 timed out.
+- Post-Phase-5 all-feature source coverage measured at 95.23% lines, 91.80% regions, and 100% functions with required CI floors unchanged at 92% / 91% / 100%.
 - Cross-host reproducibility established for 30 representative objects across Windows and Linux under the same Rust compiler commit.
 - Verification-tool currency is now enforced for cargo-audit, cargo-fuzz, cargo-mutants, cargo-llvm-cov, and libfuzzer-sys.
 - Required RustSec dependency auditing added; the current all-feature dependency set has no known advisories.
+- Optional `runtime-generation` and `arbitrary-precision` features added using exact-pinned `num-bigint 0.5.1` with default features disabled.
+- Runtime π generation implemented with Machin's identity and conservative arbitrary-precision integer bounds; requested truncation is emitted only after lower/upper bounds converge.
+- Runtime generation independently verified against both Chudnovsky and Gauss-Legendre through 1,000 fractional digits.
+- Scientific/engineering, bounded-output, runtime-generation, host-benchmark, and linked-size examples added.
+- Startup integrity self-test evaluated and intentionally left application-owned rather than adding an automatic library startup hook.
+- Resource probes extended with writable `.data`/`.bss` and static instruction counts; all 18 constrained-target probes measure 0 bytes of `.data` and `.bss`.
+- Current-nightly static stack-frame probes added for Cortex-M0, Cortex-M hardware-float, and bare-metal RISC-V.
+- Reproducible stripped fat-LTO host linked-size measurements and five-run host timing medians published.

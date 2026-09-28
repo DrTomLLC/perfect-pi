@@ -13,7 +13,7 @@ libfuzzer-sys = "=0.4.13"
 
 [dependencies.perfect-pi]
 path = ".."
-features = ["all-float-formats", "interop"]
+features = ["all-float-formats", "interop", "runtime-generation"]
 
 [[bin]]
 name = "bounded_api"
@@ -25,6 +25,13 @@ bench = false
 [[bin]]
 name = "interop"
 path = "fuzz_targets/interop.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "runtime_generation"
+path = "fuzz_targets/runtime_generation.rs"
 test = false
 doc = false
 bench = false

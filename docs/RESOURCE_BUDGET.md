@@ -23,6 +23,7 @@ These are architecture targets, not benchmark results:
 | optional complex interop | external type only when feature enabled | pulls `num-complex` only when requested | wraps verified native conversion |
 | optional fixed-point interop | destination-defined | pulls `fixed` only when requested | decimal nearest-even parse |
 | optional decimal interop | 16-byte `rust_decimal::Decimal` destination | pulls `rust_decimal` only when requested | exact to 28 places / explicit nearest-even above |
+| optional runtime/arbitrary precision | variable; allocation-backed when executed | pulls `num-bigint` only when requested | variable with requested precision; independently verified through 1,000 places |
 
 ## Verified baseline measurements
 
@@ -41,20 +42,22 @@ The initial implementation has now established these concrete properties:
 - optional binary128 π+τ probes measure 80 bytes of text on Cortex-M0, 74 bytes on Cortex-M hardware-float, and 62 bytes on bare-metal RISC-V, with 0 measured rodata;
 - enabling all optional float-format features adds no Rust dependency and continues to pass the existing `no_std` target matrix;
 - enabling interoperability pulls only the explicitly selected latest-stable optional ecosystem dependencies, while the default dependency graph remains empty;
-- the complete all-feature dependency set currently passes Cortex-M0, Cortex-M hardware-float, bare-metal RISC-V, WebAssembly, and AArch64 `no_std` checks.
+- the complete all-feature dependency set, including optional `num-bigint`, currently passes Cortex-M0, Cortex-M hardware-float, bare-metal RISC-V, WebAssembly, and AArch64 `no_std` checks;
+- all 18 constrained-target object probes contain 0 bytes of measured `.data` and 0 bytes of measured `.bss`;
+- static instruction counts are recorded for all constrained-target probes;
+- compiler-emitted stack frames are measured for representative bounded/conversion paths on Cortex-M0, Cortex-M hardware-float, and RISC-V;
+- a stripped fat-LTO Windows x86-64 linked probe records no measurable positive native-π size cost and a +256-byte `.text` delta for bounded round-40 + ASCII;
+- host release timing medians are published for native, bounded, conversion, and 100/1,000-place runtime-generation paths.
 
-These are verified implementation facts, not yet complete linked-binary or worst-case timing measurements. The checked/lossy conversion layer remains dependency-free and allocation-free. See [Initial Resource Measurements](MEASUREMENTS.md) for object-level Cortex-M and RISC-V measurements, including conversion paths.
+These are verified software-side implementation facts. The checked/lossy bounded conversion layer remains dependency-free and allocation-free; runtime arbitrary precision is explicitly opt-in and allocation-backed when executed. See [Measurements](MEASUREMENTS.md) and [Benchmark Report](BENCHMARKS.md).
 
-## Required measurements before release
+## Remaining hardware qualification
 
-- binary size deltas with link-time optimization;
-- stack usage;
-- writable RAM usage;
-- read-only data footprint;
-- instruction counts for key operations;
-- latency and worst-case execution behavior;
-- software-float versus hardware-float impact;
-- final linked-size measurements on representative x86-64, AArch64, Cortex-M, and RISC-V applications;
+- transitive stack high-water in a final firmware/application image;
+- target-hardware WCET and cycle counts;
+- power impact;
+- end-to-end software-float versus hardware-float cost on selected hardware;
+- final target-specific firmware/application deltas where a concrete board and linker script are available;
 - continued `no_std` validation as the API grows.
 
 ## Optimization policy

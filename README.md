@@ -10,9 +10,9 @@
 
 ## Status
 
-**Initial bounded core implemented and verified; minimum supported Rust is the current stable release, Rust 1.98.1; no public crate release yet.**
+**Bounded core, optional adapters, verification hardening, and the extended runtime/arbitrary-precision tier are implemented; minimum supported Rust is the current stable release, Rust 1.98.1; no public crate release yet.**
 
-The repository now contains a working `no_std` bounded core: native `f32` / `f64` constants, `Pi<D>` support for every `D = 0..=40`, explicit truncation and round-to-nearest-even behavior, checked and explicitly lossy native-float conversions, allocation-free caller-buffer output, and independent canonical/conversion verification. It is still pre-release and must not yet be treated as a production-validated or safety-certified dependency.
+The repository contains a working `no_std` bounded core, optional IEEE/interoperability adapters, and opt-in runtime/arbitrary-precision generation. The bounded core remains allocation-free and dependency-free by default. The project is still pre-release and must not be treated as safety-certified.
 
 ## Why Perfectπ
 
@@ -23,7 +23,7 @@ Rust already provides π for native floating-point types, and arbitrary-precisio
 - `#![no_std]` and no-allocation operation for the critical bounded core;
 - explicit rounding plus checked precision-preserving and explicitly named lossy conversions — never silent precision claims;
 - fixed and documented memory / execution bounds;
-- optional stable IEEE `binary16` / `binary128` interchange adapters, plus future interoperability, calculation, and arbitrary-precision layers;
+- optional stable IEEE `binary16` / `binary128` interchange adapters, ecosystem interoperability, and independently verified runtime/arbitrary-precision generation;
 - verification tooling kept outside production dependencies.
 
 ## Design priorities
@@ -162,13 +162,27 @@ Complex adapters reuse Perfectπ's existing checked/lossy native-float contracts
 
 See [Optional Interoperability](docs/INTEROPERABILITY.md).
 
+### Optional runtime / arbitrary precision
+
+Precision beyond the bounded `0..=40` tier is opt-in:
+
+```text
+cargo run --example runtime_generate --features runtime-generation -- 256
+cargo run --example runtime_generate --features runtime-generation -- 256 round
+cargo build --features arbitrary-precision
+```
+
+`runtime-generation` uses current `num-bigint 0.5.1` with default features disabled. It computes Machin's identity with conservative arbitrary-precision integer bounds and increases guard precision until the requested decimal result is certified. Both truncation and decimal nearest-even rounding are explicit, with no binary-float detour. `arbitrary-precision` is a semantic alias for the same precision-above-40 capability. The default dependency graph remains unchanged.
+
+See [Runtime Generation and Arbitrary Precision](docs/RUNTIME_GENERATION.md). Engineering and bounded-output examples are under `examples/`.
+
 ## Resource philosophy
 
 `PI_F32` and `PI_F64` are direct aliases of Rust `core` constants. `Pi<D>` is verified as a zero-sized type, while the current straightforward `DecimalPi<40>` materialization occupies 41 bytes (one integer byte plus 40 fractional digit bytes).
 
 The production source holds exactly 41 fractional digits: 40 public digits plus the one additional digit required to round `D=40`. Independent verification computes at least 64 fractional digits using two separate algorithms, so audit depth does not become runtime data. Native conversion uses independently verified IEEE bit patterns only where a bounded decimal value differs from native π; higher precisions collapse directly to `PI_F32` or `PI_F64`.
 
-Optional-format probes remain tiny: binary16 π+τ measures 16–24 bytes of text across the measured constrained targets, while binary128 π+τ measures 62–80 bytes, with 0 measured rodata in those probes. Object-level Cortex-M/RISC-V measurements are published, while stack, WCET/cycle, power, and final linked-binary claims remain pending. See [Resource Budget](docs/RESOURCE_BUDGET.md).
+Optional-format probes remain tiny: binary16 π+τ measures 16–24 bytes of text across the measured constrained targets, while binary128 π+τ measures 62–80 bytes, with 0 measured rodata in those probes. Reproducible reports now cover constrained-target text/rodata/writable sections, static instruction counts, compiler-emitted stack frames, host linked-size deltas, and host timing. Target-hardware transitive stack high-water, WCET/cycles, and power remain hardware-qualification work. See [Measurements](docs/MEASUREMENTS.md), [Benchmark Report](docs/BENCHMARKS.md), and [Resource Budget](docs/RESOURCE_BUDGET.md).
 
 ## Reliability scope
 
@@ -204,10 +218,14 @@ Primary repository assets:
 - [Precision and Numerical Semantics](docs/PRECISION.md)
 - [Optional IEEE Float Formats](docs/FLOAT_FORMATS.md)
 - [Optional Interoperability](docs/INTEROPERABILITY.md)
+- [Runtime Generation and Arbitrary Precision](docs/RUNTIME_GENERATION.md)
+- [API Stability and Compatibility](docs/API_STABILITY.md)
 - [Rust and Dependency Currency Policy](docs/RUST_POLICY.md)
 - [Safety and Reliability](docs/SAFETY.md)
 - [Resource Budget](docs/RESOURCE_BUDGET.md)
-- [Initial Resource Measurements](docs/MEASUREMENTS.md)
+- [Resource Measurements](docs/MEASUREMENTS.md)
+- [Benchmark Report](docs/BENCHMARKS.md)
+- [Startup Integrity Self-Test Evaluation](docs/INTEGRITY_SELF_TEST.md)
 - [Domain Scope](docs/DOMAIN_SCOPE.md)
 - [Verification Strategy](docs/VERIFICATION.md)
 - [Phase 4 Verification Hardening](docs/PHASE4_VERIFICATION.md)
@@ -220,19 +238,15 @@ Primary repository assets:
 
 ## Contributing
 
-Perfectπ is currently **not accepting external code contributions** while ownership, licensing, and contributor-rights policy remain intentionally undecided. Design discussion, bug reports, numerical-correctness reports, and feature proposals are welcome.
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before participating.
+Perfectπ accepts community participation and implementation contributions. Copyrightable contributions require agreement to the [Perfectπ Contributor Agreement](CONTRIBUTOR_AGREEMENT.md) and the pull-request attestation described in [CONTRIBUTING.md](CONTRIBUTING.md). Contributors retain ownership while granting the project owner the rights required to maintain the dual-licensing model.
 
 ## Rights and licensing
 
-**Copyright © 2026 DrTomLLC. All rights reserved.**
+**Copyright © 2026 DrTomLLC.**
 
-Perfectπ is publicly viewable, but it is **not currently open source and no software license is granted**. No permission to copy, modify, redistribute, sublicense, publish, sell, or create derivative works should be inferred from public availability. Any permissions required solely for GitHub to host and display the repository are governed by GitHub's platform terms.
+Perfectπ is source-available under a dual-licensing model. Community and noncommercial use, modification, and redistribution are licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). Commercial use is encouraged but requires a separate paid commercial license from DrTomLLC; no fixed royalty percentage is imposed by the repository because commercial scope and consideration are agreed for the specific deployment.
 
-No patent, trademark, or branding rights are granted. Licensing and contributor-rights policy will be decided deliberately before any release that grants broader reuse rights.
-
-See [RIGHTS.md](RIGHTS.md).
+See [RIGHTS.md](RIGHTS.md) and [Commercial Licensing](COMMERCIAL_LICENSING.md). The Cargo package remains `publish = false` until a deliberate package-release action is approved.
 
 ---
 

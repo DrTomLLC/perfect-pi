@@ -27,29 +27,33 @@ The model verifies exact digits and lengths, `Display` consistency, exact short-
 
 ## Sanitizer-backed fuzzing
 
-Two libFuzzer targets live under `fuzz/` and are isolated from the production dependency graph.
+Three libFuzzer targets live under `fuzz/` and are isolated from the production dependency graph.
 
 ### `bounded_api`
 
 Exercises arbitrary precision, truncation/rounding mode, caller-buffer capacity, native conversion, and checked-conversion boundaries.
 
-A local WSL2/Linux AddressSanitizer campaign completed **20,000 executions with no crash or assertion failure**. The final report reached 345 coverage counters / 346 features with a 199-entry minimized corpus.
+A local WSL2/Linux AddressSanitizer campaign completed **25,000 executions with no crash or assertion failure**. The final report reached 345 coverage counters / 346 features with a 199-entry minimized corpus.
 
 ### `interop`
 
 Exercises arbitrary bounded values through complex32/complex64, exact and rounded `rust_decimal`, and several fixed-point destinations.
 
-A local WSL2/Linux AddressSanitizer campaign completed **20,000 executions with no crash or assertion failure**. The final report reached 2,172 coverage counters / 2,289 features with a 243-entry minimized corpus.
+A local WSL2/Linux AddressSanitizer campaign completed **25,000 executions with no crash or assertion failure**. The final report reached 2,172 coverage counters / 2,289 features with a 240-entry minimized corpus.
+
+### `runtime_generation`
+
+Exercises opt-in arbitrary-precision generation across requested precisions 0..=512, caller-buffer failure/success boundaries, output immutability on failure, ASCII structure, untouched tail bytes, and deterministic repeated generation. A local WSL2/Linux AddressSanitizer campaign completed **10,000 executions with no crash or assertion failure**, reaching 614 coverage counters / 2,104 features with a 119-entry minimized corpus.
 
 Windows remains in ordinary host testing and reproducibility. Local Windows libFuzzer execution was not counted because the MSVC environment lacked the dynamic AddressSanitizer runtime. Sanitizer-backed fuzzing therefore runs on Linux/WSL and Linux CI.
 
-CI runs **25,000 executions per fuzz target** on current nightly Linux.
+CI runs **25,000 executions each** for the bounded and interoperability targets and **10,000 executions** for runtime generation on current-nightly Linux under AddressSanitizer.
 
 ## Mutation testing
 
-The current local Windows `cargo-mutants` pass generated **96 mutants** across production code.
+The isolated release-candidate Windows `cargo-mutants` pass generated **170 mutants** across production code.
 
-- **84 caught by the test suite**;
+- **158 caught by the test suite**;
 - **12 unviable** because the mutation could not compile/check;
 - **0 missed**;
 - **0 timed out**.
@@ -62,8 +66,8 @@ Measured with current `cargo-llvm-cov` and all features enabled:
 
 | Metric | Measured |
 | --- | ---: |
-| Lines | **92.66%** |
-| Regions | **91.48%** |
+| Lines | **95.23%** |
+| Regions | **91.80%** |
 | Functions | **100.00%** |
 
 Required CI floors are 92% lines, 91% regions, and 100% functions.
@@ -94,12 +98,25 @@ Verification tooling follows the same current-software policy:
 - `cargo-mutants 27.1.0`;
 - `cargo-llvm-cov 0.9.1`.
 
-The current local RustSec audit reports no known vulnerabilities in the resolved 19-crate all-feature dependency set. Required CI regenerates the lockfile and runs the same audit.
+The current local RustSec audit reports no known vulnerabilities in the resolved 21-crate all-feature dependency set. Required CI regenerates the lockfile and runs the same audit.
 
 Policy scripts query crates.io and fail when a newer stable direct dependency or verification tool exists until Perfectπ is explicitly updated and revalidated.
 
-## Remaining Phase 4 work
+## Resource and benchmark evidence now added
 
-This verification-hardening pass does not complete resource qualification. Remaining work includes final linked ROM/binary-size deltas, writable RAM and stack high-water measurements, instruction/cycle counts, WCET methodology, software-float versus hardware-float cost, benchmark methodology/reporting, and power impact where meaningful.
+The repository now also retains reproducible software-side resource evidence:
 
-Those claims will be added only after measured evidence exists.
+- all 18 Cortex-M/RISC-V object probes report text, rodata, writable `.data`/`.bss`, and static instruction counts;
+- all 18 measured probes contain 0 bytes of `.data` and 0 bytes of `.bss`;
+- current-nightly `-Z emit-stack-sizes` probes report representative function-frame sizes on Cortex-M0, Cortex-M hardware-float, and bare-metal RISC-V;
+- stripped fat-LTO Windows x86-64 linked probes report native and bounded forced-use section deltas;
+- a dependency-free release benchmark harness records host timing medians for native, bounded, conversion, and runtime-generation paths;
+- the optional runtime generator is independently checked against both Chudnovsky and Gauss-Legendre through 1,000 fractional digits.
+
+See [Initial Resource Measurements](MEASUREMENTS.md) and [Benchmark Report](BENCHMARKS.md) for methods, exact results, reproduction commands, and limitations.
+
+## Remaining hardware qualification
+
+Software-side Phase 4 evidence is complete for the current repository scope. Hardware-specific qualification still requires a selected board/application and cannot be inferred from object files or workstation timings. Remaining target-specific work is transitive stack high-water, WCET/cycles, power, software-vs-hardware-float cost, and final firmware/application linked deltas where meaningful.
+
+Those claims will be added only after measured hardware evidence exists.

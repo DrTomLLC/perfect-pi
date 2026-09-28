@@ -15,7 +15,8 @@
 //! - explicit truncation and round-to-nearest, ties-to-even semantics;
 //! - checked precision-preserving and explicitly lossy native-float conversions;
 //! - optional dependency-free IEEE binary16 / binary128 interchange formats;
-//! - no allocator, no I/O, no runtime π generation, and no `unsafe`.
+//! - no allocator, no I/O, no runtime π generation, and no `unsafe` in the default bounded core;
+//! - optional runtime/arbitrary-precision generation remains feature-gated and variable-cost.
 
 #[cfg(feature = "binary128")]
 mod binary128;
@@ -30,6 +31,8 @@ mod interop_decimal;
 #[cfg(feature = "fixed-point")]
 mod interop_fixed;
 mod native;
+#[cfg(feature = "runtime-generation")]
+mod runtime;
 
 #[cfg(feature = "binary16")]
 pub use binary16::{
@@ -54,4 +57,8 @@ pub use native::{
     FRAC_PI_6_F32, FRAC_PI_6_F64, FRAC_PI_8_F32, FRAC_PI_8_F64, INV_PI_F32, INV_PI_F64, PI_F32,
     PI_F64, TAU_F32, TAU_F64, TWO_INV_PI_F32, TWO_INV_PI_F64, TWO_INV_SQRT_PI_F32,
     TWO_INV_SQRT_PI_F64,
+};
+#[cfg(feature = "runtime-generation")]
+pub use runtime::{
+    RuntimePiError, generate_pi_ascii, generate_pi_ascii_round_nearest_even, runtime_pi_ascii_len,
 };
