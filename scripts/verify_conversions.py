@@ -22,12 +22,22 @@ def decimal_fraction(text: str) -> Fraction:
     return Fraction(numerator, denominator)
 
 
+def increment_decimal(text: str) -> str:
+    if "." not in text:
+        return str(int(text) + 1)
+    integer, fractional = text.split(".", maxsplit=1)
+    scale = 10 ** len(fractional)
+    scaled = int(integer) * scale + int(fractional) + 1
+    digits = str(scaled).zfill(len(fractional) + 1)
+    return f"{digits[:-len(fractional)]}.{digits[-len(fractional):]}"
+
+
 def ieee_bits(text: str, precision_bits: int, fraction_bits: int, bias: int) -> int:
     value = decimal_fraction(text)
-    if not (Fraction(2, 1) <= value < Fraction(4, 1)):
+    if not (Fraction(2, 1) <= value <= Fraction(4, 1)):
         raise ValueError(f"value outside Perfectπ conversion domain: {text}")
 
-    exponent = 1
+    exponent = 2 if value == 4 else 1
     shift = precision_bits - 1 - exponent
     scaled_numerator = value.numerator << shift
     quotient, remainder = divmod(scaled_numerator, value.denominator)
@@ -47,19 +57,22 @@ def ieee_bits(text: str, precision_bits: int, fraction_bits: int, bias: int) -> 
     return (exponent_field << fraction_bits) | fraction_field
 
 
-def bounded_cases() -> list[tuple[int, str, str]]:
+def bounded_cases() -> list[tuple[int, str, str, str]]:
     text = BOUNDED_TEST.read_text(encoding="utf-8")
     matches = re.findall(
         r'assert_case!\(\s*(\d+)\s*,\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)',
         text,
         re.DOTALL,
     )
-    cases = [(int(d), truncated, rounded) for d, truncated, rounded in matches]
+    cases = [
+        (int(d), truncated, rounded, increment_decimal(truncated))
+        for d, truncated, rounded in matches
+    ]
     if len(cases) != EXPECTED_PRECISIONS:
         raise RuntimeError(
             f"expected {EXPECTED_PRECISIONS} bounded cases, found {len(cases)}"
         )
-    if [d for d, _, _ in cases] != list(range(EXPECTED_PRECISIONS)):
+    if [d for d, _, _, _ in cases] != list(range(EXPECTED_PRECISIONS)):
         raise RuntimeError("bounded cases do not cover D=0..40 in order")
     return cases
 
@@ -75,9 +88,9 @@ def float_fraction(
     return Fraction(significand, 1 << shift)
 
 
-def expected_vectors() -> list[tuple[int, int, int, int, int]]:
+def expected_vectors() -> list[tuple[int, int, int, int, int, int, int]]:
     vectors = []
-    for d, truncated, rounded in bounded_cases():
+    for d, truncated, rounded, ceiling in bounded_cases():
         vectors.append(
             (
                 d,
@@ -85,6 +98,8 @@ def expected_vectors() -> list[tuple[int, int, int, int, int]]:
                 ieee_bits(truncated, 53, 52, 1023),
                 ieee_bits(rounded, 24, 23, 127),
                 ieee_bits(rounded, 53, 52, 1023),
+                ieee_bits(ceiling, 24, 23, 127),
+                ieee_bits(ceiling, 53, 52, 1023),
             )
         )
     return vectors
@@ -94,9 +109,9 @@ def emitted_lines() -> list[str]:
     return [
         (
             f"    assert_bits!({d}, 0x{tf32:08x}, 0x{tf64:016x}, "
-            f"0x{rf32:08x}, 0x{rf64:016x});"
+            f"0x{rf32:08x}, 0x{rf64:016x}, 0x{cf32:08x}, 0x{cf64:016x});"
         )
-        for d, tf32, tf64, rf32, rf64 in expected_vectors()
+        for d, tf32, tf64, rf32, rf64, cf32, cf64 in expected_vectors()
     ]
 
 
@@ -104,6 +119,7 @@ def verify_file() -> list[str]:
     text = CONVERSION_TEST.read_text(encoding="utf-8")
     matches = re.findall(
         r"assert_bits!\(\s*(\d+)\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*"
+        r"(0x[0-9a-fA-F]+)\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*"
         r"(0x[0-9a-fA-F]+)\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*"
         r"(0x[0-9a-fA-F]+)\s*\);",
         text,
@@ -135,8 +151,12 @@ def verify_preservation_bounds() -> list[str]:
     f32_first_failure = False
     f64_first_failure = False
 
-    for d, truncated, rounded in bounded_cases():
-        for label, text in (("truncated", truncated), ("rounded", rounded)):
+    for d, truncated, rounded, ceiling in bounded_cases():
+        for label, text in (
+            ("truncated", truncated),
+            ("nearest", rounded),
+            ("ceiling", ceiling),
+        ):
             exact = decimal_fraction(text)
             f32_bits = ieee_bits(text, 24, 23, 127)
             f64_bits = ieee_bits(text, 53, 52, 1023)
@@ -180,8 +200,8 @@ def main() -> int:
             print(f"- {failure}", file=sys.stderr)
         return 1
 
-    print("PASS: all 41 decimal conversion vectors independently verified")
-    print("PASS: each vector covers truncated/rounded × f32/f64 exact IEEE bits")
+    print("PASS: all 246 bounded decimal conversion outcomes independently verified")
+    print("PASS: each precision covers truncation/nearest/ceiling × f32/f64 exact IEEE bits")
     print("PASS: f32 preservation guarantee verified through D=6; D=7 has a failing case")
     print("PASS: f64 preservation guarantee verified through D=15; D=16 has a failing case")
     return 0
