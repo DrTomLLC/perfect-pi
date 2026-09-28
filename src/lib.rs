@@ -16,9 +16,13 @@
 //! - no allocator, no I/O, no runtime π generation, and no `unsafe`.
 
 mod bounded;
+mod conversion;
 mod native;
 
 pub use bounded::{BufferTooSmall, DecimalPi, MAX_DECIMAL_PLACES, Pi};
+pub use conversion::{
+    F32_GUARANTEED_DECIMAL_PLACES, F64_GUARANTEED_DECIMAL_PLACES, PrecisionLoss,
+};
 pub use native::{
     FRAC_PI_2_F32, FRAC_PI_2_F64, FRAC_PI_3_F32, FRAC_PI_3_F64, FRAC_PI_4_F32, FRAC_PI_4_F64,
     FRAC_PI_6_F32, FRAC_PI_6_F64, FRAC_PI_8_F32, FRAC_PI_8_F64, INV_PI_F32, INV_PI_F64, PI_F32,
