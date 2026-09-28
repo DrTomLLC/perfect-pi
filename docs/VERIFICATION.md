@@ -10,7 +10,7 @@ The initial core currently has:
 - explicit truncation and round-to-nearest-even vectors;
 - exhaustive bounded equivalence checks for all six public `RoundingMode` policies at every `D = 0..40`;
 - exact known bit-pattern checks for native `f32` and `f64` π;
-- exact-rational generation and IEEE-bit verification of all 164 bounded native-conversion outcomes (41 precisions × truncation/rounding × `f32`/`f64`);
+- exact-rational generation and IEEE-bit verification of all 246 bounded native-conversion outcomes (41 precisions × truncation/nearest/ceiling × `f32`/`f64`);
 - independent proof of the checked preservation boundaries through `D=6` for `f32` and `D=15` for `f64`, including concrete failing cases at `D=7` and `D=16`;
 - allocation-free caller-buffer output tests;
 - a compile-fail doctest proving bounded operations are unavailable for `Pi<41>`;
