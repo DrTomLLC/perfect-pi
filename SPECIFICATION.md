@@ -243,7 +243,7 @@ The `runtime-generation` feature shall:
 - expose caller-buffer ASCII generation with the shared RoundingMode semantics;
 - retain explicit truncation and nearest-even compatibility entry points;
 - provide a caller-selected maximum-precision gate that rejects before expensive generation or output mutation;
-- provide an owned UTF-8 string convenience only in the already allocation-backed runtime tier and require an explicit caller maximum;
+- keep final output storage caller-owned rather than adding a direct Perfectπ allocation convenience;
 - avoid binary floating-point as an intermediate representation;
 - reject undersized caller buffers before modifying them;
 - use variable resource cost proportional to the requested precision;
