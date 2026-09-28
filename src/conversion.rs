@@ -152,10 +152,6 @@ where
     /// stored value, not mathematical π.
     #[must_use]
     pub fn to_f32_lossy(&self) -> f32 {
-        if D >= F32_TRUNCATED_BITS.len() {
-            return PI_F32;
-        }
-
         let table: &[u32] = if self.is_truncated() {
             &F32_TRUNCATED_BITS
         } else if self.is_nearest_even() {
@@ -178,10 +174,6 @@ where
     /// stored value, not mathematical π.
     #[must_use]
     pub fn to_f64_lossy(&self) -> f64 {
-        if D >= F64_TRUNCATED_BITS.len() {
-            return PI_F64;
-        }
-
         let table: &[u64] = if self.is_truncated() {
             &F64_TRUNCATED_BITS
         } else if self.is_nearest_even() {
