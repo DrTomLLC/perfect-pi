@@ -12,6 +12,7 @@ Perfectπ keeps runtime generation outside the bounded core. Enable `runtime-gen
 - Output is `3` at zero places and `3.<digits>` otherwise.
 - Too-small output is rejected before output bytes are modified.
 - Runtime and memory cost increase with requested precision.
+- Callers must impose an application-appropriate upper bound before forwarding untrusted or externally supplied precision values; the runtime tier is not a fixed-cost parser and deliberately does not guess a universal limit.
 
 ## Numerical method
 

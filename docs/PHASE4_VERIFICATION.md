@@ -33,17 +33,17 @@ Three libFuzzer targets live under `fuzz/` and are isolated from the production 
 
 Exercises arbitrary precision, truncation/rounding mode, caller-buffer capacity, native conversion, and checked-conversion boundaries.
 
-A local WSL2/Linux AddressSanitizer campaign completed **25,000 executions with no crash or assertion failure**. The final report reached 345 coverage counters / 346 features with a 199-entry minimized corpus.
+A local WSL2/Linux AddressSanitizer campaign completed **25,000 executions with no crash or assertion failure**. The final report reached 345 coverage counters / 346 features. Corpus size is intentionally not treated as a stable metric because libFuzzer may reduce it differently between runs.
 
 ### `interop`
 
 Exercises arbitrary bounded values through complex32/complex64, exact and rounded `rust_decimal`, and several fixed-point destinations.
 
-A local WSL2/Linux AddressSanitizer campaign completed **25,000 executions with no crash or assertion failure**. The final report reached 2,172 coverage counters / 2,289 features with a 240-entry minimized corpus.
+A local WSL2/Linux AddressSanitizer campaign completed **25,000 executions with no crash or assertion failure**. The final report reached 2,172 coverage counters / 2,289 features. Corpus size is intentionally not treated as a stable metric.
 
 ### `runtime_generation`
 
-Exercises opt-in arbitrary-precision generation across requested precisions 0..=512, caller-buffer failure/success boundaries, output immutability on failure, ASCII structure, untouched tail bytes, and deterministic repeated generation. A local WSL2/Linux AddressSanitizer campaign completed **10,000 executions with no crash or assertion failure**, reaching 614 coverage counters / 2,104 features with a 119-entry minimized corpus.
+Exercises opt-in arbitrary-precision generation across requested precisions 0..=512, caller-buffer failure/success boundaries, output immutability on failure, ASCII structure, untouched tail bytes, and deterministic repeated generation. A local WSL2/Linux AddressSanitizer campaign completed **10,000 executions with no crash or assertion failure**, reaching 614 coverage counters / 2,104 features. Corpus size is intentionally not treated as a stable metric.
 
 Windows remains in ordinary host testing and reproducibility. Local Windows libFuzzer execution was not counted because the MSVC environment lacked the dynamic AddressSanitizer runtime. Sanitizer-backed fuzzing therefore runs on Linux/WSL and Linux CI.
 

@@ -229,6 +229,7 @@ Primary repository assets:
 - [Domain Scope](docs/DOMAIN_SCOPE.md)
 - [Verification Strategy](docs/VERIFICATION.md)
 - [Phase 4 Verification Hardening](docs/PHASE4_VERIFICATION.md)
+- [Release-Candidate Critic Review](docs/FINAL_REVIEW.md)
 - [Release Criteria](docs/RELEASE_CRITERIA.md)
 - [Roadmap](ROADMAP.md)
 - [Support](SUPPORT.md)

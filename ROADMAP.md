@@ -55,9 +55,11 @@ Target-hardware transitive stack high-water, WCET/cycles, power, software-vs-har
 - [x] scientific/engineering integration examples;
 - [x] evaluate optional startup integrity self-test (decision: application-owned; no automatic library startup hook).
 
-## Phase 6 — First stable release
+## Phase 6 — Release readiness
 
 - [x] freeze supported technical API baseline and compatibility policy;
 - [x] establish community/noncommercial licensing, paid commercial licensing, and contributor-rights framework;
-- [ ] complete independent review of the exact release-candidate tree;
-- [ ] publish crate only after licensing is decided, explicit release approval is given, and release-candidate tests/resource claims are reproducible.
+- [x] complete an independent critic/verifier review of the release-candidate tree and retain the evidence;
+- [x] establish the publication gate: `publish = false`; no crate publication or GitHub release occurs without a separate explicit release action.
+
+Repository-scoped implementation and release-readiness work is complete. Publishing a stable crate/release is intentionally a separate owner-controlled action, not an implicit side effect of repository completion.
