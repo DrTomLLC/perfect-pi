@@ -10,9 +10,9 @@
 
 ## Status
 
-**Architecture baseline defined; implementation not yet released.**
+**Initial bounded core implemented and locally verified; MSRV Rust 1.85; no public crate release yet.**
 
-This repository currently defines the public contract, numerical model, safety goals, resource goals, and implementation roadmap. It must not yet be treated as a validated numerical dependency for production or safety-critical systems.
+The repository now contains the first working `no_std` core: native `f32` / `f64` constants, bounded `Pi<D>` support for every `D = 0..=40`, explicit truncation and round-to-nearest-even behavior, allocation-free caller-buffer output, and independent canonical-digit verification. It is still pre-release and must not yet be treated as a production-validated or safety-certified dependency.
 
 ## Why Perfectπ
 
@@ -21,7 +21,7 @@ Rust already provides π for native floating-point types, and arbitrary-precisio
 - native `f32` / `f64` fast paths with effectively no library overhead;
 - a bounded, deterministic decimal precision model from 0 through **40 places after the decimal point**;
 - `#![no_std]` and no-allocation operation for the critical bounded core;
-- explicit rounding and explicit lossy conversions — never silent precision claims;
+- explicit rounding semantics and a specification requiring explicit handling of future lossy conversions — never silent precision claims;
 - fixed and documented memory / execution bounds;
 - optional `f16`, `f128`, interoperability, calculation, and arbitrary-precision layers;
 - verification tooling kept outside production dependencies.
@@ -91,9 +91,9 @@ perfect-pi
 
 See [Architecture](docs/ARCHITECTURE.md) for the full separation of concerns.
 
-## Planned API direction
+## Current core API
 
-The following illustrates the intended ergonomics; it is **not yet released API**:
+The native path directly exposes Rust `core` floating-point constants:
 
 ```rust
 use perfect_pi::PI_F64;
@@ -101,19 +101,22 @@ use perfect_pi::PI_F64;
 let circumference = 2.0 * PI_F64 * radius;
 ```
 
-Bounded precision will be explicit:
+Bounded decimal precision is compile-time selected and has explicit semantics:
 
 ```rust
-let p = perfect_pi::Pi::<40>::new();
+use perfect_pi::Pi;
+
+let truncated = Pi::<40>::truncated();
+let rounded = Pi::<40>::round_nearest_even();
 ```
 
-Conversions that can lose precision will be explicitly named or checked rather than silently narrowing.
+`Pi<41>` cannot use the bounded-value operations. Future conversions that can lose precision are required by the normative specification to be checked or explicitly named as lossy.
 
 ## Resource philosophy
 
-The `PI_F32` / `PI_F64` path should compile down to essentially the cost of using the corresponding native constant. The bounded 40-place representation is expected to require only a few dozen bytes of read-only canonical data plus bounded fixed-width working storage.
+`PI_F32` and `PI_F64` are direct aliases of Rust `core` constants. `Pi<D>` is verified as a zero-sized type, while the current straightforward `DecimalPi<40>` materialization occupies 41 bytes (one integer byte plus 40 fractional digit bytes).
 
-Actual ROM, RAM, stack, instruction-count, and timing claims will be published only after they are measured on representative targets. See [Resource Budget](docs/RESOURCE_BUDGET.md).
+The production source holds exactly 41 fractional digits: 40 public digits plus the one additional digit required to round `D=40`. Independent verification computes at least 64 fractional digits using two separate algorithms, so audit depth does not become runtime data. Exact ROM, stack, instruction-count, timing, and linked-binary claims will be published only after representative measurements. See [Resource Budget](docs/RESOURCE_BUDGET.md).
 
 ## Reliability scope
 
@@ -142,10 +145,12 @@ Primary repository assets:
 
 ## Project documents
 
+- [Normative Specification v1](SPECIFICATION.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Precision and Numerical Semantics](docs/PRECISION.md)
 - [Safety and Reliability](docs/SAFETY.md)
 - [Resource Budget](docs/RESOURCE_BUDGET.md)
+- [Initial Resource Measurements](docs/MEASUREMENTS.md)
 - [Domain Scope](docs/DOMAIN_SCOPE.md)
 - [Verification Strategy](docs/VERIFICATION.md)
 - [Release Criteria](docs/RELEASE_CRITERIA.md)

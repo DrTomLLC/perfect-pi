@@ -24,7 +24,7 @@ Target properties:
 - compile-time bounded precision;
 - fixed and documented memory and execution bounds.
 
-The core will expose native `f32` / `f64` representations, verified derived constants, the bounded `Pi<D>` precision family, and checked conversions.
+The implemented baseline exposes native `f32` / `f64` representations, verified native derived constants, and the bounded `Pi<D>` precision family. Checked/explicitly-lossy numeric conversion APIs remain planned and will not be added until their semantics are verified.
 
 ### 2. Optional float adapters
 
@@ -48,9 +48,11 @@ Heavy reference libraries, independent π algorithms, fuzzing, mutation testing,
 
 ## Canonical data
 
-The implementation should retain enough independently verified guard digits internally to round every public value through 40 decimal places correctly. The current design target is approximately 50 fractional reference digits.
+The production core stores 41 fractional digits: the 40 public bounded digits plus the one additional digit required to round at `D=40`. π's irrationality makes an exact finite decimal halfway tie impossible.
 
-Straightforward canonical data is preferred over clever compression when the saved bytes are insignificant compared with the increase in verification complexity.
+Verification does not depend on carrying audit-only digits in flight/runtime data. Two independent algorithms currently agree through at least 64 fractional digits and verify the 41 production digits plus every bounded precision vector.
+
+Straightforward canonical data is preferred over packing when the saved bytes do not justify additional decode logic and verification complexity.
 
 ## `Pi<D>` representation
 
