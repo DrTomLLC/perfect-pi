@@ -1,8 +1,6 @@
 #[cfg(feature = "runtime-generation")]
 fn main() -> std::process::ExitCode {
-    use perfect_pi::{
-        generate_pi_ascii, generate_pi_ascii_round_nearest_even, runtime_pi_ascii_len,
-    };
+    use perfect_pi::{RoundingMode, generate_pi_ascii_with_rounding, runtime_pi_ascii_len};
 
     let decimal_places = match std::env::args().nth(1) {
         Some(value) => match value.parse::<usize>() {
@@ -15,6 +13,22 @@ fn main() -> std::process::ExitCode {
         None => 100,
     };
 
+    let rounding = match std::env::args().nth(2).as_deref() {
+        None | Some("trunc") | Some("toward-zero") => RoundingMode::TowardZero,
+        Some("away") | Some("away-from-zero") => RoundingMode::AwayFromZero,
+        Some("floor") | Some("toward-negative") => RoundingMode::TowardNegativeInfinity,
+        Some("ceil") | Some("toward-positive") => RoundingMode::TowardPositiveInfinity,
+        Some("round") | Some("nearest-even") => RoundingMode::NearestTiesToEven,
+        Some("nearest-away") => RoundingMode::NearestTiesAwayFromZero,
+        Some(mode) => {
+            eprintln!("unknown rounding mode: {mode}");
+            eprintln!(
+                "use trunc, away, floor, ceil, round/nearest-even, or nearest-away"
+            );
+            return std::process::ExitCode::FAILURE;
+        }
+    };
+
     let required = match runtime_pi_ascii_len(decimal_places) {
         Ok(required) => required,
         Err(error) => {
@@ -22,14 +36,8 @@ fn main() -> std::process::ExitCode {
             return std::process::ExitCode::FAILURE;
         }
     };
-    let rounded = std::env::args().nth(2).as_deref() == Some("round");
     let mut output = vec![0_u8; required];
-    let generated = if rounded {
-        generate_pi_ascii_round_nearest_even(decimal_places, &mut output)
-    } else {
-        generate_pi_ascii(decimal_places, &mut output)
-    };
-    let written = match generated {
+    let written = match generate_pi_ascii_with_rounding(decimal_places, rounding, &mut output) {
         Ok(written) => written,
         Err(error) => {
             eprintln!("generation failed: {error}");
