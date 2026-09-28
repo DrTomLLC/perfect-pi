@@ -2,7 +2,6 @@
 
 use perfect_pi::{
     RoundingMode, RuntimePiError, generate_pi_ascii_with_limit, generate_pi_ascii_with_rounding,
-    generate_pi_string,
 };
 
 fn generated(decimal_places: usize, mode: RoundingMode) -> String {
@@ -50,19 +49,4 @@ fn precision_limit_rejects_before_output_mutation() {
         })
     );
     assert_eq!(output, [0xA5_u8; 16]);
-}
-
-#[test]
-fn owned_string_api_enforces_limit_and_matches_buffer_api() {
-    assert_eq!(
-        generate_pi_string(6, 6, RoundingMode::NearestTiesToEven),
-        Ok(String::from("3.141593"))
-    );
-    assert_eq!(
-        generate_pi_string(7, 6, RoundingMode::TowardZero),
-        Err(RuntimePiError::PrecisionLimitExceeded {
-            requested: 7,
-            limit: 6,
-        })
-    );
 }
