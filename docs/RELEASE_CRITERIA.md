@@ -23,7 +23,7 @@ Perfectπ will not call a release production-ready merely because it compiles.
 ## Before a stable 1.0 release
 
 - API and semver policy frozen;
-- MSRV policy documented;
+- current-Rust-only policy documented, with the manifest minimum updated to the newest stable Rust release;
 - compatibility commitments documented;
 - cross-target reproducibility results published;
 - fuzz/property and mutation testing integrated;

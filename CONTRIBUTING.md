@@ -26,14 +26,15 @@ No such mechanism is in effect today.
 
 When code contributions are eventually opened, the critical core is intended to follow these requirements:
 
-- stable Rust unless a documented compatibility decision says otherwise;
+- the newest stable Rust release only; older Rust compatibility is not a project goal;
 - `#![no_std]` compatible;
 - no heap allocation;
 - no `unsafe` code;
 - no `unwrap`, `expect`, `panic!`, `todo!`, or equivalent panic-driven control flow in production critical paths;
 - no hidden I/O, randomness, environment state, or runtime initialization;
 - no silent narrowing, truncation, or overflow;
-- no dependency added without a documented necessity and impact review.
+- no dependency added without a documented necessity and impact review;
+- when a dependency is justified, use the newest appropriate stable release rather than selecting an older version for obsolete compiler compatibility.
 
 ## Numerical changes
 
