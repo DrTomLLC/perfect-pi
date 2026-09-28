@@ -10,7 +10,7 @@
 
 ## Status
 
-**Universal 1.0 work is implemented on the release-candidate path: bounded core, explicit six-mode rounding, optional adapters, guarded arbitrary precision, broad portability CI, and qualification evidence; minimum supported Rust tracks current stable Rust 1.98.1; no public crate release yet.**
+**Universal 1.0 repository-scoped work is complete and merged: bounded core, explicit six-mode rounding, optional adapters, guarded arbitrary precision, broad portability CI, reproducibility evidence, and critical-system qualification guidance are all in `main`; minimum supported Rust tracks current stable Rust 1.98.1; no public crate release has been published yet.**
 
 The repository contains a working `no_std` bounded core, optional IEEE/interoperability adapters, and opt-in runtime/arbitrary-precision generation. The bounded core remains allocation-free and dependency-free by default. The project is still pre-release and must not be treated as safety-certified.
 
