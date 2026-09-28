@@ -37,6 +37,8 @@ jobs:
         run: cargo doc --no-deps
       - name: Independent canonical-digit verification
         run: python3 scripts/verify_reference.py
+      - name: Independent conversion verification
+        run: python3 scripts/verify_conversions.py
 
   msrv:
     name: MSRV 1.85.0
@@ -98,3 +100,5 @@ jobs:
         run: cargo check --lib --target wasm32-unknown-unknown
       - name: AArch64
         run: cargo check --lib --target aarch64-unknown-linux-gnu
+      - name: Resource probes
+        run: python3 scripts/measure_resources.py

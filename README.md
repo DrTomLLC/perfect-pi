@@ -12,7 +12,7 @@
 
 **Initial bounded core implemented and locally verified; MSRV Rust 1.85; no public crate release yet.**
 
-The repository now contains the first working `no_std` core: native `f32` / `f64` constants, bounded `Pi<D>` support for every `D = 0..=40`, explicit truncation and round-to-nearest-even behavior, allocation-free caller-buffer output, and independent canonical-digit verification. It is still pre-release and must not yet be treated as a production-validated or safety-certified dependency.
+The repository now contains a working `no_std` bounded core: native `f32` / `f64` constants, `Pi<D>` support for every `D = 0..=40`, explicit truncation and round-to-nearest-even behavior, checked and explicitly lossy native-float conversions, allocation-free caller-buffer output, and independent canonical/conversion verification. It is still pre-release and must not yet be treated as a production-validated or safety-certified dependency.
 
 ## Why Perfectπ
 
@@ -21,7 +21,7 @@ Rust already provides π for native floating-point types, and arbitrary-precisio
 - native `f32` / `f64` fast paths with effectively no library overhead;
 - a bounded, deterministic decimal precision model from 0 through **40 places after the decimal point**;
 - `#![no_std]` and no-allocation operation for the critical bounded core;
-- explicit rounding semantics and a specification requiring explicit handling of future lossy conversions — never silent precision claims;
+- explicit rounding plus checked precision-preserving and explicitly named lossy conversions — never silent precision claims;
 - fixed and documented memory / execution bounds;
 - optional `f16`, `f128`, interoperability, calculation, and arbitrary-precision layers;
 - verification tooling kept outside production dependencies.
@@ -110,13 +110,23 @@ let truncated = Pi::<40>::truncated();
 let rounded = Pi::<40>::round_nearest_even();
 ```
 
-`Pi<41>` cannot use the bounded-value operations. Future conversions that can lose precision are required by the normative specification to be checked or explicitly named as lossy.
+`Pi<41>` cannot use the bounded-value operations. Native-float conversion is explicit:
+
+```rust
+let p6 = Pi::<6>::round_nearest_even();
+let f32_checked = p6.try_to_f32_preserving_places(); // guaranteed through D=6
+
+let p40 = Pi::<40>::round_nearest_even();
+let f64_lossy = p40.to_f64_lossy(); // explicit precision loss
+```
+
+Checked conversion guarantees all requested decimal places through `D=6` for `f32` and `D=15` for `f64`. Beyond those boundaries callers must deliberately choose the lossy API.
 
 ## Resource philosophy
 
 `PI_F32` and `PI_F64` are direct aliases of Rust `core` constants. `Pi<D>` is verified as a zero-sized type, while the current straightforward `DecimalPi<40>` materialization occupies 41 bytes (one integer byte plus 40 fractional digit bytes).
 
-The production source holds exactly 41 fractional digits: 40 public digits plus the one additional digit required to round `D=40`. Independent verification computes at least 64 fractional digits using two separate algorithms, so audit depth does not become runtime data. Exact ROM, stack, instruction-count, timing, and linked-binary claims will be published only after representative measurements. See [Resource Budget](docs/RESOURCE_BUDGET.md).
+The production source holds exactly 41 fractional digits: 40 public digits plus the one additional digit required to round `D=40`. Independent verification computes at least 64 fractional digits using two separate algorithms, so audit depth does not become runtime data. Native conversion uses independently verified IEEE bit patterns only where a bounded decimal value differs from native π; higher precisions collapse directly to `PI_F32` or `PI_F64`. Object-level Cortex-M/RISC-V measurements are published, while stack, WCET/cycle, power, and final linked-binary claims remain pending. See [Resource Budget](docs/RESOURCE_BUDGET.md).
 
 ## Reliability scope
 
@@ -126,7 +136,7 @@ See [Safety and Reliability](docs/SAFETY.md).
 
 ## Verification strategy
 
-The bounded precision space is intentionally finite. Every supported decimal precision from `Pi<0>` through `Pi<40>` can be exhaustively covered by known-answer tests. Native representations will be checked by exact bit pattern, and canonical values will be cross-verified against independent references and algorithms.
+The bounded precision space is intentionally finite. Every supported decimal precision from `Pi<0>` through `Pi<40>` is covered by known-answer tests. All 164 bounded conversion outcomes (41 precisions × truncation/rounding × `f32`/`f64`) are checked against IEEE bit patterns independently generated from exact rational arithmetic, and canonical π digits are cross-verified with independent algorithms.
 
 Verification dependencies will never become runtime dependencies of the critical core.
 

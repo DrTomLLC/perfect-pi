@@ -17,3 +17,9 @@ All notable released changes to Perfectπ will be documented here.
 - Chudnovsky and Gauss–Legendre verification agree through 64 fractional digits.
 - Bare-metal Cortex-M and RISC-V, WASM, AArch64, Windows host, and MSRV checks established.
 - Initial object-level resource measurements published.
+- Checked decimal-place-preserving `f32` / `f64` conversions implemented with verified guarantees through `D=6` and `D=15`, respectively.
+- Explicitly lossy `to_f32_lossy()` / `to_f64_lossy()` conversions implemented for the full bounded domain.
+- All 164 bounded native-conversion outcomes independently verified against exact-rational IEEE-754 reference bits.
+- Conversion implementation reduced to compact verified bit tables/native-π collapse paths and measured on Cortex-M and RISC-V.
+- Decimal-place preservation guarantees fixed at `D<=6` for `f32` and `D<=15` for `f64`, with first failing cases verified at `D=7` and `D=16`.
+- Conversion resource probes added for high-precision/native-collapse and low-precision table-backed paths.

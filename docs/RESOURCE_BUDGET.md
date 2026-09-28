@@ -17,6 +17,7 @@ These are architecture targets, not benchmark results:
 | `Pi<D>` marker | 0 if zero-sized | none itself | compile-time metadata |
 | 41 production fractional digits | 0 writable | 41 bytes before linker treatment | no cost until bounded path is used |
 | bounded `Pi<40>` materialization | a few dozen bytes | fixed | bounded fixed-width work |
+| bounded native conversion | no persistent allocation | finite verified tables/code only when used | bounded lookup/selection |
 
 ## Verified baseline measurements
 
@@ -28,9 +29,11 @@ The initial implementation has now established these concrete properties:
 - the production canonical table contains 41 fractional decimal digits as `u8` values (40 public + one rounding digit);
 - the crate has zero normal Rust dependencies and does not import `alloc`;
 - bare-metal library checks pass for `thumbv6m-none-eabi`, `thumbv7em-none-eabihf`, and `riscv32imac-unknown-none-elf`;
-- library checks also pass for `wasm32-unknown-unknown` and `aarch64-unknown-linux-gnu`.
+- library checks also pass for `wasm32-unknown-unknown` and `aarch64-unknown-linux-gnu`;
+- forced `Pi<40>` conversion probes measure 328 bytes of text on Cortex-M0, 340 bytes on Cortex-M hardware-float, and 440 bytes on bare-metal RISC-V;
+- table-backed low-precision conversion probes measure 492 bytes of text on Cortex-M0, 444 bytes on Cortex-M hardware-float, and 694 bytes on bare-metal RISC-V.
 
-These are verified implementation facts, not yet complete linked-binary or worst-case timing measurements. See [Initial Resource Measurements](MEASUREMENTS.md) for the first object-level Cortex-M and RISC-V measurements.
+These are verified implementation facts, not yet complete linked-binary or worst-case timing measurements. The checked/lossy conversion layer remains dependency-free and allocation-free. See [Initial Resource Measurements](MEASUREMENTS.md) for object-level Cortex-M and RISC-V measurements, including conversion paths.
 
 ## Required measurements before release
 

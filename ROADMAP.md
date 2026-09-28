@@ -24,7 +24,7 @@
 - [x] implement `Pi<D>` for `0 <= D <= 40`;
 - [x] define stable compile-time bound enforcement;
 - [x] implement explicit rounding and truncation semantics;
-- [ ] implement checked and explicitly lossy conversions;
+- [x] implement checked and explicitly lossy `f32` / `f64` conversions;
 - [x] exhaustively test all supported `D` values.
 
 ## Phase 3 — Portability and optional adapters

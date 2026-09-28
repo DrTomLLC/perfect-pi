@@ -24,7 +24,7 @@ Target properties:
 - compile-time bounded precision;
 - fixed and documented memory and execution bounds.
 
-The implemented baseline exposes native `f32` / `f64` representations, verified native derived constants, and the bounded `Pi<D>` precision family. Checked/explicitly-lossy numeric conversion APIs remain planned and will not be added until their semantics are verified.
+The implemented bounded core exposes native `f32` / `f64` representations, verified native derived constants, the bounded `Pi<D>` precision family, checked precision-preserving conversions, and explicitly named lossy conversions to `f32` / `f64`. Conversion semantics are exhaustively verified across the finite bounded domain, while native-only callers remain separate from bounded conversion machinery.
 
 ### 2. Optional float adapters
 
@@ -65,6 +65,14 @@ The valid public bounded domain is:
 ```
 
 Out-of-range precision should be rejected at compile time where stable Rust permits a clear and maintainable implementation.
+
+## Native conversion architecture
+
+Bounded decimal values convert to the nearest IEEE-754 binary32/binary64 representation of the **stored finite decimal value**, using round-to-nearest, ties-to-even semantics. This is deliberately distinct from requesting mathematical π directly as `PI_F32` or `PI_F64`.
+
+The finite Perfectπ domain permits a compact verified implementation: only `D=0..7` need distinct binary32 reference encodings, while every canonical value at `D>=8` maps to `PI_F32`; only `D=0..14` need distinct binary64 encodings, while every canonical value at `D>=15` maps to `PI_F64`. The low-precision encodings are generated and checked independently from exact rational arithmetic.
+
+Checked conversion is stricter than merely returning a nearest float: it guarantees that all requested fractional decimal places remain recoverable. The verified conservative boundaries are `D<=6` for `f32` and `D<=15` for `f64`. Beyond those boundaries the caller must opt into an explicitly lossy method.
 
 ## Separation of representation and computation
 

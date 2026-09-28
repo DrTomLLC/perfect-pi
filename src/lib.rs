@@ -13,12 +13,15 @@
 //! - native IEEE-754 `f32` and `f64` π constants;
 //! - bounded decimal representations from 0 through 40 places;
 //! - explicit truncation and round-to-nearest, ties-to-even semantics;
+//! - checked precision-preserving and explicitly lossy native-float conversions;
 //! - no allocator, no I/O, no runtime π generation, and no `unsafe`.
 
 mod bounded;
+mod conversion;
 mod native;
 
 pub use bounded::{BufferTooSmall, DecimalPi, MAX_DECIMAL_PLACES, Pi};
+pub use conversion::{F32_GUARANTEED_DECIMAL_PLACES, F64_GUARANTEED_DECIMAL_PLACES, PrecisionLoss};
 pub use native::{
     FRAC_PI_2_F32, FRAC_PI_2_F64, FRAC_PI_3_F32, FRAC_PI_3_F64, FRAC_PI_4_F32, FRAC_PI_4_F64,
     FRAC_PI_6_F32, FRAC_PI_6_F64, FRAC_PI_8_F32, FRAC_PI_8_F64, INV_PI_F32, INV_PI_F64, PI_F32,
