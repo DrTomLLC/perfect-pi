@@ -15,7 +15,14 @@ TARGETS = (
     "thumbv7em-none-eabihf",
     "riscv32imac-unknown-none-elf",
 )
-PROBES = ("native", "bounded40", "conversion40", "conversion_low")
+PROBES = (
+    ("native", ()),
+    ("bounded40", ()),
+    ("conversion40", ()),
+    ("conversion_low", ()),
+    ("binary16", ("binary16",)),
+    ("binary128", ("binary128",)),
+)
 
 
 def run(command: list[str], *, capture: bool = False) -> str:
@@ -48,19 +55,20 @@ def llvm_size_path() -> Path:
     return path
 
 
-def build_rlib(target: str) -> Path:
-    output = run(
-        [
-            "cargo",
-            "build",
-            "--release",
-            "--lib",
-            "--target",
-            target,
-            "--message-format=json-render-diagnostics",
-        ],
-        capture=True,
-    )
+def build_rlib(target: str, features: tuple[str, ...] = ()) -> Path:
+    command = [
+        "cargo",
+        "build",
+        "--release",
+        "--lib",
+        "--target",
+        target,
+        "--message-format=json-render-diagnostics",
+    ]
+    if features:
+        command.extend(["--features", ",".join(features)])
+
+    output = run(command, capture=True)
 
     rlibs: list[Path] = []
     for line in output.splitlines():
@@ -112,9 +120,12 @@ def main() -> int:
 
     for target in TARGETS:
         run(["rustup", "target", "add", target])
-        rlib = build_rlib(target)
+        rlibs: dict[tuple[str, ...], Path] = {}
 
-        for probe in PROBES:
+        for probe, features in PROBES:
+            if features not in rlibs:
+                rlibs[features] = build_rlib(target, features)
+            rlib = rlibs[features]
             source = PROBE_DIR / f"{probe}.rs"
             object_file = OUTPUT_DIR / f"{probe}-{target}.o"
             run([

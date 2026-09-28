@@ -158,7 +158,27 @@ For the native tier, direct aliases of Rust `core` constants are preferred over 
 
 ## 13. Optional numeric tiers
 
-`f16` and `f128` are optional adapters and shall not define the canonical Perfectπ precision model.
+IEEE-754 binary16 and binary128 support shall remain optional and shall not define the canonical Perfectπ precision model.
+
+While Rust's native `f16` / `f128` primitive types remain unstable on the supported stable toolchains, Perfectπ shall provide stable interchange adapters instead of requiring nightly Rust:
+
+- feature `binary16` exposes a transparent `Binary16(u16)` bit representation;
+- feature `binary128` exposes a transparent `Binary128(u128)` bit representation;
+- feature `all-float-formats` enables both;
+- the default feature set enables neither.
+
+The optional adapters shall:
+
+- contain no arithmetic emulation;
+- require no allocator;
+- require no external dependency;
+- provide exact IEEE bit access and endian-stable byte extraction;
+- expose π, τ, π/2, π/3, π/4, π/6, π/8, 1/π, 2/π, and 2/√π;
+- use round-to-nearest, ties-to-even reference encodings;
+- be independently verified from more than one π computation;
+- compile on the supported MSRV and `no_std` target matrix.
+
+Names implying stable native Rust primitives, including `PI_F16` and `PI_F128`, are reserved until those primitive types can be supported without weakening the stable/MSRV contract.
 
 Arbitrary precision beyond 40 decimal places belongs outside the bounded critical core.
 

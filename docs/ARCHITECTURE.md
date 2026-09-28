@@ -28,7 +28,13 @@ The implemented bounded core exposes native `f32` / `f64` representations, verif
 
 ### 2. Optional float adapters
 
-`f16` and `f128` support must not determine the core precision model. They are adapters to the canonical Perfectπ representation and may be conditioned on Rust/toolchain/target support.
+Rust's native `f16` and `f128` primitives are still unstable on the supported stable toolchains. Perfectπ therefore does not require nightly Rust or emulate native arithmetic.
+
+The optional `binary16` and `binary128` features expose IEEE-754 interchange representations backed by `u16` and `u128` respectively. They provide independently verified bit patterns for the same π constant family as the native `f32` / `f64` tier, plus explicit bit/byte access.
+
+These wrappers are representation adapters, not arithmetic types. The names `PI_F16` and `PI_F128` remain unclaimed so native Rust adapters can be added later without confusing the stable interchange API.
+
+The default feature set enables neither optional format. Enabling them must not add dependencies, allocation, runtime π generation, or nightly requirements.
 
 ### 3. Optional interoperability
 

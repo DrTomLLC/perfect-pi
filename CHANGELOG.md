@@ -23,3 +23,7 @@ All notable released changes to Perfectπ will be documented here.
 - Conversion implementation reduced to compact verified bit tables/native-π collapse paths and measured on Cortex-M and RISC-V.
 - Decimal-place preservation guarantees fixed at `D<=6` for `f32` and `D<=15` for `f64`, with first failing cases verified at `D=7` and `D=16`.
 - Conversion resource probes added for high-precision/native-collapse and low-precision table-backed paths.
+- Optional dependency-free IEEE-754 `binary16` and `binary128` interchange adapters added.
+- Ten π-family constants independently verified for each optional format using Chudnovsky and Gauss–Legendre references.
+- Optional float formats verified under Rust 1.85 and the full host/`no_std` target matrix.
+- Resource probes added for optional binary16 and binary128 paths.

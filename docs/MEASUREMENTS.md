@@ -22,6 +22,8 @@ The script uses only the Python standard library plus the installed Rust toolcha
 - bounded probe forces both `Pi<40>::truncated()` and `Pi<40>::round_nearest_even()`;
 - `conversion40` forces truncated/rounded `Pi<40>` conversion to both `f32` and `f64`;
 - `conversion_low` forces the highest distinct table-backed conversions at `D=7` for `f32` and `D=14` for `f64`;
+- `binary16` forces optional `PI_BINARY16` and `TAU_BINARY16` bit-return paths with feature `binary16`;
+- `binary128` forces optional `PI_BINARY128` and `TAU_BINARY128` bit-return paths with feature `binary128`;
 - results are measured before final application linking, LTO, dead stripping, and target-specific firmware runtime integration.
 
 ## Object-level contribution
@@ -32,14 +34,20 @@ The script uses only the Python standard library plus the installed Rust toolcha
 | Cortex-M0 `thumbv6m-none-eabi` | bounded Pi<40> trunc+round | 162 | 41 | 32 ARM exidx |
 | Cortex-M0 `thumbv6m-none-eabi` | Pi<40> conversion f32+f64 | 328 | 41 | 72 ARM exidx |
 | Cortex-M0 `thumbv6m-none-eabi` | low-precision conversion tables | 386 | 41 | 88 ARM exidx |
+| Cortex-M0 `thumbv6m-none-eabi` | optional binary16 π+τ | 24 | 0 | 16 ARM exidx |
+| Cortex-M0 `thumbv6m-none-eabi` | optional binary128 π+τ | 80 | 0 | 16 ARM exidx |
 | Cortex-M `thumbv7em-none-eabihf` | native f32+f64 | 32 | 0 | 16 ARM exidx |
 | Cortex-M `thumbv7em-none-eabihf` | bounded Pi<40> trunc+round | 158 | 41 | 32 ARM exidx |
 | Cortex-M `thumbv7em-none-eabihf` | Pi<40> conversion f32+f64 | 340 | 41 | 72 ARM exidx |
 | Cortex-M `thumbv7em-none-eabihf` | low-precision conversion tables | 398 | 41 | 88 ARM exidx |
+| Cortex-M `thumbv7em-none-eabihf` | optional binary16 π+τ | 20 | 0 | 16 ARM exidx |
+| Cortex-M `thumbv7em-none-eabihf` | optional binary128 π+τ | 74 | 0 | 24 ARM exidx |
 | RISC-V `riscv32imac-unknown-none-elf` | native f32+f64 | 28 | 0 | 0 |
 | RISC-V `riscv32imac-unknown-none-elf` | bounded Pi<40> trunc+round | 250 | 41 | 0 |
 | RISC-V `riscv32imac-unknown-none-elf` | Pi<40> conversion f32+f64 | 440 | 41 | 0 |
 | RISC-V `riscv32imac-unknown-none-elf` | low-precision conversion tables | 534 | 41 | 0 |
+| RISC-V `riscv32imac-unknown-none-elf` | optional binary16 π+τ | 16 | 0 | 0 |
+| RISC-V `riscv32imac-unknown-none-elf` | optional binary128 π+τ | 62 | 0 | 0 |
 
 `*` Object files also contain non-runtime bookkeeping sections such as compiler comments and architecture attributes. Those are intentionally excluded from the text/π-data columns.
 
@@ -48,7 +56,9 @@ The script uses only the Python standard library plus the installed Rust toolcha
 - `Pi<0>`: 0 bytes in the tested builds;
 - `Pi<40>`: 0 bytes in the tested builds;
 - `DecimalPi<0>`: 1 byte;
-- `DecimalPi<40>`: 41 bytes.
+- `DecimalPi<40>`: 41 bytes;
+- `Binary16`: 2 bytes when the feature is enabled and a value is materialized;
+- `Binary128`: 16 bytes when the feature is enabled and a value is materialized.
 
 ## Interpretation
 
@@ -59,6 +69,8 @@ The bounded representation deliberately stores one decimal digit per byte. Packi
 The conversion implementation uses compact independently verified IEEE bit tables only for bounded values whose native result differs from the corresponding native π constant. The `conversion40` probe therefore measures the high-precision/native-collapse path, while `conversion_low` measures the distinct low-precision table-backed path. These are object-level forced-use probes; final linked applications may remove additional code/data through LTO and section garbage collection.
 
 The conversion implementation was deliberately reduced from an exact generic fixed-width rational converter after measurement showed roughly 0.9-1.1 KiB of forced conversion text on constrained targets. The finite-domain verified lookup/native-constant design lowers the measured conversion probes to 328-398 bytes of text across the tested Cortex-M paths and 440-534 bytes across the tested RISC-V paths while preserving identical independently verified IEEE results.
+
+The optional binary16/binary128 adapters are bit-format wrappers only; they do not emulate arithmetic. In the forced π+τ probes, binary16 contributes 16-24 bytes of text and binary128 contributes 62-80 bytes across the measured constrained targets, with 0 measured rodata. Because these are opt-in features and ordinary constants, unused adapters remain absent from the default build and may be further eliminated by final linking.
 
 ## Still required
 

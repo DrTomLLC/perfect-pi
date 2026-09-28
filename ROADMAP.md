@@ -32,8 +32,8 @@
 - [x] validate Cortex-M and RISC-V `no_std` builds;
 - [x] validate x86-64 and AArch64 builds;
 - [x] validate WebAssembly build;
-- [ ] add optional `f16` support where appropriate;
-- [ ] add optional `f128` support where appropriate;
+- [x] add optional IEEE-754 binary16 support on stable Rust (bit-format adapter; native `f16` reserved until Rust stabilization);
+- [x] add optional IEEE-754 binary128 support on stable Rust (bit-format adapter; native `f128` reserved until Rust stabilization);
 - [ ] add optional fixed/decimal/complex interoperability without contaminating core dependencies.
 
 ## Phase 4 — Verification and resource evidence
