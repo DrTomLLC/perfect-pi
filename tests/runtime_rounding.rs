@@ -1,12 +1,16 @@
 #![cfg(feature = "runtime-generation")]
 
 use perfect_pi::{
-    RuntimePiError, RoundingMode, generate_pi_ascii_with_limit, generate_pi_ascii_with_rounding,
+    RoundingMode, RuntimePiError, generate_pi_ascii_with_limit, generate_pi_ascii_with_rounding,
     generate_pi_string,
 };
 
 fn generated(decimal_places: usize, mode: RoundingMode) -> String {
-    let required = if decimal_places == 0 { 1 } else { decimal_places + 2 };
+    let required = if decimal_places == 0 {
+        1
+    } else {
+        decimal_places + 2
+    };
     let mut output = vec![0_u8; required];
     let written = match generate_pi_ascii_with_rounding(decimal_places, mode, &mut output) {
         Ok(written) => written,
@@ -37,12 +41,7 @@ fn runtime_supports_all_rounding_directions() {
 #[test]
 fn precision_limit_rejects_before_output_mutation() {
     let mut output = [0xA5_u8; 16];
-    let result = generate_pi_ascii_with_limit(
-        11,
-        10,
-        RoundingMode::NearestTiesToEven,
-        &mut output,
-    );
+    let result = generate_pi_ascii_with_limit(11, 10, RoundingMode::NearestTiesToEven, &mut output);
     assert_eq!(
         result,
         Err(RuntimePiError::PrecisionLimitExceeded {

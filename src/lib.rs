@@ -7,9 +7,6 @@
 #![deny(clippy::unwrap_used)]
 #![warn(missing_docs)]
 
-#[cfg(feature = "runtime-generation")]
-extern crate alloc;
-
 //! Perfectπ — deterministic, bounded, resource-efficient π infrastructure.
 //!
 //! The initial core is intentionally small:
@@ -20,6 +17,9 @@ extern crate alloc;
 //! - optional dependency-free IEEE binary16 / binary128 interchange formats;
 //! - no allocator, no I/O, no runtime π generation, and no `unsafe` in the default bounded core;
 //! - optional runtime/arbitrary-precision generation remains feature-gated and variable-cost.
+
+#[cfg(feature = "runtime-generation")]
+extern crate alloc;
 
 #[cfg(feature = "binary128")]
 mod binary128;
@@ -56,13 +56,13 @@ pub use conversion::{F32_GUARANTEED_DECIMAL_PLACES, F64_GUARANTEED_DECIMAL_PLACE
 pub use interop_decimal::{RUST_DECIMAL_MAX_PLACES, RustDecimalInteropError};
 #[cfg(feature = "fixed-point")]
 pub use interop_fixed::FixedInteropError;
-pub use rounding::RoundingMode;
 pub use native::{
     FRAC_PI_2_F32, FRAC_PI_2_F64, FRAC_PI_3_F32, FRAC_PI_3_F64, FRAC_PI_4_F32, FRAC_PI_4_F64,
     FRAC_PI_6_F32, FRAC_PI_6_F64, FRAC_PI_8_F32, FRAC_PI_8_F64, INV_PI_F32, INV_PI_F64, PI_F32,
     PI_F64, TAU_F32, TAU_F64, TWO_INV_PI_F32, TWO_INV_PI_F64, TWO_INV_SQRT_PI_F32,
     TWO_INV_SQRT_PI_F64,
 };
+pub use rounding::RoundingMode;
 #[cfg(feature = "runtime-generation")]
 pub use runtime::{
     RuntimePiError, generate_pi_ascii, generate_pi_ascii_round_nearest_even,

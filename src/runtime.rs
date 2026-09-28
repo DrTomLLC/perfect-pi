@@ -325,7 +325,10 @@ mod tests {
     fn guard_progression_accepts_limit_and_rejects_beyond_it() {
         assert_eq!(next_guard_places(48), Ok(56));
         assert_eq!(next_guard_places(56), Ok(64));
-        assert_eq!(next_guard_places(64), Err(RuntimePiError::InternalInvariant));
+        assert_eq!(
+            next_guard_places(64),
+            Err(RuntimePiError::InternalInvariant)
+        );
         assert_eq!(
             next_guard_places(u32::MAX),
             Err(RuntimePiError::PrecisionTooLarge)
