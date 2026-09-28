@@ -25,7 +25,7 @@ A software crate cannot guarantee immunity from radiation-induced bit flips, mem
 
 Perfectπ should therefore support fault-aware systems rather than falsely claim to replace them.
 
-An optional startup integrity/self-test facility may be provided for environments that want to verify canonical data before use. It must not impose continuous runtime overhead on ordinary callers.
+Automatic startup self-test is intentionally not provided. The evaluation and fault-model rationale are documented in [Startup Integrity Self-Test Evaluation](INTEGRITY_SELF_TEST.md). Applications that require startup or periodic integrity checking should use independently stored expected values at the application boundary.
 
 ## Certification
 

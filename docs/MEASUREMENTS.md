@@ -51,6 +51,33 @@ The script uses only the Python standard library plus the installed Rust toolcha
 
 `*` Object files also contain non-runtime bookkeeping sections such as compiler comments and architecture attributes. Those are intentionally excluded from the text/π-data columns.
 
+## Writable memory and static instruction counts
+
+The same exact probe objects are also inspected with `llvm-size` for writable sections and `llvm-objdump -d` for static instruction counts. All 18 probes measured **0 bytes of `.data` and 0 bytes of `.bss`**.
+
+| Target | Probe | Instructions |
+| --- | --- | ---: |
+| Cortex-M0 `thumbv6m-none-eabi` | native f32+f64 | 13 |
+| Cortex-M0 `thumbv6m-none-eabi` | bounded Pi<40> trunc+round | 74 |
+| Cortex-M0 `thumbv6m-none-eabi` | Pi<40> conversion f32+f64 | 144 |
+| Cortex-M0 `thumbv6m-none-eabi` | low-precision conversion tables | 171 |
+| Cortex-M0 `thumbv6m-none-eabi` | optional binary16 π+τ | 10 |
+| Cortex-M0 `thumbv6m-none-eabi` | optional binary128 π+τ | 32 |
+| Cortex-M `thumbv7em-none-eabihf` | native f32+f64 | 13 |
+| Cortex-M `thumbv7em-none-eabihf` | bounded Pi<40> trunc+round | 65 |
+| Cortex-M `thumbv7em-none-eabihf` | Pi<40> conversion f32+f64 | 134 |
+| Cortex-M `thumbv7em-none-eabihf` | low-precision conversion tables | 152 |
+| Cortex-M `thumbv7em-none-eabihf` | optional binary16 π+τ | 8 |
+| Cortex-M `thumbv7em-none-eabihf` | optional binary128 π+τ | 25 |
+| RISC-V `riscv32imac-unknown-none-elf` | native f32+f64 | 8 |
+| RISC-V `riscv32imac-unknown-none-elf` | bounded Pi<40> trunc+round | 87 |
+| RISC-V `riscv32imac-unknown-none-elf` | Pi<40> conversion f32+f64 | 143 |
+| RISC-V `riscv32imac-unknown-none-elf` | low-precision conversion tables | 188 |
+| RISC-V `riscv32imac-unknown-none-elf` | optional binary16 π+τ | 6 |
+| RISC-V `riscv32imac-unknown-none-elf` | optional binary128 π+τ | 18 |
+
+These are static object instruction counts, not cycle counts or WCET. A single instruction can have target- and state-dependent latency, so the project does not convert these counts into timing claims without target-specific execution evidence.
+
 ## Type storage
 
 - `Pi<0>`: 0 bytes in the tested builds;
@@ -72,16 +99,32 @@ The conversion implementation was deliberately reduced from an exact generic fix
 
 The optional binary16/binary128 adapters are bit-format wrappers only; they do not emulate arithmetic. In the forced π+τ probes, binary16 contributes 16-24 bytes of text and binary128 contributes 62-80 bytes across the measured constrained targets, with 0 measured rodata. Because these are opt-in features and ordinary constants, unused adapters remain absent from the default build and may be further eliminated by final linking.
 
-## Still required
+## Static stack-frame measurements
 
-These measurements do not yet establish:
+Current nightly `rustc 1.101.0-nightly (d080e7dff 2026-09-27)` with `-Z emit-stack-sizes` reports the following **individual probe-function frames**:
 
-- final linked application/firmware delta with LTO and section garbage collection;
-- worst-case stack usage;
-- worst-case execution time;
-- cycle counts;
+| Target | bounded round-40 + ASCII | round-40 → f64 |
+| --- | ---: | ---: |
+| `thumbv6m-none-eabi` | 92 B | 8 B |
+| `thumbv7em-none-eabihf` | 8 B | 8 B |
+| `riscv32imac-unknown-none-elf` | 48 B | 0 B |
+
+Reproduce with `python scripts/measure_stack_frames.py`. These are compiler-emitted frame sizes, not transitive call-chain high-water marks.
+
+## Linked host size and timing
+
+A stripped fat-LTO Windows x86-64 linked probe measured a +256-byte `.text` delta for forced bounded round-40 + ASCII relative to the baseline, with unchanged `.rdata` and `.data`. The native constant probe showed no measurable positive linked-size cost. Reproduce with `python scripts/measure_linked_size.py`.
+
+Host timing methodology and five-run medians are published in [Benchmark Report](BENCHMARKS.md).
+
+## Still required for hardware qualification
+
+The software-side Phase 4 measurements do not establish:
+
+- transitive worst-case stack high-water on a final application/firmware image;
+- target-hardware worst-case execution time and cycle counts;
 - power impact;
-- software-float versus hardware-float arithmetic costs;
-- cross-compiler reproducibility of machine code.
+- end-to-end software-float versus hardware-float arithmetic cost on selected hardware;
+- cross-compiler reproducibility of final machine code.
 
-Those remain Phase 4 work before production-readiness claims.
+Those require a specific MCU/board, clock/memory configuration, compiler/linker setup, and measurement method. Perfectπ does not infer those values from object bytes or host timing.

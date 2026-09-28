@@ -1,24 +1,19 @@
 ## Summary
 
-Describe the change and why it is needed.
-
-## Numerical impact
-
-- [ ] No numerical semantics changed.
-- [ ] Numerical semantics changed and independent reference evidence is included.
-
-## Critical-core impact
-
-- [ ] `no_std` compatibility preserved.
-- [ ] No allocation added to the bounded core.
-- [ ] No `unsafe` added to the bounded core.
-- [ ] No new panic path added to the bounded core.
-- [ ] No silent narrowing/truncation/overflow introduced.
+Describe the change and why it is necessary.
 
 ## Verification
 
-List tests, target builds, reference comparisons, benchmarks, or other evidence performed.
+List the checks run and their exact results. Do not claim checks that were not run.
 
-## Resource impact
+## Contributor attestation
 
-Describe any material ROM, RAM, stack, binary-size, or execution-time change.
+- [ ] I have read and agree to `CONTRIBUTOR_AGREEMENT.md`.
+- [ ] I have the right and authority to submit this contribution.
+- [ ] I have identified any third-party material and its applicable terms.
+- [ ] I understand that accepted contributions may be distributed under the Perfectπ community license and separate paid commercial licenses.
+- [ ] My contribution commits contain a `Signed-off-by: Name <email>` trailer.
+
+## Numerical / resource impact
+
+For changes affecting numerical semantics, precision, conversion, runtime generation, dependencies, or resource use, describe the independent reference evidence, boundary tests, and measured impact.

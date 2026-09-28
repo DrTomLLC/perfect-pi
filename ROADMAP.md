@@ -43,19 +43,23 @@
 - [x] mutation testing;
 - [x] exhaustively check bounded-state invariants where the finite state space is tractable;
 - [x] cross-target reproducibility tests;
-- [ ] measure ROM, RAM, stack, binary-size, instruction, and timing costs;
-- [ ] publish benchmark and resource reports.
+- [x] measure software-side ROM/read-only data, writable sections, static stack frames, linked host size, static instruction counts, and host timing;
+- [x] publish reproducible benchmark and resource reports.
+
+Target-hardware transitive stack high-water, WCET/cycles, power, software-vs-hardware-float cost, and final firmware deltas remain target-specific qualification work; they require a selected board/application and are not inferred from generic repository measurements.
 
 ## Phase 5 — Extended ecosystem
 
-- [ ] optional runtime π-generation algorithms;
-- [ ] optional arbitrary precision above 40 places;
-- [ ] scientific/engineering integration examples;
-- [ ] evaluate optional startup integrity self-test.
+- [x] optional runtime π-generation algorithm with independently verified interval bounds;
+- [x] optional arbitrary precision above 40 places;
+- [x] scientific/engineering integration examples;
+- [x] evaluate optional startup integrity self-test (decision: application-owned; no automatic library startup hook).
 
-## Phase 6 — First stable release
+## Phase 6 — Release readiness
 
-- [ ] freeze supported API;
-- [ ] decide final licensing model and contributor-rights framework;
-- [ ] complete independent review;
-- [ ] publish crate only after tests and resource claims are reproducible.
+- [x] freeze supported technical API baseline and compatibility policy;
+- [x] establish community/noncommercial licensing, paid commercial licensing, and contributor-rights framework;
+- [x] complete an independent critic/verifier review of the release-candidate tree and retain the evidence;
+- [x] establish the publication gate: `publish = false`; no crate publication or GitHub release occurs without a separate explicit release action.
+
+Repository-scoped implementation and release-readiness work is complete. Publishing a stable crate/release is intentionally a separate owner-controlled action, not an implicit side effect of repository completion.

@@ -4,6 +4,7 @@
 from pathlib import Path
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -45,13 +46,13 @@ def host_triple() -> str:
     raise RuntimeError("rustc host triple not found")
 
 
-def llvm_size_path() -> Path:
+def llvm_tool_path(tool: str) -> Path:
     run(["rustup", "component", "add", "llvm-tools"])
     sysroot = Path(run(["rustc", "--print", "sysroot"], capture=True).strip())
-    executable = "llvm-size.exe" if os.name == "nt" else "llvm-size"
+    executable = f"{tool}.exe" if os.name == "nt" else tool
     path = sysroot / "lib" / "rustlib" / host_triple() / "bin" / executable
     if not path.is_file():
-        raise RuntimeError(f"llvm-size not found at {path}")
+        raise RuntimeError(f"{tool} not found at {path}")
     return path
 
 
@@ -93,9 +94,11 @@ def build_rlib(target: str, features: tuple[str, ...] = ()) -> Path:
     return rlibs[0]
 
 
-def section_totals(output: str) -> tuple[int, int, int]:
+def section_totals(output: str) -> tuple[int, int, int, int, int]:
     text_bytes = 0
     rodata_bytes = 0
+    data_bytes = 0
+    bss_bytes = 0
     unwind_bytes = 0
     for line in output.splitlines():
         parts = line.split()
@@ -107,16 +110,26 @@ def section_totals(output: str) -> tuple[int, int, int]:
             text_bytes += size
         elif section.startswith(".rodata"):
             rodata_bytes += size
+        elif section.startswith(".data"):
+            data_bytes += size
+        elif section.startswith(".bss"):
+            bss_bytes += size
         elif section.startswith(".ARM.exidx"):
             unwind_bytes += size
-    return text_bytes, rodata_bytes, unwind_bytes
+    return text_bytes, rodata_bytes, data_bytes, bss_bytes, unwind_bytes
+
+
+def instruction_count(output: str) -> int:
+    instruction = re.compile(r"^\s*[0-9a-fA-F]+:\s")
+    return sum(1 for line in output.splitlines() if instruction.match(line))
 
 
 def main() -> int:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    llvm_size = llvm_size_path()
-    print("| Target | Probe | Text | rodata | ARM exidx |")
-    print("| --- | --- | ---: | ---: | ---: |")
+    llvm_size = llvm_tool_path("llvm-size")
+    llvm_objdump = llvm_tool_path("llvm-objdump")
+    print("| Target | Probe | Text | rodata | data | bss | Instructions | ARM exidx |")
+    print("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |")
 
     for target in TARGETS:
         run(["rustup", "target", "add", target])
@@ -136,10 +149,12 @@ def main() -> int:
                 "-o", str(object_file),
             ])
             size_output = run([str(llvm_size), "-A", str(object_file)], capture=True)
-            text_bytes, rodata_bytes, unwind_bytes = section_totals(size_output)
+            disassembly = run([str(llvm_objdump), "-d", str(object_file)], capture=True)
+            text_bytes, rodata_bytes, data_bytes, bss_bytes, unwind_bytes = section_totals(size_output)
+            instructions = instruction_count(disassembly)
             print(
-                f"| `{target}` | `{probe}` | {text_bytes} | "
-                f"{rodata_bytes} | {unwind_bytes} |"
+                f"| `{target}` | `{probe}` | {text_bytes} | {rodata_bytes} | "
+                f"{data_bytes} | {bss_bytes} | {instructions} | {unwind_bytes} |"
             )
 
     return 0

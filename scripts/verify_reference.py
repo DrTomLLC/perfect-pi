@@ -51,9 +51,11 @@ def gauss_legendre_pi(decimal_places: int) -> Decimal:
         t = Decimal(1) / four
         p = one
 
-        # Quadratic convergence; this is comfortably beyond the required
-        # precision for the 64-digit verification target.
-        for _ in range(8):
+        # Quadratic convergence roughly doubles correct digits per iteration.
+        # Use a precision-scaled count with a wide safety margin instead of
+        # relying on exact Decimal equality at the final rounded ulp.
+        iterations = max(16, ctx.prec.bit_length() + 8)
+        for _ in range(iterations):
             next_a = (a + b) / two
             b = (a * b).sqrt()
             t -= p * (a - next_a) ** 2

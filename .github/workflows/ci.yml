@@ -45,6 +45,8 @@ jobs:
           cargo check --lib --no-default-features --features fixed-point
           cargo check --lib --no-default-features --features decimal
           cargo check --lib --no-default-features --features interop
+          cargo check --lib --no-default-features --features runtime-generation
+          cargo check --lib --no-default-features --features arbitrary-precision
       - name: Compile-fail documentation tests
         run: cargo test --doc --all-features
       - name: Rustdoc warnings
@@ -59,6 +61,8 @@ jobs:
         run: python3 scripts/verify_float_formats.py
       - name: Independent interoperability verification
         run: python3 scripts/verify_interop.py
+      - name: Independent runtime-generation verification
+        run: python3 scripts/verify_runtime_generation.py
       - name: Enforce direct dependency currency/isolation
         run: python3 scripts/verify_dependency_policy.py
       - name: Enforce verification-tool currency
@@ -114,6 +118,8 @@ jobs:
         run: cargo +nightly fuzz run bounded_api --sanitizer address -- -runs=25000 -max_len=8
       - name: Fuzz interoperability with AddressSanitizer
         run: cargo +nightly fuzz run interop --sanitizer address -- -runs=25000 -max_len=8
+      - name: Fuzz runtime generation with AddressSanitizer
+        run: cargo +nightly fuzz run runtime_generation --sanitizer address -- -runs=10000 -max_len=4
 
   mutation:
     name: Mutation testing

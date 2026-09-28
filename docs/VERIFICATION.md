@@ -23,9 +23,10 @@ The initial core currently has:
 - required crates.io currency checks for all direct optional interoperability dependencies and verification tools;
 - RustSec advisory auditing of the resolved optional dependency graph;
 - exhaustive bounded-state caller-buffer verification across 3,690 legal precision/mode/capacity states;
-- sanitizer-backed libFuzzer targets for the bounded core and optional interoperability surfaces;
-- mutation testing with 96 generated mutants: 84 caught, 12 unviable, 0 missed, and 0 timed out;
-- measured all-feature source coverage of 92.66% lines, 91.48% regions, and 100% functions, with enforced CI floors of 92% / 91% / 100%;
+- sanitizer-backed libFuzzer targets for the bounded core, optional interoperability surfaces, and runtime arbitrary-precision generation;
+- independent truncation and nearest-even runtime-generation checks against both Chudnovsky and Gauss-Legendre through 1,000 fractional digits at nine precision checkpoints;
+- mutation testing with zero surviving viable mutants required by CI; retained exact counts are updated whenever the production tree changes;
+- measured post-Phase-5 all-feature source coverage of 95.23% lines, 91.80% regions, and 100% functions, with enforced CI floors of 92% / 91% / 100%;
 - byte-for-byte reproducibility of 30 representative probe objects across repeated Windows and Linux builds using the same Rust 1.98.1 compiler commit.
 
 Detailed methodology and retained evidence are documented in [Phase 4 Verification Hardening](PHASE4_VERIFICATION.md).
@@ -58,7 +59,7 @@ Canonical π digits and derived constants should be checked against more than on
 
 ## Verification isolation
 
-Reference generators, arbitrary-precision packages, fuzzers, model checkers, and other heavy tools belong in development/verification dependency graphs only.
+Reference generators, fuzzers, model checkers, and other verification-only tools belong outside production dependency graphs. The one production arbitrary-precision dependency, `num-bigint`, is permitted only behind the explicit `runtime-generation`/`arbitrary-precision` feature boundary; it remains absent from the default bounded core.
 
 ## Evidence retention
 

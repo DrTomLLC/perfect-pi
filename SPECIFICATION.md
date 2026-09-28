@@ -206,6 +206,27 @@ All direct interoperability dependencies shall:
 
 The default Perfectπ dependency graph shall remain empty.
 
+### 13.2 Optional runtime generation and arbitrary precision
+
+Runtime generation shall remain opt-in and outside the bounded critical core.
+
+The `runtime-generation` feature shall:
+
+- use arbitrary-precision integer arithmetic without changing the default dependency graph;
+- keep its direct dependency optional, exact-version pinned, and configured with default features disabled;
+- expose caller-buffer ASCII generation with explicit truncation semantics;
+- expose explicit decimal round-to-nearest, ties-to-even generation;
+- avoid binary floating-point as an intermediate representation;
+- reject undersized caller buffers before modifying them;
+- use variable resource cost proportional to the requested precision;
+- compile on the supported current-stable `no_std` target matrix.
+
+The `arbitrary-precision` feature is the semantic alias for this precision-above-40 capability.
+
+The implemented generator uses Machin's identity with conservative integer lower/upper bounds. Guard precision shall increase until both bounds prove the same requested truncation. Nearest-even generation shall certify at least one additional decimal digit before rounding. Because pi is irrational, an exact finite decimal halfway tie cannot occur.
+
+Runtime-generation results shall be independently checked against at least two separately implemented pi algorithms at precision materially above the bounded 40-place tier.
+
 ## 14. Verification
 
 Before a bounded release is described as production-ready, verification shall include:
