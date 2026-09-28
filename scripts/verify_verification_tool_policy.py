@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify Perfectπ verification-tool currency and CI pin consistency."""
+"""Verify Perfectπ verification-tool pins and workflow usage."""
 
 from pathlib import Path
 import json
@@ -12,12 +12,16 @@ ROOT = Path(__file__).resolve().parents[1]
 POLICY = ROOT / "verification" / "policy" / "tooling.toml"
 WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
 USER_AGENT = "PerfectPi-verification-tool-policy/0.1"
-EXPECTED_TOOLS = {
+EXPECTED_TOOLS = frozenset({
     "cargo-audit",
     "cargo-fuzz",
-    "cargo-mutants",
     "cargo-llvm-cov",
-}
+    "cargo-mutants",
+})
+INSTALL_PATTERN = re.compile(
+    r"cargo install (?P<crate>cargo-[a-z0-9-]+) "
+    r"--version =(?P<version>\d+(?:\.\d+)+) --locked"
+)
 
 
 def stable_key(version: str) -> tuple[int, ...] | None:
@@ -50,52 +54,84 @@ def newest_stable(crate: str) -> str:
     return max(candidates)[1]
 
 
+def workflow_pins() -> tuple[dict[str, str], list[str]]:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    pins: dict[str, str] = {}
+    duplicates: list[str] = []
+
+    for match in INSTALL_PATTERN.finditer(text):
+        crate = match.group("crate")
+        version = match.group("version")
+        if crate in pins:
+            duplicates.append(crate)
+        pins[crate] = version
+
+    return pins, duplicates
+
+
 def main() -> int:
     with POLICY.open("rb") as handle:
         policy = tomllib.load(handle)
 
     failures: list[str] = []
-    tools = policy.get("verification-tools", {})
-    if not isinstance(tools, dict):
-        failures.append("[verification-tools] must be a table")
-        tools = {}
+    raw_tools = policy.get("verification-tools", {})
+    if not isinstance(raw_tools, dict):
+        print("FAIL: [verification-tools] must be a table", file=sys.stderr)
+        return 1
 
-    declared_tools = set(tools)
-    missing = sorted(EXPECTED_TOOLS - declared_tools)
-    unexpected = sorted(declared_tools - EXPECTED_TOOLS)
-    if missing:
-        failures.append(f"missing required verification tools: {', '.join(missing)}")
-    if unexpected:
-        failures.append(f"unexpected verification tools: {', '.join(unexpected)}")
+    tools = dict(raw_tools)
+    policy_names = set(tools)
+    if policy_names != EXPECTED_TOOLS:
+        missing = sorted(EXPECTED_TOOLS - policy_names)
+        unexpected = sorted(policy_names - EXPECTED_TOOLS)
+        if missing:
+            failures.append(f"tooling.toml missing required tools: {', '.join(missing)}")
+        if unexpected:
+            failures.append(f"tooling.toml contains unexpected tools: {', '.join(unexpected)}")
 
-    workflow = WORKFLOW.read_text(encoding="utf-8")
+    workflow, duplicates = workflow_pins()
+    if duplicates:
+        failures.append(
+            "workflow contains duplicate cargo-install pins: " + ", ".join(sorted(set(duplicates)))
+        )
+
+    workflow_names = set(workflow)
+    if workflow_names != EXPECTED_TOOLS:
+        missing = sorted(EXPECTED_TOOLS - workflow_names)
+        unexpected = sorted(workflow_names - EXPECTED_TOOLS)
+        if missing:
+            failures.append(f"CI workflow missing required tool installs: {', '.join(missing)}")
+        if unexpected:
+            failures.append(f"CI workflow installs unexpected tools: {', '.join(unexpected)}")
 
     for crate in sorted(EXPECTED_TOOLS):
         declared = tools.get(crate)
         if not isinstance(declared, str):
-            failures.append(f"{crate}: version must be a string")
+            failures.append(f"{crate}: tooling.toml version must be a string")
+            continue
+        if stable_key(declared) is None:
+            failures.append(f"{crate}: tooling.toml version is not a stable numeric version: {declared}")
             continue
 
-        install_pattern = re.compile(
-            rf"^\s*cargo install {re.escape(crate)} --version ={re.escape(declared)} --locked\s*$",
-            re.MULTILINE,
-        )
-        if install_pattern.search(workflow) is None:
+        workflow_version = workflow.get(crate)
+        if workflow_version != declared:
             failures.append(
-                f"{crate}: ci.yml must install exactly --version ={declared} --locked"
+                f"{crate}: workflow pin {workflow_version!r} does not match tooling.toml {declared!r}"
             )
 
         latest = newest_stable(crate)
         if declared != latest:
             failures.append(f"{crate}: declared {declared}, newest stable {latest}")
         else:
-            print(f"PASS: {crate} is current at stable {latest}")
+            print(f"PASS: {crate} policy/workflow pin is exact and current at stable {latest}")
 
     if failures:
-        print("FAIL: verification tooling policy is inconsistent", file=sys.stderr)
+        print("FAIL: verification tooling policy violated", file=sys.stderr)
         for failure in failures:
             print(f"- {failure}", file=sys.stderr)
         return 1
+
+    print("PASS: required verification-tool set is complete and CI pins match policy exactly")
     return 0
 
 
