@@ -15,7 +15,7 @@ The baseline includes:
 - optional `Binary16` and `Binary128` interchange types and constants;
 - optional complex, fixed-point, and `rust_decimal` interoperability;
 - shared `RoundingMode` semantics covering six conventional decimal rounding directions;
-- optional `runtime-generation` / `arbitrary-precision` generation with caller-buffer, caller-limit, and owned-string entry points.
+- optional `runtime-generation` / `arbitrary-precision` generation with caller-buffer and caller-limit entry points; final output storage remains caller-owned.
 
 ## Feature compatibility
 
