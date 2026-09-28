@@ -49,4 +49,16 @@ fn precision_limit_rejects_before_output_mutation() {
         })
     );
     assert_eq!(output, [0xA5_u8; 16]);
+
+    let mut exact_limit = [0_u8; 12];
+    assert_eq!(
+        generate_pi_ascii_with_limit(
+            10,
+            10,
+            RoundingMode::TowardZero,
+            &mut exact_limit,
+        ),
+        Ok(12)
+    );
+    assert_eq!(&exact_limit, b"3.1415926535");
 }
