@@ -25,7 +25,7 @@ The initial core currently has:
 - RustSec advisory auditing of the resolved optional dependency graph;
 - exhaustive bounded-state caller-buffer verification across 3,690 legal precision/mode/capacity states;
 - sanitizer-backed libFuzzer targets for the bounded core, optional interoperability surfaces, and runtime arbitrary-precision generation;
-- independent checks of all six runtime rounding policies against both Chudnovsky and Gauss-Legendre through 1,000 fractional digits at nine precision checkpoints;
+- independent checks of all six runtime rounding policies against both Chudnovsky and Gauss-Legendre through 10,000 fractional digits at ten precision checkpoints, plus production Chudnovsky cross-checks against the retained Machin reference through 1,000 places;
 - runtime precision-limit tests proving rejection occurs before output mutation, with the same surfaces exercised by sanitizer-backed fuzzing;
 - a 29-target dependency-free core portability matrix spanning embedded, word-size, endian, OS, mobile, WebAssembly, and architecture classes;
 - mutation testing with zero surviving viable mutants required by CI; retained exact counts are updated whenever the production tree changes;
