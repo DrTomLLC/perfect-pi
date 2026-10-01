@@ -194,31 +194,17 @@ fn certified_scaled_pi(decimal_places: usize) -> Result<BigInt, RuntimePiError> 
             .checked_add(1)
             .ok_or(RuntimePiError::PrecisionTooLarge)?;
         let next_leaf = chudnovsky_binary_split(terms, next_term_end)?;
-
-        let next_q = &split.q * &next_leaf.q;
-        let next_t = &split.t * &next_leaf.q + &split.p * &next_leaf.t;
-
-        let comparison = (&split.t * &next_q).cmp(&(&next_t * &split.q));
-        let ((series_lower_t, series_lower_q), (series_upper_t, series_upper_q)) = match comparison
-        {
-            Ordering::Less | Ordering::Equal => ((&split.t, &split.q), (&next_t, &next_q)),
-            Ordering::Greater => ((&next_t, &next_q), (&split.t, &split.q)),
-        };
-
-        if series_lower_t <= &BigInt::default() || series_upper_t <= &BigInt::default() {
-            return Err(RuntimePiError::InternalInvariant);
-        }
+        let extended = combine_binary_splits(&split, &next_leaf);
+        let bounds = ordered_positive_series_bounds(&split, &extended)?;
 
         let decimal_scale = BigInt::from(10_u8).pow(exponent);
-        let sqrt_floor = scaled_sqrt_10005_floor(&decimal_scale);
-        let c_lower = &sqrt_floor * CHUDNOVSKY_C_MULTIPLIER;
-        let c_upper = (&sqrt_floor + 1_u8) * CHUDNOVSKY_C_MULTIPLIER;
+        let (c_lower, c_upper) = scaled_chudnovsky_constant_bounds(&decimal_scale);
         let guard_scale = BigInt::from(10_u8).pow(guard_places);
 
-        let lower_numerator = c_lower * series_upper_q;
-        let lower_denominator = &guard_scale * series_upper_t;
-        let upper_numerator = c_upper * series_lower_q;
-        let upper_denominator = &guard_scale * series_lower_t;
+        let lower_numerator = c_lower * bounds.upper_q;
+        let lower_denominator = &guard_scale * bounds.upper_t;
+        let upper_numerator = c_upper * bounds.lower_q;
+        let upper_denominator = &guard_scale * bounds.lower_t;
 
         let lower_floor = lower_numerator / lower_denominator;
         let upper_floor = upper_numerator / upper_denominator;
@@ -252,11 +238,57 @@ fn chudnovsky_binary_split(start: usize, end: usize) -> Result<BinarySplit, Runt
     let left = chudnovsky_binary_split(start, midpoint)?;
     let right = chudnovsky_binary_split(midpoint, end)?;
 
+    Ok(combine_binary_splits(&left, &right))
+}
+
+fn combine_binary_splits(left: &BinarySplit, right: &BinarySplit) -> BinarySplit {
     let p = &left.p * &right.p;
     let q = &left.q * &right.q;
     let t = &left.t * &right.q + &left.p * &right.t;
+    BinarySplit { p, q, t }
+}
 
-    Ok(BinarySplit { p, q, t })
+struct SeriesBounds<'a> {
+    lower_t: &'a BigInt,
+    lower_q: &'a BigInt,
+    upper_t: &'a BigInt,
+    upper_q: &'a BigInt,
+}
+
+fn ordered_positive_series_bounds<'a>(
+    first: &'a BinarySplit,
+    second: &'a BinarySplit,
+) -> Result<SeriesBounds<'a>, RuntimePiError> {
+    let comparison = compare_rationals(&first.t, &first.q, &second.t, &second.q);
+    let bounds = match comparison {
+        Ordering::Less | Ordering::Equal => SeriesBounds {
+            lower_t: &first.t,
+            lower_q: &first.q,
+            upper_t: &second.t,
+            upper_q: &second.q,
+        },
+        Ordering::Greater => SeriesBounds {
+            lower_t: &second.t,
+            lower_q: &second.q,
+            upper_t: &first.t,
+            upper_q: &first.q,
+        },
+    };
+
+    if bounds.lower_t <= &BigInt::default() || bounds.upper_t <= &BigInt::default() {
+        Err(RuntimePiError::InternalInvariant)
+    } else {
+        Ok(bounds)
+    }
+}
+
+fn compare_rationals(
+    left_numerator: &BigInt,
+    left_denominator: &BigInt,
+    right_numerator: &BigInt,
+    right_denominator: &BigInt,
+) -> Ordering {
+    (left_numerator * right_denominator).cmp(&(right_numerator * left_denominator))
 }
 
 fn chudnovsky_leaf(index: usize) -> BinarySplit {
@@ -280,6 +312,13 @@ fn chudnovsky_leaf(index: usize) -> BinarySplit {
     }
 
     BinarySplit { p, q, t }
+}
+
+fn scaled_chudnovsky_constant_bounds(scale: &BigInt) -> (BigInt, BigInt) {
+    let sqrt_floor = scaled_sqrt_10005_floor(scale);
+    let lower = &sqrt_floor * CHUDNOVSKY_C_MULTIPLIER;
+    let upper = (&sqrt_floor + 1_u8) * CHUDNOVSKY_C_MULTIPLIER;
+    (lower, upper)
 }
 
 fn scaled_sqrt_10005_floor(scale: &BigInt) -> BigInt {
@@ -457,6 +496,69 @@ mod tests {
             next_guard_places(u32::MAX),
             Err(RuntimePiError::PrecisionTooLarge)
         );
+    }
+
+    #[test]
+    fn binary_split_composition_is_exact() {
+        let left = BinarySplit {
+            p: BigInt::from(2_u8),
+            q: BigInt::from(3_u8),
+            t: BigInt::from(5_u8),
+        };
+        let right = BinarySplit {
+            p: BigInt::from(7_u8),
+            q: BigInt::from(11_u8),
+            t: BigInt::from(13_u8),
+        };
+
+        let combined = combine_binary_splits(&left, &right);
+        assert_eq!(combined.p, BigInt::from(14_u8));
+        assert_eq!(combined.q, BigInt::from(33_u8));
+        assert_eq!(combined.t, BigInt::from(81_u8));
+    }
+
+    #[test]
+    fn rational_ordering_uses_cross_products() {
+        let one = BigInt::from(1_u8);
+        let two = BigInt::from(2_u8);
+        assert_eq!(compare_rationals(&one, &two, &one, &two), Ordering::Equal);
+
+        let three = BigInt::from(3_u8);
+        let four = BigInt::from(4_u8);
+        assert_eq!(
+            compare_rationals(&three, &two, &four, &three),
+            Ordering::Greater
+        );
+    }
+
+    #[test]
+    fn series_bounds_require_both_positive_endpoints() {
+        let positive = BinarySplit {
+            p: BigInt::from(1_u8),
+            q: BigInt::from(2_u8),
+            t: BigInt::from(1_u8),
+        };
+        let zero = BinarySplit {
+            p: BigInt::from(1_u8),
+            q: BigInt::from(1_u8),
+            t: BigInt::default(),
+        };
+
+        assert!(matches!(
+            ordered_positive_series_bounds(&zero, &positive),
+            Err(RuntimePiError::InternalInvariant)
+        ));
+        assert!(matches!(
+            ordered_positive_series_bounds(&positive, &zero),
+            Err(RuntimePiError::InternalInvariant)
+        ));
+    }
+
+    #[test]
+    fn chudnovsky_constant_bounds_are_exact_at_unit_scale() {
+        let (lower, upper) = scaled_chudnovsky_constant_bounds(&BigInt::from(1_u8));
+        assert_eq!(lower, BigInt::from(42_688_000_u32));
+        assert_eq!(upper, BigInt::from(43_114_880_u32));
     }
 
     #[test]
