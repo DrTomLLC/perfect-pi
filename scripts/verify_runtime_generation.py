@@ -15,8 +15,8 @@ import sys
 
 from verify_reference import chudnovsky_pi, gauss_legendre_pi
 
-VERIFICATION_DIGITS = 1000
-CHECKPOINTS = (0, 1, 2, 3, 10, 40, 100, 256, 1000)
+VERIFICATION_DIGITS = 10_000
+CHECKPOINTS = (0, 1, 2, 3, 10, 40, 100, 256, 1_000, 10_000)
 MODES = {
     "trunc": ROUND_DOWN,
     "away": ROUND_CEILING,
