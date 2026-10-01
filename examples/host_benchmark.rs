@@ -27,6 +27,8 @@ fn main() {
     {
         benchmark_runtime(100, 100);
         benchmark_runtime(1_000, 10);
+        benchmark_runtime(10_000, 3);
+        benchmark_runtime(100_000, 1);
     }
 }
 
