@@ -94,3 +94,18 @@ The optimized Windows runtime-generation linked probe measured 136,477 bytes acr
 At a 10,000-place workload, the optimized runtime probe peaked at about 4.53 MB working set and 1.25 MB private memory, improved from approximately 6.00 MB / 2.55 MB for the prior backend. The bounded tier remains effectively at process-baseline memory.
 
 The high-precision backend therefore trades a small linked-size increase for orders-of-magnitude better scaling and lower measured runtime memory while leaving the dependency-free native/bounded tiers unchanged.
+
+
+### Million-place stress validation
+
+A separate 1,000,000-place stress run was used to confirm that the binary-splitting backend continues scaling beyond the normal benchmark range:
+
+| Method | Generation / end-to-end time | Output |
+| --- | ---: | --- |
+| Perfectπ | 9.302 s end-to-end | 1,000,002-byte caller buffer |
+| Dashu | 3.271 s generation / 3.641 s including decimal String | 1,000,002-byte decimal String |
+| astro-float | 3.007 s generation / 4.865 s including decimal String | implementation-specific decimal rendering |
+
+Perfectπ and Dashu produced the identical FNV-1a digest `68d9256552385bfe` for their complete 1,000,002-byte decimal outputs, providing an independent byte-for-byte check at one million fractional digits.
+
+Perfectπ is not the fastest implementation at this extreme depth, but the prior catastrophic scaling failure is removed: the production backend completes one million places in seconds rather than extrapolating the former Machin-series behavior.
