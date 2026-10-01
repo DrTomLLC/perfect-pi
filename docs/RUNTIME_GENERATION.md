@@ -19,13 +19,15 @@ Perfectπ keeps runtime generation outside the bounded core. Enable `runtime-gen
 
 ## Numerical method
 
-The generator uses Machin's identity, `π = 16 atan(1/5) - 4 atan(1/239)`, evaluated with arbitrary-precision integers. Every integer division contributes conservative lower and upper bounds. The implementation increases guard precision until both bounds prove the same requested decimal truncation.
+The production generator uses the Chudnovsky series with recursive binary splitting over arbitrary-precision integers. Consecutive partial sums of the alternating, monotonically decreasing series bracket the reciprocal-π series, and an integer square-root bound brackets `sqrt(10005)`. Perfectπ combines those rational intervals and increases guard precision until both bounds prove the same requested decimal truncation.
+
+The previous certified Machin implementation remains in the test configuration as an algorithmically independent reference. Unit tests compare the production Chudnovsky result against Machin at representative precisions through 1,000 places, while the external verifier independently checks Chudnovsky and Gauss-Legendre references.
 
 This is intentionally different from assuming a fixed number of guard digits is sufficient.
 
 ## Verification
 
-`tests/runtime_generation.rs` and `tests/runtime_rounding.rs` check zero, bounded, 100-place, six-mode rounding, precision-limit, and failure behavior. `scripts/verify_runtime_generation.py` independently computes π with Chudnovsky and Gauss-Legendre and requires all six public runtime rounding modes to match the independent reference through 1,000 fractional digits at nine checkpoints. The runtime libFuzzer target mutates precision, rounding policy, output capacity, and caller limits under AddressSanitizer.
+`tests/runtime_generation.rs` and `tests/runtime_rounding.rs` check zero, bounded, 100-place, six-mode rounding, precision-limit, and failure behavior. `scripts/verify_runtime_generation.py` independently computes π with Chudnovsky and Gauss-Legendre and requires all six public runtime rounding modes to match the independent reference through 10,000 fractional digits at ten checkpoints. The runtime libFuzzer target mutates precision, rounding policy, output capacity, and caller limits under AddressSanitizer.
 
 ## Example
 
