@@ -49,3 +49,48 @@ The native probe's 48-byte reduction is treated as linker/layout variation, not 
 ## Limits
 
 These measurements do not establish embedded WCET, cycle counts, interrupt-driven stack high-water, power impact, cache behavior, or final firmware deltas. Those require target-specific hardware/toolchain integration and must be reported separately when measured.
+
+
+## Certified Chudnovsky runtime backend — 2026-09-30
+
+The Universal 1.0 acceptance campaign exposed a high-precision scaling defect in the original Machin-series runtime backend. Production runtime generation was replaced with certified Chudnovsky binary splitting while retaining the same public APIs, six rounding modes, caller-owned output contract, precision-limit behavior, and `num-bigint 0.5.1` dependency.
+
+The optimized production source was independently checked against the retained Machin reference in unit tests and against independent Chudnovsky plus Gauss–Legendre calculations through 10,000 fractional digits at ten checkpoints.
+
+### Final host timing medians
+
+Measured on the same Windows x86-64 / Ryzen AI 9 365 / Rust 1.98.1 host using the extended `scripts/measure_host_timing.py` harness:
+
+| Operation | Iterations per run | Median ns/op | Approximate wall time |
+| --- | ---: | ---: | ---: |
+| native `PI_F64.to_bits()` | 20,000,000 | 0.229 | sub-ns optimized constant path |
+| `Pi<40>::round_nearest_even()` | 5,000,000 | 0.437 | sub-ns bounded path |
+| rounded `Pi<40>` → lossy `f64` | 5,000,000 | 0.218 | sub-ns conversion path |
+| runtime generation, 100 places | 100 | 11,524 | 11.524 µs |
+| runtime generation, 1,000 places | 10 | 114,670 | 0.115 ms |
+| runtime generation, 10,000 places | 3 | 4,517,300 | 4.517 ms |
+| runtime generation, 100,000 places | 1 | 182,949,800 | 182.950 ms |
+
+Compared with the pre-optimization acceptance measurements, runtime generation improved by roughly 2.7× at 100 places, 10× at 1,000 places, 200× at 10,000 places, and about 1,900× at 100,000 places.
+
+An isolated 100,000-place run produced 100,002 output bytes and the same FNV-1a digest (`6b16a6390067574d`) as the independently generated Dashu decimal result.
+
+### Comparative high-precision context
+
+The same acceptance campaign measured end-to-end decimal output at 100,000 places as approximately:
+
+| Method | 100,000-place time |
+| --- | ---: |
+| Dashu | 102.459 ms |
+| astro-float | 171.497 ms |
+| Perfectπ certified Chudnovsky | 182.950 ms |
+
+At 10,000 places Perfectπ measured 4.517 ms versus 6.583 ms for Dashu and 8.497 ms for astro-float on this host. These are host-specific measurements, not universal performance guarantees.
+
+### Runtime footprint tradeoff
+
+The optimized Windows runtime-generation linked probe measured 136,477 bytes across `.text`, `.rdata`, `.data`, and `.bss`, or +37,304 bytes over the 99,173-byte baseline. The prior Machin runtime probe added +34,896 bytes, so the speedup costs about 2.4 KiB of additional measured linked sections.
+
+At a 10,000-place workload, the optimized runtime probe peaked at about 4.53 MB working set and 1.25 MB private memory, improved from approximately 6.00 MB / 2.55 MB for the prior backend. The bounded tier remains effectively at process-baseline memory.
+
+The high-precision backend therefore trades a small linked-size increase for orders-of-magnitude better scaling and lower measured runtime memory while leaving the dependency-free native/bounded tiers unchanged.
