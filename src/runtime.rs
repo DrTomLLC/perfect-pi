@@ -199,13 +199,11 @@ fn certified_scaled_pi(decimal_places: usize) -> Result<BigInt, RuntimePiError> 
         let next_t = &split.t * &next_leaf.q + &split.p * &next_leaf.t;
 
         let comparison = (&split.t * &next_q).cmp(&(&next_t * &split.q));
-        let ((series_lower_t, series_lower_q), (series_upper_t, series_upper_q)) =
-            match comparison {
-                Ordering::Less | Ordering::Equal => {
-                    ((&split.t, &split.q), (&next_t, &next_q))
-                }
-                Ordering::Greater => ((&next_t, &next_q), (&split.t, &split.q)),
-            };
+        let ((series_lower_t, series_lower_q), (series_upper_t, series_upper_q)) = match comparison
+        {
+            Ordering::Less | Ordering::Equal => ((&split.t, &split.q), (&next_t, &next_q)),
+            Ordering::Greater => ((&next_t, &next_q), (&split.t, &split.q)),
+        };
 
         if series_lower_t <= &BigInt::default() || series_upper_t <= &BigInt::default() {
             return Err(RuntimePiError::InternalInvariant);
@@ -272,13 +270,8 @@ fn chudnovsky_leaf(index: usize) -> BinarySplit {
 
     let index_big = BigInt::from(index);
     let six_index = &index_big * 6_u8;
-    let p = (&six_index - 5_u8)
-        * (&index_big * 2_u8 - 1_u8)
-        * (&six_index - 1_u8);
-    let q = &index_big
-        * &index_big
-        * &index_big
-        * BigInt::from(CHUDNOVSKY_C3_OVER_24);
+    let p = (&six_index - 5_u8) * (&index_big * 2_u8 - 1_u8) * (&six_index - 1_u8);
+    let q = &index_big * &index_big * &index_big * BigInt::from(CHUDNOVSKY_C3_OVER_24);
     let linear = BigInt::from(CHUDNOVSKY_A) + &index_big * CHUDNOVSKY_B;
     let mut t = &p * linear;
 
@@ -344,10 +337,7 @@ fn certified_scaled_pi_machin(decimal_places: usize) -> Result<BigInt, RuntimePi
 }
 
 #[cfg(test)]
-fn machin_pi_bounds(
-    scale: &BigInt,
-    max_terms: usize,
-) -> Result<(BigInt, BigInt), RuntimePiError> {
+fn machin_pi_bounds(scale: &BigInt, max_terms: usize) -> Result<(BigInt, BigInt), RuntimePiError> {
     let (atan5_lower, atan5_upper) = arctan_reciprocal_bounds(scale, 5, max_terms)?;
     let (atan239_lower, atan239_upper) = arctan_reciprocal_bounds(scale, 239, max_terms)?;
 
