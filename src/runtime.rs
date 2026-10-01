@@ -1,11 +1,19 @@
 //! Optional runtime generation of π beyond the bounded constant tier.
 
+use core::cmp::Ordering;
 use core::fmt;
 use num_bigint::BigInt;
 
 use crate::RoundingMode;
 
 const MAX_GUARD_PLACES: u32 = 64;
+const CHUDNOVSKY_A: u64 = 13_591_409;
+const CHUDNOVSKY_B: u64 = 545_140_134;
+const CHUDNOVSKY_C3_OVER_24: u64 = 10_939_058_860_032_000;
+const CHUDNOVSKY_C_MULTIPLIER: u32 = 426_880;
+const CHUDNOVSKY_SQRT_RADICAND: u32 = 10_005;
+const CHUDNOVSKY_TERM_DIGITS: usize = 14;
+const CHUDNOVSKY_TERM_MARGIN: usize = 8;
 
 /// Error returned by runtime π generation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -155,7 +163,159 @@ fn scaled_pi_for_rounding(
     }
 }
 
+/// Returns floor(π * 10^decimal_places) after proving that the exact value lies
+/// inside one integer bucket.
+///
+/// Production generation uses the Chudnovsky series with binary splitting.
+/// Consecutive partial sums of its alternating, monotonically decreasing series
+/// bracket the exact reciprocal-π series. Integer square-root bounds bracket
+/// sqrt(10005). Combining those rational intervals produces lower and upper
+/// bounds for π itself; generation succeeds only when both bounds have the same
+/// requested-scale floor.
 fn certified_scaled_pi(decimal_places: usize) -> Result<BigInt, RuntimePiError> {
+    let mut guard_places = 16_u32;
+
+    loop {
+        let guard_usize =
+            usize::try_from(guard_places).map_err(|_| RuntimePiError::PrecisionTooLarge)?;
+        let working_places = decimal_places
+            .checked_add(guard_usize)
+            .ok_or(RuntimePiError::PrecisionTooLarge)?;
+        let exponent =
+            u32::try_from(working_places).map_err(|_| RuntimePiError::PrecisionTooLarge)?;
+
+        let terms = working_places
+            .checked_div(CHUDNOVSKY_TERM_DIGITS)
+            .and_then(|value| value.checked_add(CHUDNOVSKY_TERM_MARGIN))
+            .ok_or(RuntimePiError::PrecisionTooLarge)?;
+
+        let split = chudnovsky_binary_split(0, terms)?;
+        let next_term_end = terms
+            .checked_add(1)
+            .ok_or(RuntimePiError::PrecisionTooLarge)?;
+        let next_leaf = chudnovsky_binary_split(terms, next_term_end)?;
+
+        let next_q = &split.q * &next_leaf.q;
+        let next_t = &split.t * &next_leaf.q + &split.p * &next_leaf.t;
+
+        let comparison = (&split.t * &next_q).cmp(&(&next_t * &split.q));
+        let ((series_lower_t, series_lower_q), (series_upper_t, series_upper_q)) =
+            match comparison {
+                Ordering::Less | Ordering::Equal => {
+                    ((&split.t, &split.q), (&next_t, &next_q))
+                }
+                Ordering::Greater => ((&next_t, &next_q), (&split.t, &split.q)),
+            };
+
+        if series_lower_t <= &BigInt::default() || series_upper_t <= &BigInt::default() {
+            return Err(RuntimePiError::InternalInvariant);
+        }
+
+        let decimal_scale = BigInt::from(10_u8).pow(exponent);
+        let sqrt_floor = scaled_sqrt_10005_floor(&decimal_scale);
+        let c_lower = &sqrt_floor * CHUDNOVSKY_C_MULTIPLIER;
+        let c_upper = (&sqrt_floor + 1_u8) * CHUDNOVSKY_C_MULTIPLIER;
+        let guard_scale = BigInt::from(10_u8).pow(guard_places);
+
+        let lower_numerator = c_lower * series_upper_q;
+        let lower_denominator = &guard_scale * series_upper_t;
+        let upper_numerator = c_upper * series_lower_q;
+        let upper_denominator = &guard_scale * series_lower_t;
+
+        let lower_floor = lower_numerator / lower_denominator;
+        let upper_floor = upper_numerator / upper_denominator;
+
+        if lower_floor == upper_floor {
+            return Ok(lower_floor);
+        }
+
+        guard_places = next_guard_places(guard_places)?;
+    }
+}
+
+struct BinarySplit {
+    p: BigInt,
+    q: BigInt,
+    t: BigInt,
+}
+
+fn chudnovsky_binary_split(start: usize, end: usize) -> Result<BinarySplit, RuntimePiError> {
+    if start >= end {
+        return Err(RuntimePiError::InternalInvariant);
+    }
+
+    if end - start == 1 {
+        return Ok(chudnovsky_leaf(start));
+    }
+
+    let midpoint = start
+        .checked_add((end - start) / 2)
+        .ok_or(RuntimePiError::PrecisionTooLarge)?;
+    let left = chudnovsky_binary_split(start, midpoint)?;
+    let right = chudnovsky_binary_split(midpoint, end)?;
+
+    let p = &left.p * &right.p;
+    let q = &left.q * &right.q;
+    let t = &left.t * &right.q + &left.p * &right.t;
+
+    Ok(BinarySplit { p, q, t })
+}
+
+fn chudnovsky_leaf(index: usize) -> BinarySplit {
+    if index == 0 {
+        return BinarySplit {
+            p: BigInt::from(1_u8),
+            q: BigInt::from(1_u8),
+            t: BigInt::from(CHUDNOVSKY_A),
+        };
+    }
+
+    let index_big = BigInt::from(index);
+    let six_index = &index_big * 6_u8;
+    let p = (&six_index - 5_u8)
+        * (&index_big * 2_u8 - 1_u8)
+        * (&six_index - 1_u8);
+    let q = &index_big
+        * &index_big
+        * &index_big
+        * BigInt::from(CHUDNOVSKY_C3_OVER_24);
+    let linear = BigInt::from(CHUDNOVSKY_A) + &index_big * CHUDNOVSKY_B;
+    let mut t = &p * linear;
+
+    if !index.is_multiple_of(2) {
+        t = -t;
+    }
+
+    BinarySplit { p, q, t }
+}
+
+fn scaled_sqrt_10005_floor(scale: &BigInt) -> BigInt {
+    let radicand = BigInt::from(CHUDNOVSKY_SQRT_RADICAND) * scale * scale;
+    let mut estimate = scale * 101_u8;
+
+    loop {
+        let quotient = &radicand / &estimate;
+        let next = (&estimate + quotient) / 2_u8;
+        if next >= estimate {
+            return estimate;
+        }
+        estimate = next;
+    }
+}
+
+fn next_guard_places(current: u32) -> Result<u32, RuntimePiError> {
+    let next = current
+        .checked_add(8)
+        .ok_or(RuntimePiError::PrecisionTooLarge)?;
+    if next > MAX_GUARD_PLACES {
+        Err(RuntimePiError::InternalInvariant)
+    } else {
+        Ok(next)
+    }
+}
+
+#[cfg(test)]
+fn certified_scaled_pi_machin(decimal_places: usize) -> Result<BigInt, RuntimePiError> {
     let mut guard_places = 8_u32;
     loop {
         let guard_usize =
@@ -183,18 +343,11 @@ fn certified_scaled_pi(decimal_places: usize) -> Result<BigInt, RuntimePiError> 
     }
 }
 
-fn next_guard_places(current: u32) -> Result<u32, RuntimePiError> {
-    let next = current
-        .checked_add(8)
-        .ok_or(RuntimePiError::PrecisionTooLarge)?;
-    if next > MAX_GUARD_PLACES {
-        Err(RuntimePiError::InternalInvariant)
-    } else {
-        Ok(next)
-    }
-}
-
-fn machin_pi_bounds(scale: &BigInt, max_terms: usize) -> Result<(BigInt, BigInt), RuntimePiError> {
+#[cfg(test)]
+fn machin_pi_bounds(
+    scale: &BigInt,
+    max_terms: usize,
+) -> Result<(BigInt, BigInt), RuntimePiError> {
     let (atan5_lower, atan5_upper) = arctan_reciprocal_bounds(scale, 5, max_terms)?;
     let (atan239_lower, atan239_upper) = arctan_reciprocal_bounds(scale, 239, max_terms)?;
 
@@ -203,6 +356,7 @@ fn machin_pi_bounds(scale: &BigInt, max_terms: usize) -> Result<(BigInt, BigInt)
     Ok((lower, upper))
 }
 
+#[cfg(test)]
 fn arctan_reciprocal_bounds(
     scale: &BigInt,
     inverse: u32,
@@ -313,6 +467,28 @@ mod tests {
             next_guard_places(u32::MAX),
             Err(RuntimePiError::PrecisionTooLarge)
         );
+    }
+
+    #[test]
+    fn chudnovsky_matches_independent_machin_reference() {
+        for decimal_places in [0_usize, 1, 2, 6, 15, 28, 40, 100, 1_000] {
+            assert_eq!(
+                certified_scaled_pi(decimal_places),
+                certified_scaled_pi_machin(decimal_places),
+                "mismatch at {decimal_places} decimal places"
+            );
+        }
+    }
+
+    #[test]
+    fn scaled_integer_sqrt_is_a_floor_bound() {
+        let scale = BigInt::from(10_u8).pow(80_u32);
+        let radicand = BigInt::from(CHUDNOVSKY_SQRT_RADICAND) * &scale * &scale;
+        let root = scaled_sqrt_10005_floor(&scale);
+        let next = &root + 1_u8;
+
+        assert!(&root * &root <= radicand);
+        assert!(&next * &next > radicand);
     }
 
     #[test]
