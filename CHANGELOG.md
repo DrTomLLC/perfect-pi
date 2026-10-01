@@ -8,7 +8,7 @@ All notable released changes to Perfectπ will be documented here.
 - Universal 1.0 support contract, qualification guide, and executable requirement traceability added.
 - Shared six-mode `RoundingMode` added for bounded and runtime π: toward zero, away from zero, toward negative infinity, toward positive infinity, nearest ties-to-even, and nearest ties-away-from-zero.
 - Runtime generation now offers explicit caller precision ceilings while retaining caller-owned output storage and the no-direct-allocation source policy.
-- Runtime independent verification expanded so all six rounding modes are checked against both Chudnovsky and Gauss–Legendre through 1,000 fractional digits at nine checkpoints.
+- Runtime independent verification expanded so all six rounding modes are checked against both Chudnovsky and Gauss–Legendre through 10,000 fractional digits at ten checkpoints.
 - Runtime ASan fuzzing expanded across rounding policies, precision limits, buffer capacities, and deterministic regeneration.
 - Aggregate `full` feature added to enable all current production capability tiers while preserving an empty default feature set.
 - Portable-core CI expanded across embedded ARM/RISC-V, 32/64-bit, little/big-endian, Linux/musl, Windows, Android, Apple, WebAssembly/WASI, BSD/illumos, s390x, PowerPC, and LoongArch representative targets.
@@ -50,8 +50,8 @@ All notable released changes to Perfectπ will be documented here.
 - Verification-tool currency is now enforced for cargo-audit, cargo-fuzz, cargo-mutants, cargo-llvm-cov, and libfuzzer-sys.
 - Required RustSec dependency auditing added; the current all-feature dependency set has no known advisories.
 - Optional `runtime-generation` and `arbitrary-precision` features added using exact-pinned `num-bigint 0.5.1` with default features disabled.
-- Runtime π generation implemented with Machin's identity and conservative arbitrary-precision integer bounds; requested truncation is emitted only after lower/upper bounds converge.
-- Runtime generation independently verified against both Chudnovsky and Gauss-Legendre through 1,000 fractional digits.
+- Runtime π generation uses certified Chudnovsky binary splitting with conservative arbitrary-precision integer bounds; requested truncation is emitted only after lower/upper bounds converge. The prior Machin implementation remains as an independent test reference.
+- Runtime generation independently verified against both Chudnovsky and Gauss-Legendre through 10,000 fractional digits.
 - Scientific/engineering, bounded-output, runtime-generation, host-benchmark, and linked-size examples added.
 - Startup integrity self-test evaluated and intentionally left application-owned rather than adding an automatic library startup hook.
 - Resource probes extended with writable `.data`/`.bss` and static instruction counts; all 18 constrained-target probes measure 0 bytes of `.data` and `.bss`.
