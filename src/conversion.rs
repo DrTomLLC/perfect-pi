@@ -17,10 +17,12 @@ pub const F64_GUARANTEED_DECIMAL_PLACES: usize = 15;
 // two finite decimal value classes that can exist at a fixed precision for
 // positive irrational π: floor/truncation and ceiling. Nearest rounding always
 // selects one of those two values. Runtime-parameter helpers retain direct
-// branch coverage while #[inline(always)] lets constant D call sites dead-strip
-// unrelated vectors on optimized constrained-target builds.
+// branch coverage. Normal builds force inlining so constant D call sites can
+// dead-strip unrelated vectors on optimized constrained targets; coverage builds
+// disable inlining to keep LLVM profile identities stable across test binaries.
 
-#[inline(always)]
+#[cfg_attr(coverage, inline(never))]
+#[cfg_attr(not(coverage), inline(always))]
 fn f32_truncated_bits(decimal_places: usize) -> Option<u32> {
     match decimal_places {
         0 => Some(0x4040_0000),
@@ -35,7 +37,8 @@ fn f32_truncated_bits(decimal_places: usize) -> Option<u32> {
     }
 }
 
-#[inline(always)]
+#[cfg_attr(coverage, inline(never))]
+#[cfg_attr(not(coverage), inline(always))]
 fn f32_ceiling_bits(decimal_places: usize) -> Option<u32> {
     match decimal_places {
         0 => Some(0x4080_0000),
@@ -49,7 +52,8 @@ fn f32_ceiling_bits(decimal_places: usize) -> Option<u32> {
     }
 }
 
-#[inline(always)]
+#[cfg_attr(coverage, inline(never))]
+#[cfg_attr(not(coverage), inline(always))]
 fn f64_truncated_bits(decimal_places: usize) -> Option<u64> {
     match decimal_places {
         0 => Some(0x4008_0000_0000_0000),
@@ -71,7 +75,8 @@ fn f64_truncated_bits(decimal_places: usize) -> Option<u64> {
     }
 }
 
-#[inline(always)]
+#[cfg_attr(coverage, inline(never))]
+#[cfg_attr(not(coverage), inline(always))]
 fn f64_ceiling_bits(decimal_places: usize) -> Option<u64> {
     match decimal_places {
         0 => Some(0x4010_0000_0000_0000),

@@ -31,6 +31,9 @@ rust_decimal = { version = "=1.43.0", default-features = false, optional = true 
 [dev-dependencies]
 num-bigint = { version = "=0.5.1", default-features = false }
 
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(coverage)'] }
+
 [package.metadata.perfect-pi]
 status = "pre-release"
 bounded_decimal_places = 40

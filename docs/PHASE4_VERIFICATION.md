@@ -72,6 +72,8 @@ Measured with current `cargo-llvm-cov` and all features enabled:
 
 Required CI floors are 92% lines, 91% regions, and 100% functions.
 
+Coverage builds deliberately disable forced inlining for the four private decimal-to-float lookup helpers under `cfg(coverage)` so LLVM assigns stable profile identities across separately linked test binaries. Normal production builds retain `#[inline(always)]`; Windows and Linux reproducibility probes confirm the coverage-only annotations do not change the committed production object bytes. No function is excluded from coverage and the CI floors are unchanged.
+
 The remaining uncovered lines are defensive paths that legal Perfectπ constructors cannot reach. They remain in production rather than being removed merely to inflate coverage.
 
 ## Reproducibility
