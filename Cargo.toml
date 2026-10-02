@@ -2,7 +2,7 @@
 name = "perfect-pi"
 version = "0.1.0-alpha.1"
 edition = "2024"
-rust-version = "1.98.1"
+rust-version = "1.99.0"
 description = "Perfectπ — universal, deterministic, resource-explicit Pi infrastructure for Rust."
 repository = "https://github.com/DrTomLLC/perfect-pi"
 readme = "README.md"
@@ -18,15 +18,18 @@ complex = ["dep:num-complex"]
 fixed-point = ["dep:fixed"]
 decimal = ["dep:rust_decimal"]
 interop = ["complex", "fixed-point", "decimal"]
-runtime-generation = ["dep:num-bigint"]
+runtime-generation = []
+parallel-runtime = ["runtime-generation"]
 arbitrary-precision = ["runtime-generation"]
 full = ["all-float-formats", "interop", "arbitrary-precision"]
 
 [dependencies]
 fixed = { version = "=1.31.0", default-features = false, optional = true }
 num-complex = { version = "=0.4.6", default-features = false, optional = true }
-num-bigint = { version = "=0.5.1", default-features = false, optional = true }
 rust_decimal = { version = "=1.43.0", default-features = false, optional = true }
+
+[dev-dependencies]
+num-bigint = { version = "=0.5.1", default-features = false }
 
 [package.metadata.perfect-pi]
 status = "pre-release"

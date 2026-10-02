@@ -2,3 +2,11 @@ all_features = true
 minimum_test_timeout = 10
 timeout_multiplier = 3.0
 build_timeout_multiplier = 3.0
+
+# In bit_reverse_permute, swapping when index < reversed or index > reversed
+# performs the same disjoint transpositions; <= only adds no-op self-swaps.
+# These two generated mutants are therefore mathematically equivalent.
+exclude_re = [
+    "src/runtime_arith\\.rs:.*replace < with > in bit_reverse_permute",
+    "src/runtime_arith\\.rs:.*replace < with <= in bit_reverse_permute",
+]

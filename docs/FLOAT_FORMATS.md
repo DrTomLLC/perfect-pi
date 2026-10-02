@@ -65,7 +65,7 @@ Each result is converted independently to IEEE binary16 and binary128 using exac
 
 The optional formats are also tested under:
 
-- current stable Rust 1.98.1;
+- current stable Rust 1.99.0;
 - current nightly Rust (currently 1.101.0-nightly), including direct comparison with native nightly `f16` / `f128` constants;
 - Linux;
 - Windows;

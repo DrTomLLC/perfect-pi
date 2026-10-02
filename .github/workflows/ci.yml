@@ -46,6 +46,7 @@ jobs:
           cargo check --lib --no-default-features --features decimal
           cargo check --lib --no-default-features --features interop
           cargo check --lib --no-default-features --features runtime-generation
+          cargo check --lib --no-default-features --features parallel-runtime
           cargo check --lib --no-default-features --features arbitrary-precision
           cargo check --lib --no-default-features --features full
       - name: Compile-fail documentation tests
@@ -56,6 +57,8 @@ jobs:
         run: cargo doc --no-deps --all-features
       - name: Independent canonical-digit verification
         run: python3 scripts/verify_reference.py
+      - name: Verify generated runtime prefix
+        run: python3 scripts/generate_runtime_prefix.py
       - name: Independent conversion verification
         run: python3 scripts/verify_conversions.py
       - name: Independent optional float-format verification

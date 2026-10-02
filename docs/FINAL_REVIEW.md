@@ -59,3 +59,25 @@ No crates.io publication or GitHub release is performed by repository completion
 ## Review conclusion
 
 No unresolved repository-scoped correctness, portability, verification, licensing-framework, or documentation blocker was identified after the corrections above. Merge readiness is conditional only on the final GitHub CI run passing on the exact corrected PR head.
+
+## 2026-10-02 specialized-runtime assurance addendum
+
+This addendum covers the later specialized dependency-free runtime and performance work on branch `perf/specialized-pi-arithmetic-local`, based on commit `d95e1f7864bd12bf58f38951680126aedbf63412`. The final remote commit SHA is intentionally not claimed here because this candidate has not been committed or pushed yet.
+
+The final local candidate has no known repository-scoped implementation blocker. Evidence on the exact corrected working tree includes:
+
+- Rust 1.99.0 stable formatting, all-target/all-feature check, Clippy with warnings denied, full tests, doc tests, and rustdoc with warnings denied;
+- current nightly full tests and the complete declared feature matrix;
+- representative all-feature cross-target checks for Cortex-M0, Cortex-M hardware-float, bare-metal RISC-V, WebAssembly, and AArch64 Linux;
+- independent runtime-prefix regeneration plus all six public runtime rounding modes verified through 10,001 fractional digits at eleven checkpoints, including the 10,000/10,001 fast-path handoff;
+- full-repository mutation testing with 586 generated mutants after two documented mathematically equivalent bit-reversal exclusions: 519 caught, 67 compiler-unviable, 0 missed, and 0 timed out;
+- all-feature source coverage of 96.33% lines, 92.43% regions, and 100.00% functions;
+- Linux/WSL AddressSanitizer fuzzing totaling 60,000 executions: 25,000 bounded API, 25,000 interoperability, and 10,000 runtime-generation runs, with no crash or sanitizer finding;
+- RustSec audit of the 21-crate resolved lockfile with no vulnerability failure;
+- package construction and verification of 113 files;
+- byte-for-byte reproducibility of all 30 representative probe objects across repeated Windows and Linux builds using rustc 1.99.0 commit `b940084d7eb6a299eb4bfeb8e34901bc051e7ac4`;
+- corrected-tree performance medians on the retained Windows host of 116.948 ms serial / 77.504 ms parallel at 100,000 fractional places and 1.798 s serial / 1.131 s parallel at 1,000,000 places, with retained full-output digests unchanged.
+
+The two mutation exclusions are behaviorally equivalent for valid power-of-two NTT lengths: using `index > reversed` performs the same disjoint bit-reversal transpositions from the opposite endpoint, while `index <= reversed` only adds self-swaps. An independent exhaustive check confirmed identical permutations for power-of-two lengths through 4096.
+
+The remaining gate is external rather than a local implementation task: the eventual exact pushed commit must pass the repository's required GitHub Actions matrix, including macOS host reproducibility. No commit, push, merge, package publication, or release is performed by this local assurance pass.
