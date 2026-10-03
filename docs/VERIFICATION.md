@@ -25,11 +25,11 @@ The initial core currently has:
 - RustSec advisory auditing of the resolved optional dependency graph;
 - exhaustive bounded-state caller-buffer verification across 3,690 legal precision/mode/capacity states;
 - sanitizer-backed libFuzzer targets for the bounded core, optional interoperability surfaces, and runtime arbitrary-precision generation;
-- independent checks of all six runtime rounding policies against both Chudnovsky and Gauss-Legendre through 10,001 fractional digits at eleven precision checkpoints, explicitly covering the 10,000/10,001 fast-path handoff, plus production Chudnovsky cross-checks against the retained Machin reference through 1,000 places;
-- runtime precision-limit tests proving rejection occurs before output mutation, with the same surfaces exercised by sanitizer-backed fuzzing;
+- independent checks of all six runtime rounding policies against both Chudnovsky and Gauss-Legendre through 36,808 fractional digits at fourteen precision checkpoints, explicitly covering the 10,000/10,001 fast-path handoff and reciprocal-division regression points at 36,000, 36,700, and 36,808 places, plus production Chudnovsky cross-checks against the retained Machin reference through 1,000 places;
+- runtime precision-limit tests proving rejection occurs before output mutation, with sanitizer-backed fuzzing using a reachable limit selector and structured deep-precision cases that cross into the specialized arithmetic engine;
 - a 29-target dependency-free core portability matrix spanning embedded, word-size, endian, OS, mobile, WebAssembly, and architecture classes;
-- mutation testing with zero surviving viable mutants required by CI; the current corrected-tree local pass generated 586 mutants after two documented mathematically equivalent exclusions, with 519 caught, 67 compiler-unviable, 0 missed, and 0 timed out;
-- measured corrected-tree all-feature source coverage of 96.33% lines, 92.43% regions, and 100% functions, with enforced CI floors of 92% / 91% / 100%;
+- mutation testing with zero surviving viable mutants required by CI; the current corrected-tree local pass generated 580 mutants after two documented mathematically equivalent exclusions, with 510 caught, 70 compiler-unviable, 0 missed, and 0 timed out;
+- measured corrected-tree all-feature source coverage of 96.06% lines, 92.31% regions, and 100% functions, with enforced CI floors of 92% / 91% / 100%;
 - byte-for-byte reproducibility of 30 representative probe objects across repeated Windows and Linux builds using Rust 1.99.0 commit `b940084d7eb6a299eb4bfeb8e34901bc051e7ac4`; required host CI also checks the same golden manifest on macOS.
 
 Detailed methodology and retained evidence are documented in [Phase 4 Verification Hardening](PHASE4_VERIFICATION.md).

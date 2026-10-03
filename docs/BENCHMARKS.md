@@ -24,7 +24,7 @@ This report records host measurements for Perfectπ. It is evidence for the meas
 | runtime generation, 100 fractional places | 100 | 25 | verified-prefix fast path |
 | runtime generation, 1,000 fractional places | 10 | 30 | verified-prefix fast path |
 | runtime generation, 10,000 fractional places | 5 | 340 | verified-prefix fast path; caller buffer already allocated |
-| runtime generation, 100,000 fractional places | 1 | 116,947,600 | corrected-tree serial specialized-arithmetic path |
+| runtime generation, 100,000 fractional places | 1 | 116,947,600 | retained pre-Astra-repair serial specialized-arithmetic measurement |
 
 The sub-nanosecond core figures must not be generalized to other CPUs or used as hardware latency claims. They mainly demonstrate that the optimized native/bounded paths are tiny relative to host timer-scale work. Runtime generation has deliberately variable cost and should be benchmarked at the precision actually used by an application.
 
@@ -34,20 +34,20 @@ The first Chudnovsky production fix removed the catastrophic Machin-series scali
 
 The public runtime API, six rounding modes, caller precision limit, and caller-owned output contract are unchanged. The optional `parallel-runtime` feature adds dependency-free scoped host parallelism for deeper arithmetic work. The verified-prefix path does not create worker threads.
 
-### Corrected-tree timing and retained comparison context
+### Retained pre-Astra-repair timing and comparison context
 
-After mutation hardening, the corrected-tree Perfectπ runtime was remeasured on the same Windows host with Rust 1.99.0. The 100k values below are medians of five runs from fixed prebuilt executables; the 1M values are medians of three runs and hash the complete generated output after the timed generation interval. The Dashu and astro-float rows are retained from the earlier same-host comparison campaign and are shown only as historical context; they were not rerun under the exact final load, so this table is not presented as a fresh same-load ranking. The 10k Perfectπ direct probe includes complete-output hashing, while the current built-in preallocated generation-only harness measured 340 ns median.
+These Perfectπ measurements were taken after the mutation-hardening pass but **before** the later Astra-discovered reciprocal-division repair. They remain useful historical evidence for the hot-path architecture, but they are not final-tree benchmark claims. The 100k values are medians of five runs from fixed prebuilt executables; the 1M values are medians of three runs and hash the complete generated output after the timed generation interval. Dashu and astro-float are retained from the earlier same-host comparison campaign and were not rerun under the exact repaired load. A fresh apples-to-apples benchmark is intentionally deferred until the repaired exact SHA passes the follow-up Astra audit.
 
 | Method | 10,000 places | 100,000 places | 1,000,000 places |
 | --- | ---: | ---: | ---: |
-| Perfectπ serial, corrected tree | **~0.0084 ms*** | **116.948 ms** | **1.798 s** |
-| Perfectπ `parallel-runtime`, corrected tree | **~0.0084 ms*** | **77.504 ms** | **1.131 s** |
+| Perfectπ serial, retained pre-Astra repair | **~0.0084 ms*** | **116.948 ms** | **1.798 s** |
+| Perfectπ `parallel-runtime`, retained pre-Astra repair | **~0.0084 ms*** | **77.504 ms** | **1.131 s** |
 | Dashu, retained prior campaign | 5.343 ms | 142.952 ms | 5.009 s |
 | astro-float, retained prior campaign | 9.715 ms | 169.445 ms | 5.833 s |
 
 *The 10k direct Perfectπ probe includes hashing all 10,002 output bytes after generation; the current generation-only harness measured 340 ns median with a preallocated caller buffer.
 
-The corrected tree re-confirmed the retained complete-output FNV-1a digests: `6b16a6390067574d` for 100,000 fractional places and `68d9256552385bfe` for 1,000,000 fractional places. The prior Dashu comparison matched those deep-output digests. The retained 10k fast-path output digest is `fcc2d20a5dac172b`.
+The pre-Astra-repair tree re-confirmed the retained complete-output FNV-1a digests: `6b16a6390067574d` for 100,000 fractional places and `68d9256552385bfe` for 1,000,000 fractional places. The prior Dashu comparison matched those deep-output digests. The retained 10k fast-path output digest is `fcc2d20a5dac172b`.
 
 The current parallel crossover is 512 Chudnovsky terms. Because requests through 10,000 places use the non-threaded prefix fast path, supported hosts do not create worker threads for the common small/mid precision tier; deeper arithmetic requests are eligible for the measured parallel path.
 
@@ -102,7 +102,7 @@ The optimized runtime backend is not accepted on timing evidence alone:
 - all-feature tests and Clippy with warnings denied must pass;
 - production Chudnovsky output is cross-checked against the retained Machin implementation through representative points up to 1,000 fractional places;
 - `scripts/generate_runtime_prefix.py` regenerates and byte-checks the retained prefix using independent Chudnovsky and Gauss-Legendre calculations;
-- `scripts/verify_runtime_generation.py` checks all six public rounding modes through 10,001 fractional places at eleven checkpoints, including both sides of the 10,000/10,001 fast-path handoff;
+- `scripts/verify_runtime_generation.py` checks all six public rounding modes through 36,808 fractional places at fourteen checkpoints, including both sides of the 10,000/10,001 fast-path handoff and the three deep reciprocal-division regression points;
 - CI fuzz, mutation, coverage, portability, reproducibility, and security jobs remain required on the exact pull-request head.
 
 ## Limits

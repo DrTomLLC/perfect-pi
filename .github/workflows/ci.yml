@@ -123,7 +123,17 @@ jobs:
       - name: Fuzz interoperability with AddressSanitizer
         run: cargo +nightly fuzz run interop --sanitizer address -- -runs=25000 -max_len=8
       - name: Fuzz runtime generation with AddressSanitizer
-        run: cargo +nightly fuzz run runtime_generation --sanitizer address -- -runs=10000 -max_len=4
+        run: |
+          rm -rf /tmp/perfect-pi-runtime-corpus
+          mkdir -p /tmp/perfect-pi-runtime-corpus
+          cp fuzz/seeds/runtime_generation/* /tmp/perfect-pi-runtime-corpus/
+          cargo +nightly fuzz run runtime_generation /tmp/perfect-pi-runtime-corpus --sanitizer address -- -runs=10000 -max_len=5
+      - name: Fuzz deep runtime arithmetic with AddressSanitizer
+        run: |
+          rm -rf /tmp/perfect-pi-arithmetic-corpus
+          mkdir -p /tmp/perfect-pi-arithmetic-corpus
+          cp fuzz/seeds/runtime_arithmetic/* /tmp/perfect-pi-arithmetic-corpus/
+          cargo +nightly fuzz run runtime_arithmetic /tmp/perfect-pi-arithmetic-corpus --sanitizer address -- -runs=64 -max_len=3
 
   mutation:
     name: Mutation testing

@@ -776,19 +776,69 @@ fn quotient_floor(numerator: &Nat, denominator: &Nat) -> Result<Nat, RuntimePiEr
     let quotient_shift = target_precision
         .checked_mul(2)
         .ok_or(RuntimePiError::PrecisionTooLarge)?;
-    let mut candidate = product
+    let candidate = product
         .div_pow10_floor(quotient_shift)
         .ok_or(RuntimePiError::InternalInvariant)?;
-    let mut adjustments = 0_u8;
+    if let Some(certified) = certify_quotient_candidate(candidate, numerator, denominator)? {
+        return Ok(certified);
+    }
 
-    loop {
+    retry_quotient_candidate(
+        &reciprocal,
+        &normalized_numerator,
+        numerator,
+        denominator,
+        denominator_digits,
+        target_precision,
+        quotient_shift,
+    )
+}
+
+#[cold]
+#[inline(never)]
+fn retry_quotient_candidate(
+    reciprocal: &Nat,
+    normalized_numerator: &Nat,
+    numerator: &Nat,
+    denominator: &Nat,
+    denominator_digits: usize,
+    target_precision: usize,
+    quotient_shift: usize,
+) -> Result<Nat, RuntimePiError> {
+    let normalized = normalized_denominator(denominator, denominator_digits, target_precision)?;
+    let scaled_product = normalized
+        .mul(reciprocal)
+        .div_pow10_floor(target_precision)
+        .ok_or(RuntimePiError::InternalInvariant)?;
+    let twice_scale = Nat::pow10(target_precision).mul_small(2);
+    let correction = twice_scale
+        .checked_sub(&scaled_product)
+        .ok_or(RuntimePiError::InternalInvariant)?;
+    let reciprocal = reciprocal
+        .mul(&correction)
+        .div_pow10_floor(target_precision)
+        .ok_or(RuntimePiError::InternalInvariant)?;
+
+    let product = normalized_numerator.mul(&reciprocal);
+    let candidate = product
+        .div_pow10_floor(quotient_shift)
+        .ok_or(RuntimePiError::InternalInvariant)?;
+    certify_quotient_candidate(candidate, numerator, denominator)?
+        .ok_or(RuntimePiError::InternalInvariant)
+}
+
+fn certify_quotient_candidate(
+    mut candidate: Nat,
+    numerator: &Nat,
+    denominator: &Nat,
+) -> Result<Option<Nat>, RuntimePiError> {
+    for _ in 0..MAX_CERTIFICATION_ADJUSTMENTS {
         let candidate_product = candidate.mul(denominator);
         match candidate_product.cmp(numerator) {
             Ordering::Greater => {
                 candidate = candidate
                     .checked_sub_small(1)
                     .ok_or(RuntimePiError::InternalInvariant)?;
-                adjustments = next_adjustment(adjustments)?;
                 continue;
             }
             Ordering::Equal | Ordering::Less => {}
@@ -796,12 +846,23 @@ fn quotient_floor(numerator: &Nat, denominator: &Nat) -> Result<Nat, RuntimePiEr
 
         let next_product = candidate_product.add(denominator);
         match next_product.cmp(numerator) {
-            Ordering::Less | Ordering::Equal => {
-                candidate = candidate.add_small(1);
-                adjustments = next_adjustment(adjustments)?;
-            }
-            Ordering::Greater => return Ok(candidate),
+            Ordering::Less | Ordering::Equal => candidate = candidate.add_small(1),
+            Ordering::Greater => return Ok(Some(candidate)),
         }
+    }
+
+    let candidate_product = candidate.mul(denominator);
+    if matches!(candidate_product.cmp(numerator), Ordering::Greater) {
+        return Ok(None);
+    }
+    let next_product = candidate_product.add(denominator);
+    if matches!(
+        next_product.cmp(numerator),
+        Ordering::Less | Ordering::Equal
+    ) {
+        Ok(None)
+    } else {
+        Ok(Some(candidate))
     }
 }
 
@@ -859,17 +920,6 @@ fn certification_adjustment_limit_reached(adjustments: u8) -> bool {
 
 fn reciprocal_sqrt_refinement_limit_reached(refinements: u8) -> bool {
     refinements >= MAX_RECIPROCAL_SQRT_REFINEMENTS
-}
-
-fn next_adjustment(current: u8) -> Result<u8, RuntimePiError> {
-    let next = current
-        .checked_add(1)
-        .ok_or(RuntimePiError::InternalInvariant)?;
-    if next > MAX_CERTIFICATION_ADJUSTMENTS {
-        Err(RuntimePiError::InternalInvariant)
-    } else {
-        Ok(next)
-    }
 }
 
 fn next_guard_places(current: u32) -> Result<u32, RuntimePiError> {
@@ -1120,11 +1170,6 @@ mod tests {
         assert!(reciprocal_sqrt_refinement_limit_reached(
             MAX_RECIPROCAL_SQRT_REFINEMENTS
         ));
-        assert_eq!(
-            next_adjustment(MAX_CERTIFICATION_ADJUSTMENTS - 1),
-            Ok(MAX_CERTIFICATION_ADJUSTMENTS)
-        );
-
         let (dispatch, lower, upper) = split_and_constant_bounds(8, 64)?;
         let (sequential, sequential_lower, sequential_upper) =
             split_and_constant_bounds_sequential(8, 64)?;
@@ -1315,6 +1360,44 @@ mod tests {
     }
 
     #[test]
+    fn reciprocal_division_retry_recovers_out_of_window_candidate() -> Result<(), RuntimePiError> {
+        let numerator = Nat::from_u64(1_000);
+        let denominator = Nat::from_u64(3);
+        let denominator_digits = denominator.decimal_digits();
+        let target_precision = 4_usize;
+        let quotient_shift = target_precision
+            .checked_mul(2)
+            .ok_or(RuntimePiError::PrecisionTooLarge)?;
+        let normalized_numerator =
+            normalized_numerator(&numerator, denominator_digits, target_precision)?;
+        let reciprocal = Nat::from_u64(32_000);
+
+        let initial_product = normalized_numerator.mul(&reciprocal);
+        let initial_candidate = initial_product
+            .div_pow10_floor(quotient_shift)
+            .ok_or(RuntimePiError::InternalInvariant)?;
+        assert_eq!(initial_candidate, Nat::from_u64(320));
+        assert_eq!(
+            certify_quotient_candidate(initial_candidate, &numerator, &denominator)?,
+            None
+        );
+
+        assert_eq!(
+            retry_quotient_candidate(
+                &reciprocal,
+                &normalized_numerator,
+                &numerator,
+                &denominator,
+                denominator_digits,
+                target_precision,
+                quotient_shift,
+            )?,
+            Nat::from_u64(333)
+        );
+        Ok(())
+    }
+
+    #[test]
     fn arctan_bounds_cover_both_tail_directions() {
         assert_eq!(
             arctan_reciprocal_bounds(&BigInt::from(1_u8), 5, 16),
@@ -1488,16 +1571,6 @@ mod tests {
         assert_eq!(
             normalized_numerator(&Nat::from_u64(12), 2, 5)?,
             Nat::from_u64(12_000)
-        );
-
-        assert_eq!(next_adjustment(0), Ok(1));
-        assert_eq!(
-            next_adjustment(MAX_CERTIFICATION_ADJUSTMENTS),
-            Err(RuntimePiError::InternalInvariant)
-        );
-        assert_eq!(
-            next_adjustment(u8::MAX),
-            Err(RuntimePiError::InternalInvariant)
         );
 
         assert!(matches!(

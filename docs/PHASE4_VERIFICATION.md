@@ -43,18 +43,22 @@ A current corrected-tree WSL2/Linux AddressSanitizer campaign completed **25,000
 
 ### `runtime_generation`
 
-Exercises opt-in arbitrary-precision generation across requested precisions 0..=512, caller-buffer failure/success boundaries, output immutability on failure, ASCII structure, untouched tail bytes, and deterministic repeated generation. A current corrected-tree WSL2/Linux AddressSanitizer campaign completed **10,000 executions with no crash, assertion failure, or AddressSanitizer finding**, reaching 80 coverage counters / 108 features. Corpus size is intentionally not treated as a stable metric.
+Exercises opt-in runtime generation across requested precisions 0..=512, caller-buffer failure/success boundaries, the reachable caller-limit rejection selector, output immutability on failure, ASCII structure, untouched tail bytes, and deterministic repeated generation. A current corrected-tree WSL2/Linux AddressSanitizer campaign completed **10,000 executions with no crash, assertion failure, or AddressSanitizer finding**, reaching 83 coverage counters / 112 features. Corpus size is intentionally not treated as a stable metric.
+
+### `runtime_arithmetic`
+
+Exercises the specialized >10,000-place arithmetic engine directly with a seeded corpus spanning 10,001, 36,000, 36,700, and 36,808 places across all six rounding modes, plus short-buffer and caller-limit rejection cases. The current corrected-tree WSL2/Linux AddressSanitizer campaign completed **64 seeded executions with no crash, assertion failure, or AddressSanitizer finding**, reaching 632 coverage counters / 949 features.
 
 Windows remains in ordinary host testing and reproducibility. Local Windows libFuzzer execution was not counted because the MSVC environment lacked the dynamic AddressSanitizer runtime. Sanitizer-backed fuzzing therefore runs on Linux/WSL and Linux CI.
 
-CI runs **25,000 executions each** for the bounded and interoperability targets and **10,000 executions** for runtime generation on current-nightly Linux under AddressSanitizer.
+CI runs **25,000 executions each** for the bounded and interoperability targets, **10,000 executions** for general runtime generation, and a **64-execution seeded deep-arithmetic lane** on current-nightly Linux under AddressSanitizer, for a 60,064-execution corrected-tree campaign.
 
 ## Mutation testing
 
-The current corrected-tree WSL2/Linux `cargo-mutants 27.1.0` pass generated **586 mutants** across production code after two explicitly documented mathematically equivalent `bit_reverse_permute` mutations were excluded in `.cargo/mutants.toml`.
+The current corrected-tree WSL2/Linux `cargo-mutants 27.1.0` pass generated **580 mutants** across production code after two explicitly documented mathematically equivalent `bit_reverse_permute` mutations were excluded in `.cargo/mutants.toml`.
 
-- **519 caught by the test suite**;
-- **67 unviable** because the mutation could not compile/check;
+- **510 caught by the test suite**;
+- **70 unviable** because the mutation could not compile/check;
 - **0 missed**;
 - **0 timed out**.
 
@@ -66,8 +70,8 @@ Measured with current `cargo-llvm-cov` and all features enabled:
 
 | Metric | Measured |
 | --- | ---: |
-| Lines | **96.33%** |
-| Regions | **92.43%** |
+| Lines | **96.06%** |
+| Regions | **92.31%** |
 | Functions | **100.00%** |
 
 Required CI floors are 92% lines, 91% regions, and 100% functions.
@@ -113,7 +117,7 @@ The repository now also retains reproducible software-side resource evidence:
 - current-nightly `-Z emit-stack-sizes` probes report representative function-frame sizes on Cortex-M0, Cortex-M hardware-float, and bare-metal RISC-V;
 - stripped fat-LTO Windows x86-64 linked probes report native and bounded forced-use section deltas;
 - a dependency-free release benchmark harness records host timing medians for native, bounded, conversion, and runtime-generation paths;
-- the optional runtime generator is independently checked against both Chudnovsky and Gauss-Legendre through 10,001 fractional digits at eleven checkpoints, including the 10,000/10,001 fast-path handoff.
+- the optional runtime generator is independently checked against both Chudnovsky and Gauss-Legendre through 36,808 fractional digits at fourteen checkpoints, including the 10,000/10,001 fast-path handoff and the reciprocal-division regression points at 36,000, 36,700, and 36,808 places.
 
 See [Initial Resource Measurements](MEASUREMENTS.md) and [Benchmark Report](BENCHMARKS.md) for methods, exact results, reproduction commands, and limitations.
 

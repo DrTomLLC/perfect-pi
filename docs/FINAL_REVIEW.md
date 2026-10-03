@@ -62,21 +62,21 @@ No unresolved repository-scoped correctness, portability, verification, licensin
 
 ## 2026-10-02 specialized-runtime assurance addendum
 
-This addendum covers the later specialized dependency-free runtime and performance work on branch `perf/specialized-pi-arithmetic-local`, based on commit `d95e1f7864bd12bf58f38951680126aedbf63412`. The final remote commit SHA is intentionally not claimed here because this candidate has not been committed or pushed yet.
+This addendum covers the later specialized dependency-free runtime and performance work on branch `perf/specialized-pi-arithmetic-local`, whose pre-specialization base is commit `d95e1f7864bd12bf58f38951680126aedbf63412`. The authoritative corrected remote SHA is tracked by pull request #13 and Git history rather than hard-coded into this review document.
 
 The final local candidate has no known repository-scoped implementation blocker. Evidence on the exact corrected working tree includes:
 
 - Rust 1.99.0 stable formatting, all-target/all-feature check, Clippy with warnings denied, full tests, doc tests, and rustdoc with warnings denied;
 - current nightly full tests and the complete declared feature matrix;
 - representative all-feature cross-target checks for Cortex-M0, Cortex-M hardware-float, bare-metal RISC-V, WebAssembly, and AArch64 Linux;
-- independent runtime-prefix regeneration plus all six public runtime rounding modes verified through 10,001 fractional digits at eleven checkpoints, including the 10,000/10,001 fast-path handoff;
-- full-repository mutation testing with 586 generated mutants after two documented mathematically equivalent bit-reversal exclusions: 519 caught, 67 compiler-unviable, 0 missed, and 0 timed out;
-- all-feature source coverage of 96.33% lines, 92.43% regions, and 100.00% functions;
-- Linux/WSL AddressSanitizer fuzzing totaling 60,000 executions: 25,000 bounded API, 25,000 interoperability, and 10,000 runtime-generation runs, with no crash or sanitizer finding;
+- independent runtime-prefix regeneration plus all six public runtime rounding modes verified through 36,808 fractional digits at fourteen checkpoints, including the 10,000/10,001 fast-path handoff and reciprocal-division regression points at 36,000, 36,700, and 36,808 places;
+- full-repository mutation testing with 580 generated mutants after two documented mathematically equivalent bit-reversal exclusions: 510 caught, 70 compiler-unviable, 0 missed, and 0 timed out;
+- all-feature source coverage of 96.06% lines, 92.31% regions, and 100.00% functions;
+- Linux/WSL AddressSanitizer fuzzing totaling 60,064 executions: 25,000 bounded API, 25,000 interoperability, 10,000 general runtime-generation runs, and 64 seeded deep-arithmetic runs covering 10,001 / 36,000 / 36,700 / 36,808 places, with no crash or sanitizer finding;
 - RustSec audit of the 21-crate resolved lockfile with no vulnerability failure;
 - package construction and verification of 113 files;
 - byte-for-byte reproducibility of all 30 representative probe objects across repeated Windows and Linux builds using rustc 1.99.0 commit `b940084d7eb6a299eb4bfeb8e34901bc051e7ac4`;
-- corrected-tree performance medians on the retained Windows host of 116.948 ms serial / 77.504 ms parallel at 100,000 fractional places and 1.798 s serial / 1.131 s parallel at 1,000,000 places, with retained full-output digests unchanged.
+- retained pre-Astra-repair performance medians on the Windows host of 116.948 ms serial / 77.504 ms parallel at 100,000 fractional places and 1.798 s serial / 1.131 s parallel at 1,000,000 places, with retained full-output digests unchanged; the final competitor benchmark is intentionally deferred until the repaired exact SHA passes the follow-up Astra audit.
 
 The two mutation exclusions are behaviorally equivalent for valid power-of-two NTT lengths: using `index > reversed` performs the same disjoint bit-reversal transpositions from the opposite endpoint, while `index <= reversed` only adds self-swaps. An independent exhaustive check confirmed identical permutations for power-of-two lengths through 4096.
 
