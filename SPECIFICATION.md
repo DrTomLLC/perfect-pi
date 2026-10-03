@@ -238,8 +238,8 @@ Runtime generation shall remain opt-in and outside the bounded critical core.
 
 The `runtime-generation` feature shall:
 
-- use arbitrary-precision integer arithmetic without changing the default dependency graph;
-- keep its direct dependency optional, exact-version pinned, and configured with default features disabled;
+- use Perfectπ-owned arbitrary-precision integer arithmetic without changing the default dependency graph;
+- introduce no normal bigint crate dependency; independent bigint/reference tooling shall remain development-only;
 - expose caller-buffer ASCII generation with the shared RoundingMode semantics;
 - retain explicit truncation and nearest-even compatibility entry points;
 - provide a caller-selected maximum-precision gate that rejects before expensive generation or output mutation;
@@ -249,9 +249,9 @@ The `runtime-generation` feature shall:
 - use variable resource cost proportional to the requested precision;
 - compile on the supported current-stable `no_std` target matrix.
 
-The `arbitrary-precision` feature is the semantic alias for this precision-above-40 capability. The `full` feature enables all current production capability tiers: all IEEE interchange adapters, all interoperability adapters, and arbitrary precision. The default feature set remains empty.
+The `arbitrary-precision` feature is the semantic alias for this precision-above-40 capability. The `parallel-runtime` feature may add scoped host threading for sufficiently large runtime-generation workloads on supported targets without changing numerical semantics or adding a production crate dependency; unsupported threading targets shall retain the serial runtime path. The `full` feature enables all numerical capability tiers but intentionally does not enable `parallel-runtime`, because host threading and its resource policy remain an explicit caller choice. The default feature set remains empty.
 
-The implemented generator uses Machin's identity with conservative integer lower/upper bounds. Guard precision shall increase until both bounds prove the same requested truncation. Nearest-even generation shall certify at least one additional decimal digit before rounding. Because pi is irrational, an exact finite decimal halfway tie cannot occur.
+The implemented production generator uses certified Chudnovsky binary splitting over Perfectπ's internal specialized integer engine. Guard precision shall increase until lower/upper bounds prove the same requested truncation. Reciprocal-based square-root and quotient estimates shall be accepted only after exact integer certification, with bounded refinement where required. The former Machin implementation and an independent development bigint implementation shall remain verification oracles rather than production dependencies. Nearest-even generation shall certify at least one additional decimal digit before rounding. Because pi is irrational, an exact finite decimal halfway tie cannot occur.
 
 Runtime-generation results shall be independently checked against at least two separately implemented pi algorithms at precision materially above the bounded 40-place tier. All public runtime rounding modes shall be covered by independent reference checks or by a documented mathematical reduction to independently verified values.
 

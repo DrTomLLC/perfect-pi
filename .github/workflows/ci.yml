@@ -46,6 +46,7 @@ jobs:
           cargo check --lib --no-default-features --features decimal
           cargo check --lib --no-default-features --features interop
           cargo check --lib --no-default-features --features runtime-generation
+          cargo check --lib --no-default-features --features parallel-runtime
           cargo check --lib --no-default-features --features arbitrary-precision
           cargo check --lib --no-default-features --features full
       - name: Compile-fail documentation tests
@@ -56,6 +57,8 @@ jobs:
         run: cargo doc --no-deps --all-features
       - name: Independent canonical-digit verification
         run: python3 scripts/verify_reference.py
+      - name: Verify generated runtime prefix
+        run: python3 scripts/generate_runtime_prefix.py
       - name: Independent conversion verification
         run: python3 scripts/verify_conversions.py
       - name: Independent optional float-format verification
@@ -120,7 +123,17 @@ jobs:
       - name: Fuzz interoperability with AddressSanitizer
         run: cargo +nightly fuzz run interop --sanitizer address -- -runs=25000 -max_len=8
       - name: Fuzz runtime generation with AddressSanitizer
-        run: cargo +nightly fuzz run runtime_generation --sanitizer address -- -runs=10000 -max_len=4
+        run: |
+          rm -rf /tmp/perfect-pi-runtime-corpus
+          mkdir -p /tmp/perfect-pi-runtime-corpus
+          cp fuzz/seeds/runtime_generation/* /tmp/perfect-pi-runtime-corpus/
+          cargo +nightly fuzz run runtime_generation /tmp/perfect-pi-runtime-corpus --sanitizer address -- -runs=10000 -max_len=5
+      - name: Fuzz deep runtime arithmetic with AddressSanitizer
+        run: |
+          rm -rf /tmp/perfect-pi-arithmetic-corpus
+          mkdir -p /tmp/perfect-pi-arithmetic-corpus
+          cp fuzz/seeds/runtime_arithmetic/* /tmp/perfect-pi-arithmetic-corpus/
+          cargo +nightly fuzz run runtime_arithmetic /tmp/perfect-pi-arithmetic-corpus --sanitizer address -- -runs=64 -max_len=3
 
   mutation:
     name: Mutation testing
@@ -150,11 +163,12 @@ jobs:
       - name: Install current cargo-llvm-cov
         run: cargo install cargo-llvm-cov --version =0.9.1 --locked
       - name: Enforce production coverage floor
-        run: >-
-          cargo llvm-cov --all-features --all-targets --summary-only
-          --fail-under-lines 92
-          --fail-under-regions 91
-          --fail-under-functions 100
+        run: |
+          cargo llvm-cov clean --workspace
+          cargo llvm-cov --workspace --all-features --summary-only \
+            --fail-under-lines 92 \
+            --fail-under-regions 91 \
+            --fail-under-functions 100
 
   security:
     name: Security audit

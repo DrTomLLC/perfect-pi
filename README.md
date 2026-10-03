@@ -10,7 +10,7 @@
 
 ## Status
 
-**Universal 1.0 repository-scoped work is complete and merged: bounded core, explicit six-mode rounding, optional adapters, guarded arbitrary precision, broad portability CI, reproducibility evidence, and critical-system qualification guidance are all in `main`; minimum supported Rust tracks current stable Rust 1.98.1; no public crate release has been published yet.**
+**Universal 1.0 repository-scoped work is complete and merged: bounded core, explicit six-mode rounding, optional adapters, guarded arbitrary precision, broad portability CI, reproducibility evidence, and critical-system qualification guidance are all in `main`; minimum supported Rust tracks current stable Rust 1.99.0; no public crate release has been published yet.**
 
 The repository contains a working `no_std` bounded core, optional IEEE/interoperability adapters, and opt-in runtime/arbitrary-precision generation. The bounded core remains allocation-free and dependency-free by default. The project is still pre-release and must not be treated as safety-certified.
 
@@ -124,7 +124,7 @@ Checked conversion guarantees all requested decimal places through `D=6` for `f3
 
 ### Optional IEEE binary16 / binary128
 
-Current stable Rust 1.98.1 still treats native `f16` and `f128` as experimental, so Perfectπ does not make nightly Rust part of its production portability contract. Current nightly is nevertheless tested continuously, and its native `f16` / `f128` π-family bit patterns are required to match Perfectπ. Until those primitives reach stable, optional features expose exact IEEE interchange bits:
+Current stable Rust 1.99.0 still treats native `f16` and `f128` as experimental, so Perfectπ does not make nightly Rust part of its production portability contract. Current nightly is nevertheless tested continuously, and its native `f16` / `f128` π-family bit patterns are required to match Perfectπ. Until those primitives reach stable, optional features expose exact IEEE interchange bits:
 
 ```text
 cargo build --features binary16
@@ -170,10 +170,11 @@ Precision beyond the bounded `0..=40` tier is opt-in:
 cargo run --example runtime_generate --features runtime-generation -- 256
 cargo run --example runtime_generate --features runtime-generation -- 256 round
 cargo build --features arbitrary-precision
+cargo build --features parallel-runtime
 cargo build --features full
 ```
 
-`runtime-generation` uses current `num-bigint 0.5.1` with default features disabled. It computes Machin's identity with conservative arbitrary-precision integer bounds and increases guard precision until the requested decimal result is certified. All six public decimal rounding modes are explicit, with no binary-float detour. The limit-taking API rejects untrusted precision above a caller-selected ceiling before expensive generation or output mutation, while final output storage remains caller-owned. `arbitrary-precision` is the precision-above-40 alias; `full` enables every current production capability. The default dependency graph remains unchanged.
+`runtime-generation` adds no production dependency. Requests through 10,000 fractional places use an independently verified read-only π prefix and write directly into caller-owned storage; deeper requests use Perfectπ's specialized arbitrary-precision integer engine with certified Chudnovsky binary splitting, reciprocal-Newton square-root/division support, and adaptive multiplication. All six public decimal rounding modes are explicit, with no binary-float detour. `parallel-runtime` is an additional opt-in host performance policy that uses scoped threads only for deeper arithmetic work on supported non-WASM/non-bare-metal targets; the common ≤10k fast path remains non-threaded. `arbitrary-precision` remains the precision-above-40 alias. `full` enables all numerical capability tiers but intentionally does not enable `parallel-runtime`, because threading/resource policy remains an explicit caller choice.
 
 See [Runtime Generation and Arbitrary Precision](docs/RUNTIME_GENERATION.md). Engineering and bounded-output examples are under `examples/`.
 
@@ -181,7 +182,7 @@ See [Runtime Generation and Arbitrary Precision](docs/RUNTIME_GENERATION.md). En
 
 `PI_F32` and `PI_F64` are direct aliases of Rust `core` constants. `Pi<D>` is verified as a zero-sized type, while the current straightforward `DecimalPi<40>` materialization occupies 41 bytes (one integer byte plus 40 fractional digit bytes).
 
-The production source holds exactly 41 fractional digits: 40 public digits plus the one additional digit required to round `D=40`. Independent verification computes at least 64 fractional digits using two separate algorithms, so audit depth does not become runtime data. Native conversion uses independently verified IEEE bit patterns only where a bounded decimal value differs from native π; higher precisions collapse directly to `PI_F32` or `PI_F64`.
+The default bounded core holds exactly 41 fractional digits: 40 public digits plus the one additional digit required to round `D=40`. Enabling `runtime-generation` additionally links the independently verified runtime prefix used through 10,000 requested places; that optional data is absent from default builds. Independent verification still computes beyond the retained data using separate algorithms. Native conversion uses independently verified IEEE bit patterns only where a bounded decimal value differs from native π; higher precisions collapse directly to `PI_F32` or `PI_F64`.
 
 Optional-format probes remain tiny: binary16 π+τ measures 16–24 bytes of text across the measured constrained targets, while binary128 π+τ measures 62–80 bytes, with 0 measured rodata in those probes. Reproducible reports now cover constrained-target text/rodata/writable sections, static instruction counts, compiler-emitted stack frames, host linked-size deltas, and host timing. Target-hardware transitive stack high-water, WCET/cycles, and power remain hardware-qualification work. See [Measurements](docs/MEASUREMENTS.md), [Benchmark Report](docs/BENCHMARKS.md), and [Resource Budget](docs/RESOURCE_BUDGET.md).
 

@@ -18,6 +18,15 @@
 //! - no allocator, no I/O, no runtime π generation, and no `unsafe` in the default bounded core;
 //! - optional interoperability and runtime/arbitrary-precision tiers remain feature-gated.
 
+#[cfg(feature = "runtime-generation")]
+extern crate alloc;
+#[cfg(all(
+    feature = "parallel-runtime",
+    not(target_os = "none"),
+    not(target_family = "wasm")
+))]
+extern crate std;
+
 #[cfg(feature = "binary128")]
 mod binary128;
 #[cfg(feature = "binary16")]
@@ -34,6 +43,10 @@ mod native;
 mod rounding;
 #[cfg(feature = "runtime-generation")]
 mod runtime;
+#[cfg(feature = "runtime-generation")]
+mod runtime_arith;
+#[cfg(feature = "runtime-generation")]
+mod runtime_precomputed;
 
 #[cfg(feature = "binary16")]
 pub use binary16::{

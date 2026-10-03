@@ -9,8 +9,8 @@ Perfectπ supports the **newest stable Rust release only**.
 At the time this policy was established:
 
 ```text
-stable:  rustc 1.98.1
-nightly: rustc 1.101.0-nightly (2026-09-27)
+stable:  rustc 1.99.0
+nightly: rustc 1.101.0-nightly (2026-10-01)
 ```
 
 `Cargo.toml` sets `rust-version` to the current stable version. CI compares that value to the Rust `stable` channel and fails when stable advances until Perfectπ is updated, retested, and the manifest floor is moved forward.

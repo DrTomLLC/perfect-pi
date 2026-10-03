@@ -19,7 +19,7 @@ The baseline includes:
 
 ## Feature compatibility
 
-The default feature set remains empty. Existing feature names are part of the compatibility surface: `binary16`, `binary128`, `all-float-formats`, `complex`, `fixed-point`, `decimal`, `interop`, `runtime-generation`, `arbitrary-precision`, and `full`. The `full` feature is an additive umbrella over all current production capability features; it does not change the empty default feature set.
+The default feature set remains empty. Existing feature names are part of the compatibility surface: `binary16`, `binary128`, `all-float-formats`, `complex`, `fixed-point`, `decimal`, `interop`, `runtime-generation`, `parallel-runtime`, `arbitrary-precision`, and `full`. The `full` feature is an additive umbrella over numerical capability features but intentionally excludes `parallel-runtime`; host threading/resource policy must remain an explicit caller choice.
 
 ## Rust and platform policy
 

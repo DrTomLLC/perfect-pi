@@ -36,7 +36,7 @@ evidence.
 
 ## Toolchain limitation log
 
-Rust 1.98.1 does not yet make slice get/get_mut const-stable for the operations
+Rust 1.99.0 does not yet make slice get/get_mut const-stable for the operations
 used by the panic-safe bounded implementation. Perfectπ therefore does not
 weaken safe indexing or introduce unsafe code merely to make bounded
 materialization const. Revisit this when stable Rust can express the same

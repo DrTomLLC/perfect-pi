@@ -18,8 +18,9 @@ library build is pre-certified for every downstream safety standard or device.
 | Core | native constants, Pi<D>, DecimalPi<D>, RoundingMode | no_std, no allocator, dependency-free | bare metal, RTOS, deterministic/high-assurance code |
 | IEEE | binary16, binary128 interchange | no allocation, dependency-free | wire/file formats and non-native IEEE widths |
 | Ecosystem | complex, fixed-point, rust_decimal | opt-in dependencies | application/numerical interoperability |
-| Precision | runtime-generation / arbitrary-precision | allocation-backed, variable cost | research, validation, high-precision computation |
-| Full | full | all production capabilities | hosts or applications that deliberately want every feature |
+| Precision | runtime-generation / arbitrary-precision | verified read-only prefix through 10k; allocation-backed internal arithmetic above 10k; zero normal bigint dependency | research, validation, high-precision computation |
+| Performance | parallel-runtime | optional scoped host threading above a measured crossover | large high-precision host workloads |
+| Full | full | all numerical capability tiers; parallel policy remains separate | hosts or applications that deliberately want every numerical feature |
 | Assurance | Core plus retained verification evidence | application-qualified | safety/security/reliability cases |
 
 The default feature set is empty. Enabling heavier tiers never changes the
@@ -31,7 +32,7 @@ The bounded tier supports exactly 0 through 40 places after the decimal point.
 This finite domain is deliberately exhaustively testable and allocation-free.
 
 The arbitrary-precision tier accepts a runtime precision limited by address
-space, the big-integer implementation, execution resources, and caller policy.
+space, Perfectπ's internal integer arithmetic, execution resources, and caller policy.
 For untrusted inputs, use a caller-selected maximum through
 generate_pi_ascii_with_limit. Perfectπ does not invent a global maximum that
 would be wrong for either a microcontroller or a workstation. Final output

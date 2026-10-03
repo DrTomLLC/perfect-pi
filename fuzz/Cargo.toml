@@ -35,3 +35,10 @@ path = "fuzz_targets/runtime_generation.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "runtime_arithmetic"
+path = "fuzz_targets/runtime_arithmetic.rs"
+test = false
+doc = false
+bench = false

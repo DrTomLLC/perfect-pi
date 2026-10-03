@@ -17,7 +17,7 @@ The initial core currently has:
 - independent standard-library Python Chudnovsky and Gauss–Legendre computations agreeing through 64 fractional digits, verifying all 41 production source digits and all 41 bounded precision vectors;
 - successful bare-metal Cortex-M and RISC-V `no_std` builds;
 - successful WASM and AArch64 builds;
-- successful current-stable Rust 1.98.1 check, tests, and Clippy, with no support target below current stable;
+- successful current-stable Rust 1.99.0 check, tests, and Clippy, with no support target below current stable;
 - dual-algorithm independent verification of all 10 binary16 and all 10 binary128 optional constants;
 - all-feature builds and tests across the supported host and `no_std` target matrix;
 - independent exact-rational reference checks for fixed-point interop and rust_decimal exact/28-place nearest-even results;
@@ -25,12 +25,12 @@ The initial core currently has:
 - RustSec advisory auditing of the resolved optional dependency graph;
 - exhaustive bounded-state caller-buffer verification across 3,690 legal precision/mode/capacity states;
 - sanitizer-backed libFuzzer targets for the bounded core, optional interoperability surfaces, and runtime arbitrary-precision generation;
-- independent checks of all six runtime rounding policies against both Chudnovsky and Gauss-Legendre through 10,000 fractional digits at ten precision checkpoints, plus production Chudnovsky cross-checks against the retained Machin reference through 1,000 places;
-- runtime precision-limit tests proving rejection occurs before output mutation, with the same surfaces exercised by sanitizer-backed fuzzing;
+- independent checks of all six runtime rounding policies against both Chudnovsky and Gauss-Legendre through 36,808 fractional digits at fourteen precision checkpoints, explicitly covering the 10,000/10,001 fast-path handoff and reciprocal-division regression points at 36,000, 36,700, and 36,808 places, plus production Chudnovsky cross-checks against the retained Machin reference through 1,000 places;
+- runtime precision-limit tests proving rejection occurs before output mutation, with sanitizer-backed fuzzing using a reachable limit selector and structured deep-precision cases that cross into the specialized arithmetic engine;
 - a 29-target dependency-free core portability matrix spanning embedded, word-size, endian, OS, mobile, WebAssembly, and architecture classes;
-- mutation testing with zero surviving viable mutants required by CI; retained exact counts are updated whenever the production tree changes;
-- measured post-Phase-5 all-feature source coverage of 95.23% lines, 91.80% regions, and 100% functions, with enforced CI floors of 92% / 91% / 100%;
-- byte-for-byte reproducibility of 30 representative probe objects across repeated Windows and Linux builds using the same Rust 1.98.1 compiler commit.
+- mutation testing with zero surviving viable mutants required by CI; the current corrected-tree local pass generated 580 mutants after two documented mathematically equivalent exclusions, with 510 caught, 70 compiler-unviable, 0 missed, and 0 timed out;
+- measured corrected-tree all-feature source coverage of 96.06% lines, 92.31% regions, and 100% functions, with enforced CI floors of 92% / 91% / 100%;
+- byte-for-byte reproducibility of 30 representative probe objects across repeated Windows and Linux builds using Rust 1.99.0 commit `b940084d7eb6a299eb4bfeb8e34901bc051e7ac4`; required host CI also checks the same golden manifest on macOS.
 
 Detailed methodology and retained evidence are documented in [Phase 4 Verification Hardening](PHASE4_VERIFICATION.md).
 
@@ -62,7 +62,7 @@ Canonical π digits and derived constants should be checked against more than on
 
 ## Verification isolation
 
-Reference generators, fuzzers, model checkers, and other verification-only tools belong outside production dependency graphs. The one production arbitrary-precision dependency, `num-bigint`, is permitted only behind the explicit `runtime-generation`/`arbitrary-precision` feature boundary; it remains absent from the default bounded core.
+Reference generators, fuzzers, model checkers, and other verification-only tools belong outside production dependency graphs. Runtime arbitrary precision is now implemented by Perfectπ's internal specialized integer engine and introduces no normal bigint dependency. `num-bigint` remains development-only as an independent arithmetic oracle and never enters the production dependency graph.
 
 ## Evidence retention
 
